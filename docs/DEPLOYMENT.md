@@ -36,6 +36,11 @@ npm run lint:php     # Syntaxprüfung des Kontaktendpunkts
 4. Vorher Sicherung: bestehendes Zielverzeichnis als `_backup_JJJJMMTT` kopieren. Rollback = Backup zurückkopieren.
 5. Nach dem Upload prüfen: Startseite, eine Fachseite, /kontakt/, /danke/, /404, /robots.txt, /sitemap-index.xml, HTTPS-Redirect, Security-Header (z. B. mit curl -I), Formular-Testanfrage mit Berechtigung.
 
+## Caching und Sicherheitsheader (public/.htaccess)
+- Cache-Staffelung: gehashte Build-Assets unter `/_astro/` ein Jahr mit `immutable`; Dateien aus `public/` (og-default.png, favicon.svg, favicon.png, logo-hvm.webp, ohne Hash im Namen) einen Tag; HTML kurz (`max-age=600, must-revalidate`). Nach einem Austausch von Dateien aus `public/` kann die alte Fassung deshalb bis zu einem Tag im Browsercache bleiben.
+- CSP mit `script-src 'unsafe-inline'` für die Astro-Inline-Skripte (no-js-Klasse, Navigation, Formular). Eine Hash-CSP (sha256 je Inline-Skript, nach jedem Build neu aus dist zu erzeugen) ist als optionaler Deploy-Schritt in der .htaccess beschrieben, siehe docs/LAUNCH-CHECKLISTE.md.
+- Header und Caching sind auf dem Zielserver mit `curl -I` zu prüfen (nicht lokal getestet, siehe TESTBERICHT.md).
+
 ## Staging
 - Zugriffsschutz per HTTP Basic Auth auf dem Staging-Verzeichnis (Hoster-Konfiguration). Ein robots-Verbot ist kein Vertraulichkeitsschutz.
 - Build mit `NOINDEX=true` und `SITE_URL=<staging-url>`.

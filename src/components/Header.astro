@@ -1,9 +1,23 @@
 ---
-import { NAV, CTA, SITE } from '../data/site';
+/**
+ * Kopf der Seite (docs/DESIGN-SPEC-V2.md 6.1, docs/CONTENT-PLAN-V2.md 6.1).
+ * Name im Vordergrund, Kennlinie als einziger Farbtraeger. Untermenue Beratung als details/summary
+ * mit zwei Gruppen (desktop zweispaltig), ohne JavaScript sichtbar und bedienbar.
+ */
+import { NAV, NAV_GRUPPEN, BERATUNG_LINKS, CTA, SITE } from '../data/site';
 interface Props { currentPath: string }
 const { currentPath } = Astro.props;
 const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href));
-const beratungActive = NAV[0].children.some((c) => isActive(c.href));
+/* Der Ausloeser "Beratung" erhaelt aria-current="true" (aktiver Zweig); aria-current="page" traegt nur der Link der aktuellen Seite im Untermenue. */
+const beratungActive = BERATUNG_LINKS.some((c) => isActive(c.href));
+/* Seiten, die im Breadcrumb unter einem Hauptmenuepunkt stehen, ohne dessen Pfad zu tragen (Glossar unter Einblicke, Inhaltsplan 6.2). */
+const ZWEIG_ZUSATZ: Record<string, readonly string[]> = { '/einblicke/': ['/glossar/'] };
+/* Hauptmenuepunkte ohne Untermenue: "page" nur auf der Seite selbst, "true" auf Unterseiten des Zweigs (Beitraege, Glossar). */
+const hauptCurrent = (href: string): 'page' | 'true' | undefined => {
+  if (currentPath === href) return 'page';
+  if (isActive(href) || (ZWEIG_ZUSATZ[href] ?? []).includes(currentPath)) return 'true';
+  return undefined;
+};
 ---
 <div class="kennlinie" aria-hidden="true"></div>
 <header class="site-header">
@@ -19,27 +33,34 @@ const beratungActive = NAV[0].children.some((c) => isActive(c.href));
     </button>
 
     <nav id="hauptnavigation" class="site-nav" aria-label="Hauptnavigation" data-nav>
-      <ul class="site-nav__list">
+      <ul class="site-nav__list" role="list">
         <li class="site-nav__item site-nav__item--has-children">
           <details class="nav-details" data-nav-details>
-            <summary class="site-nav__link" aria-current={beratungActive ? 'page' : undefined}>
+            <summary class="site-nav__link" aria-current={beratungActive ? 'true' : undefined}>
               {NAV[0].label}<span class="chev" aria-hidden="true"></span>
             </summary>
-            <ul class="submenu">
-              {NAV[0].children.map((c) => (
-                <li>
-                  <a href={c.href} aria-current={isActive(c.href) ? 'page' : undefined}>
-                    <span class="submenu__label">{c.label}</span>
-                    <span class="submenu__kurz">{c.kurz}</span>
-                  </a>
-                </li>
+            <div class="submenu submenu--gruppen">
+              {NAV_GRUPPEN.map((g) => (
+                <div class="submenu__gruppe">
+                  <p class="submenu__titel" id={`nav-gruppe-${g.id}`}>{g.titel}</p>
+                  <ul aria-labelledby={`nav-gruppe-${g.id}`} role="list">
+                    {g.children.map((c) => (
+                      <li>
+                        <a href={c.href} aria-current={isActive(c.href) ? 'page' : undefined}>
+                          <span class="submenu__label">{c.label}</span>
+                          {c.kurz && <span class="submenu__kurz">{c.kurz}</span>}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </details>
         </li>
         {NAV.slice(1).map((n) => (
           <li class="site-nav__item">
-            <a class="site-nav__link" href={n.href} aria-current={isActive(n.href) ? 'page' : undefined}>{n.label}</a>
+            <a class="site-nav__link" href={n.href} aria-current={hauptCurrent(n.href)}>{n.label}</a>
           </li>
         ))}
         <li class="site-nav__item site-nav__item--cta">
@@ -51,50 +72,93 @@ const beratungActive = NAV[0].children.some((c) => isActive(c.href));
 </header>
 
 <style>
-  .site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--c-linie); backdrop-filter: blur(6px); }
-  .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--s-5); min-height: 4.5rem; flex-wrap: wrap; }
-  .brand { text-decoration: none; display: flex; flex-direction: column; line-height: 1.15; padding-block: var(--s-3); }
-  .brand__name { font-weight: 700; font-size: 1.2rem; letter-spacing: -0.01em; }
-  .brand__claim { font-size: var(--fs-xs); color: var(--c-text-2); letter-spacing: 0.04em; text-transform: uppercase; }
+  .site-header { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: var(--rule); }
+  /* Desktop: Marke und Navigation in einer Zeile ohne Umbruch. Wird es knapp (breitere Schriftmetrik),
+     bricht die Unterzeile der Marke um, nicht die Navigation; die Kopfhoehe bleibt damit nahe --header-h. */
+  .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--s-5); min-height: var(--header-h); }
+  .brand { text-decoration: none; display: flex; flex-direction: column; line-height: 1.15; padding-block: var(--s-3); min-width: 0; }
+  .brand__name { font-weight: 700; font-size: 1.25rem; letter-spacing: var(--ls-heading); }
+  .brand__claim { font-size: var(--fs-xs); color: var(--c-text-2); letter-spacing: var(--ls-caps); text-transform: uppercase; }
+  .site-nav { flex: none; }
 
-  .nav-toggle { display: none; align-items: center; gap: var(--s-2); background: none; border: 1px solid var(--c-linie); border-radius: var(--radius); padding: 0.5rem 0.75rem; min-height: 44px; font-weight: 600; cursor: pointer; }
+  .nav-toggle { display: none; align-items: center; gap: var(--s-2); background: none; border: 1px solid var(--c-text-3); border-radius: var(--radius); padding: 0.5rem 0.75rem; min-height: 44px; font-weight: 600; cursor: pointer; }   /* Rahmen wie Formularfelder und Sekundaerbutton (--c-text-3, 5,24:1); Text und Balkensymbol bleiben die eigentlichen Merkmale */
   .nav-toggle__bars { display: block; width: 18px; height: 2px; background: currentColor; box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor; }
 
   .site-nav__list { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: var(--s-2); }
-  .site-nav__link { display: inline-flex; align-items: center; gap: 0.3em; padding: 0.6rem 0.75rem; border-radius: var(--radius); text-decoration: none; font-weight: 600; cursor: pointer; list-style: none; min-height: 44px; }
+  .site-nav__list li { margin: 0; }
+  .site-nav__link {
+    display: inline-flex; align-items: center; gap: 0.3em; padding: 0.6rem 0.25rem; margin-inline: 0.5rem; border-radius: 0;
+    font-weight: 600; cursor: pointer; list-style: none; min-height: 44px; background: none;
+    text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 0.45em;
+    transition: text-decoration-color var(--dur) var(--ease);
+  }
   .site-nav__link::-webkit-details-marker { display: none; }
-  .site-nav__link:hover { background: var(--c-flaeche); }
-  .site-nav__link[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--c-orange); }
+  .site-nav__link[aria-current] { text-decoration-color: var(--c-text); }   /* "page" an Links, "true" am Ausloeser des aktiven Zweigs */
   .site-nav__item--cta { margin-left: var(--s-3); }
+  .site-nav__item--cta .btn { padding: 0.6em 1.1em; }
   .chev { width: 0.45em; height: 0.45em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-0.15em) rotate(45deg); }
   .nav-details[open] .chev { transform: translateY(0.1em) rotate(225deg); }
 
+  /* Untermenue: zwei Gruppen, desktop zweispaltig, mittig unter dem Auslöser, nie breiter als der Viewport abzueglich der Seitenraender */
   .nav-details { position: relative; }
-  .submenu { list-style: none; margin: 0; padding: var(--s-2); position: absolute; top: calc(100% + 0.25rem); left: 0; min-width: 21rem; background: #fff; border: 1px solid var(--c-linie); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(26,26,26,.08); z-index: 60; }
+  .submenu {
+    --submenu-w: min(38rem, 100vw - 2 * var(--gutter));
+    position: absolute; top: calc(100% + 0.25rem); left: 50%; width: var(--submenu-w); margin-left: calc(var(--submenu-w) / -2); z-index: 60;
+    padding: var(--s-3); background: #fff; border: var(--rule); border-top: var(--rule-strong);
+    border-radius: 0 0 var(--radius) var(--radius); box-shadow: var(--shadow-soft);
+  }
+  .submenu--gruppen { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--s-4); }
+  .submenu__gruppe { min-width: 0; }
+  .submenu__titel { font-size: var(--fs-xs); letter-spacing: var(--ls-caps); text-transform: uppercase; font-weight: 600; color: var(--c-text-2); margin: 0; padding: var(--s-2) var(--s-4) var(--s-2); }
+  .submenu ul { list-style: none; margin: 0; padding: 0; }
   .submenu li + li { margin: 0; }
-  .submenu a { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); text-decoration: none; border-radius: var(--radius); }
-  .submenu a:hover { background: var(--c-flaeche); }
-  .submenu a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--c-orange); }
-  .submenu__label { font-weight: 600; }
+  .submenu a { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); text-decoration: none; border-radius: 0; min-height: 44px; }
+  .submenu a[aria-current="page"] { box-shadow: inset 2px 0 0 var(--c-text); }
+  .submenu__label { font-weight: 600; font-size: var(--fs-small); }
   .submenu__kurz { font-size: var(--fs-xs); color: var(--c-text-2); }
 
-  @media (max-width: 1080px) {
+  @media (hover: hover) {
+    .site-nav__link:hover { text-decoration-color: var(--c-mittelgrau); }
+    .site-nav__link[aria-current]:hover { text-decoration-color: var(--c-text); }
+    .submenu a:hover { background: var(--c-flaeche); }
+  }
+
+  /* Mobil bis 1120 px (Reserve fuer breitere Schriftmetriken: zwischen 1081 und 1089 px brach die Desktop-Navigation unter die Marke).
+     Marke und Toggle stehen immer in einer Zeile, die Navigation darunter in einer eigenen Zeile; die Kopfhoehe bleibt bei --header-h. */
+  @media (max-width: 1120px) {
+    .site-header__inner { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: var(--s-5); }
+    .brand { justify-self: start; }   /* Linkflaeche nur so breit wie der Text; die Unterzeile bricht innerhalb der Spalte um */
     .nav-toggle { display: inline-flex; }
-    .site-nav { flex-basis: 100%; }
+    .site-nav { grid-column: 1 / -1; }
     .site-nav:not([data-open]) { display: none; }
-    /* Ohne JavaScript ist die Navigation immer sichtbar */
+    /* Ohne JavaScript ist die Navigation immer sichtbar; der Kopf ist dann nicht mehr sticky,
+       weil die ausgeklappte Navigation sonst auf kleinen Viewports den Inhalt dauerhaft verdecken wuerde */
     html.no-js .site-nav { display: block; }
+    html.no-js .site-header { position: static; }
+    /* Geoeffnet darf der sticky Kopf nicht hoeher als der Viewport werden: er scrollt dann selbst, damit Profil, Einblicke
+       und der Kontaktbutton per Tastatur und Finger erreichbar bleiben (WCAG 2.4.7, 2.4.11) */
+    .site-header:has(.site-nav[data-open]) { max-height: 100vh; max-height: 100dvh; overflow-y: auto; }
+    @supports not selector(:has(a)) {
+      .site-nav[data-open] { max-height: calc(100vh - var(--header-h)); overflow-y: auto; }   /* Fallback ohne :has: die Navigation selbst scrollt */
+    }
     .site-nav__list { flex-direction: column; align-items: stretch; gap: 0; padding-bottom: var(--s-4); }
-    .site-nav__link { width: 100%; }
-    .submenu { position: static; box-shadow: none; border: 0; border-left: 2px solid var(--c-hellgrau); margin: 0 0 var(--s-2) var(--s-4); min-width: 0; }
+    .site-nav__link { width: 100%; margin-inline: 0; padding-inline: 0.25rem; }
+    .submenu { position: static; width: auto; margin: 0 0 var(--s-2) var(--s-4); box-shadow: none; border: 0; border-left: 2px solid var(--c-hellgrau); border-radius: 0; padding: var(--s-2) 0; }
+    .submenu--gruppen { display: block; }
+    .submenu__gruppe + .submenu__gruppe { margin-top: var(--s-3); border-top: var(--rule); padding-top: var(--s-3); }
     .site-nav__item--cta { margin: var(--s-3) 0 0; }
     .site-nav__item--cta .btn { width: 100%; justify-content: center; }
+  }
+  @media (max-width: 600px) {
+    /* Bis etwa 600 px wird die Unterzeile neben dem Toggle zweizeilig. In 13 px waere der Kopf dann 78 px hoch,
+       in 11 px passen zwei Zeilen in --header-h: Name 23 px, Unterzeile 2 x 12,7 px, Innenabstand 24 px */
+    .brand__claim { font-size: 0.6875rem; }
   }
 </style>
 
 <script>
-  // Progressive Enhancement: Menue-Toggle und Schliessen des Untermenues bei Klick ausserhalb.
-  document.documentElement.classList.remove('no-js');
+  // Progressive Enhancement: Menue-Toggle und Schliessen aller Untermenues bei Klick ausserhalb, Escape oder Fokusverlust.
+  // Die Klasse no-js entfernt Base.astro synchron im <head>, damit kein Layoutsprung vor dem ersten Paint entsteht.
   const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
   const nav = document.querySelector<HTMLElement>('[data-nav]');
   toggle?.addEventListener('click', () => {
@@ -102,11 +166,26 @@ const beratungActive = NAV[0].children.some((c) => isActive(c.href));
     if (open) nav?.removeAttribute('data-open'); else nav?.setAttribute('data-open', '');
     toggle.setAttribute('aria-expanded', String(!open));
   });
-  const details = document.querySelector<HTMLDetailsElement>('[data-nav-details]');
+  const alleDetails = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-nav-details]'));
   document.addEventListener('click', (e) => {
-    if (details?.open && !details.contains(e.target as Node)) details.open = false;
+    for (const d of alleDetails) {
+      if (d.open && !d.contains(e.target as Node)) d.open = false;
+    }
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && details?.open) { details.open = false; details.querySelector('summary')?.focus(); }
+    if (e.key !== 'Escape') return;
+    for (const d of alleDetails) {
+      if (d.open) { d.open = false; d.querySelector('summary')?.focus(); }
+    }
   });
+  // Verlaesst der Fokus das geoeffnete Untermenue (Tab ueber den letzten Eintrag hinaus, Shift+Tab vor den Ausloeser), schliesst es,
+  // damit das Overlay keinen Inhalt verdeckt. Nur im Desktop-Overlay (position: absolute): im mobilen Kopf steht das Untermenue
+  // im Textfluss und darf beim Antippen des naechsten Menuepunkts nicht unter dem Finger zusammenfallen.
+  for (const d of alleDetails) {
+    const menu = d.querySelector<HTMLElement>('.submenu');
+    d.addEventListener('focusout', (e) => {
+      if (!d.open || !menu || getComputedStyle(menu).position !== 'absolute') return;
+      if (!d.contains(e.relatedTarget as Node | null)) d.open = false;
+    });
+  }
 </script>

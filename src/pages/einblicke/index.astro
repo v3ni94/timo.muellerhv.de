@@ -1,58 +1,159 @@
 ---
+/**
+ * Einblicke, Uebersicht der Fachbeitraege (docs/CONTENT-PLAN-V2.md 4.7, docs/DESIGN-SPEC-V2.md 6.4, 6.16, 9.5).
+ * Aufbau: Breadcrumb, Hero mit Glossar-Link, Beitraege als Register (Datum links, Titel und Kernaussage rechts),
+ * Redaktionsgrundsaetze (#redaktionsgrundsaetze, Heimatort des Hinweises "Was ein echter Fall zusaetzlich braucht"), Cta.
+ * Leerzustand: Ohne freigegebenen Beitrag traegt die Seite robots "noindex, follow" (Base-Props noindex und follow,
+ * damit Links auf Glossar und Beratungsseiten weiter verfolgt werden) und einen sachlichen Hinweis; astro.config.mjs
+ * nimmt sie dann aus der Sitemap. Der Cta fragt nur im gefuellten Zustand nach den Thesen, im Leerzustand rendert er
+ * den Standardtitel der Komponente. Keine Ankuendigungsliste, keine Titel unveroeffentlichter Entwuerfe.
+ * Ordnung nach Themenfeldern erst ab etwa sechs freigegebenen Beitraegen; bis dahin flache Liste.
+ */
 import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import Hero from '../../components/Hero.astro';
 import Cta from '../../components/Cta.astro';
-import { breadcrumbLd } from '../../lib/seo';
+import { breadcrumbLd, type Crumb } from '../../lib/seo';
 import { veroeffentlichteBeitraege, formatDatum } from '../../lib/einblicke';
 
 const path = '/einblicke/';
-const title = 'Einblicke | Timo Müller';
-const description = 'Fachbeiträge zur Arbeitsweise: Portfoliooptimierung, Zusammenarbeit von Asset und Property Management und kontrollierter KI-Einstieg im Immobilienmanagement.';
-const crumbs = [{ name: 'Einblicke', href: path }];
+const title = 'Einblicke: Fachbeiträge zur Portfoliosteuerung | Timo Müller';
+const description =
+  'Fachbeiträge zur Steuerung von Immobilienbeständen: je eine These, konkrete Arbeitsschritte und Grenzen. Mit Redaktionsgrundsätzen und Glossar. Von Timo Müller.';
+
+const crumbs: Crumb[] = [{ name: 'Einblicke', href: path }];
 const beitraege = await veroeffentlichteBeitraege();
+const leer = beitraege.length === 0;
+
+/* Cta: Die Frage nach den Thesen nur, wenn Beitraege sichtbar sind. Im Leerzustand undefined, dann greift der Standardtitel von Cta.astro. */
+const ctaTitle = leer ? undefined : 'Sie möchten eine dieser Thesen an Ihrem Bestand prüfen?';
+
+/* Redaktionsgrundsaetze: je Punkt ein Titel und ein Satz. Keine Zahlen, keine Zusagen. */
+interface Grundsatz { t: string; d: string }
+const grundsaetze: Grundsatz[] = [
+  { t: 'Kernaussage zuerst.', d: 'Jeder Beitrag beginnt mit dem Satz, der ihn trägt. Wer nur diesen Satz liest, kennt die These.' },
+  { t: 'Arbeitsschritte statt Appelle.', d: 'Der Beitrag erklärt, wie ein Vorgehen konkret aussieht: welche Daten, welche Reihenfolge, welche Zuständigkeit.' },
+  { t: 'Grenzen werden benannt.', d: 'Was ein Vorgehen nicht leistet und wo Rechtsanwalt oder Steuerberater zuständig sind, steht im Beitrag.' },
+  { t: 'Quellen bei Tatsachenaussagen.', d: 'Fachlich oder rechtlich relevante Tatsachen werden mit Primärquellen und Abrufdatum belegt.' },
+  { t: 'Fachliche Prüfung und Freigabe vor Veröffentlichung.', d: 'Ein Beitrag erscheint erst nach Prüfung und Autorenfreigabe. Entwürfe bleiben unveröffentlicht.' },
+  { t: 'Echtes Änderungsdatum.', d: 'Veröffentlichungs- und Aktualisierungsdatum sind die tatsächlichen Daten, keine künstlich erneuerten Zeitstempel.' },
+  { t: 'Keine Kundenfälle ohne Freigabe, keine erfundenen Ich-Erlebnisse.', d: 'Szenarien sind als Vorgehen gekennzeichnet und im Konjunktiv formuliert.' },
+];
+
+/* Heimatort des Hinweises "Was ein echter Fall zusaetzlich braucht" (Masterprompt Abschnitt 9, Inhaltsplan 1.2). */
+const echterFall: Grundsatz[] = [
+  { t: 'Belegtes Ergebnis.', d: 'Was sich verändert hat, mit Datenbasis, nicht als Einschätzung.' },
+  { t: 'Zeitraum.', d: 'Beginn und Ende des Mandats oder des betrachteten Abschnitts.' },
+  { t: 'Messmethode.', d: 'Woran das Ergebnis gemessen wurde und woher die Zahlen stammen.' },
+  { t: 'Freigabe des Eigentümers.', d: 'Schriftliche Zustimmung zur Veröffentlichung, auch in anonymisierter Form.' },
+  { t: 'Abgrenzung des eigenen Beitrags.', d: 'Bei gemeinsamen Projekten: was auf meine Arbeit zurückgeht und was auf Verwaltung, Technik oder Dritte.' },
+];
 ---
-<Base title={title} description={description} path={path} ld={[breadcrumbLd(crumbs)]}>
+<Base title={title} description={description} path={path} noindex={leer} follow ld={[breadcrumbLd(crumbs)]}>
   <Breadcrumb crumbs={crumbs} />
-  <section class="hero">
+
+  <Hero
+    eyebrow="Einblicke"
+    title="Einblicke in die Arbeitsweise"
+    lead="Fachbeiträge zur Steuerung von Immobilienbeständen: je Beitrag eine These, die Arbeitsschritte dahinter und die Grenzen des Vorgehens. Kurz, konkret und ohne Kundenfälle."
+  >
+    <p class="hero__glossar">Begriffe, die in den Beiträgen vorkommen, erklärt das <a href="/glossar/">Glossar</a> an einer Stelle, in der Bedeutung, in der ich sie verwende.</p>
+  </Hero>
+
+  {leer ? (
+    <section class="section" id="beitraege" aria-labelledby="beitraege-h">
+      <div class="container g">
+        <div class="gc-1-8 prose">
+          <h2 id="beitraege-h">Beiträge</h2>
+          <p>Beiträge erscheinen nach fachlicher Prüfung und Freigabe. Bis dahin finden Sie die inhaltlichen Grundlagen auf den Beratungsseiten: <a href="/asset-management-beratung/">Asset-Management-Beratung</a>, <a href="/portfoliooptimierung/">Portfoliooptimierung</a>, <a href="/property-management-optimierung/">Property-Management-Optimierung</a> und <a href="/ki-immobilienmanagement/">KI im Immobilienmanagement</a>.</p>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <section class="section" id="beitraege">
+      <div class="container">
+        <div class="abschnitt">
+          <div class="abschnitt__kopf sticky-rand">
+            <span class="eyebrow eyebrow--still">Beiträge</span>
+            <h2>Eine These je Beitrag.</h2>
+            <p>Neueste zuerst. Jeder Beitrag nennt seine Kernaussage vorab, erklärt die Arbeitsschritte und benennt, was das Vorgehen nicht leistet.</p>
+          </div>
+          <div class="abschnitt__inhalt">
+            <ol class="register register--einblicke" role="list">
+              {beitraege.map((b) => (
+                <li>
+                  {b.data.datum && <time datetime={b.data.datum.toISOString().slice(0, 10)}>{formatDatum(b.data.datum)}</time>}
+                  <h3><a href={`/einblicke/${b.id}/`}>{b.data.title}</a></h3>
+                  <p>{b.data.kernaussage}</p>
+                  <a class="textlink" href={`/einblicke/${b.id}/`}>Beitrag lesen<span class="visually-hidden">: {b.data.title}</span></a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="section section--linie" id="redaktionsgrundsaetze">
     <div class="container">
-      <span class="eyebrow">Einblicke</span>
-      <h1>Einblicke in die Arbeitsweise</h1>
-      <p class="lead">Fachbeiträge zu Portfoliosteuerung, Zusammenarbeit von Asset und Property Management und dem sinnvollen Einsatz von KI. Jeder Beitrag beginnt mit einer Kernaussage, erklärt konkrete Arbeitsschritte und benennt Grenzen.</p>
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Redaktion</span>
+          <h2>Redaktions&shy;grundsätze</h2>
+          <p>Nach diesen Regeln entstehen die Beiträge. Sie gelten auch für die Szenarien auf den Beratungsseiten.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ul class="checklist grundsaetze" role="list">
+            {grundsaetze.map((g) => (
+              <li><strong>{g.t}</strong> {g.d}</li>
+            ))}
+          </ul>
+
+          <h3 id="echter-fall" class="echter-fall__titel">Was ein echter Fall zusätzlich braucht</h3>
+          <p class="echter-fall__intro">Die Szenarien unter der Überschrift „So würde ich vorgehen“ beschreiben eine Methode, keinen Kundenfall. Ein belegter Fall würde erst veröffentlicht, wenn fünf Punkte vorliegen:</p>
+          <ul class="checklist grundsaetze" role="list">
+            {echterFall.map((g) => (
+              <li><strong>{g.t}</strong> {g.d}</li>
+            ))}
+          </ul>
+          <p class="bildunterschrift echter-fall__hinweis">Anonymisierung ersetzt weder die Belegbarkeit noch die Prüfung der Vertraulichkeit. Bis solche Fälle vorliegen, zeigt die Website Vorgehen, keine Ergebnisse.</p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="container">
-      {beitraege.length === 0 ? (
-        <div class="prose">
-          <h2>Beiträge in Vorbereitung</h2>
-          <p>Die ersten Fachbeiträge befinden sich in der fachlichen Prüfung und werden nach Freigabe veröffentlicht:</p>
-          <ul class="checklist">
-            <li>Immobilienportfolio optimieren: Welche Daten zuerst auf den Tisch gehören</li>
-            <li>Asset Management und Property Management: Wo die Zusammenarbeit konkret wird</li>
-            <li>KI im Immobilienmanagement: Welche Prozesse sich für einen kontrollierten Einstieg eignen</li>
-          </ul>
-          <p>Bis dahin finden Sie die inhaltlichen Grundlagen auf den Beratungsseiten: <a href="/portfoliooptimierung/">Portfoliooptimierung</a>, <a href="/property-management-optimierung/">Property-Management-Optimierung</a> und <a href="/ki-immobilienmanagement/">KI im Immobilienmanagement</a>.</p>
-        </div>
-      ) : (
-        <div class="grid grid--2">
-          {beitraege.map((b) => (
-            <article class="card">
-              <p class="article-meta">{b.data.datum && <time datetime={b.data.datum.toISOString().slice(0, 10)}>{formatDatum(b.data.datum)}</time>}</p>
-              <h2 class="h3"><a href={`/einblicke/${b.id}/`}>{b.data.title}</a></h2>
-              <p>{b.data.kernaussage}</p>
-              <a class="textlink" href={`/einblicke/${b.id}/`}>Beitrag lesen</a>
-            </article>
-          ))}
-        </div>
-      )}
-    </div>
-  </section>
-  <Cta />
+  <Cta
+    title={ctaTitle}
+    text="Schildern Sie mir kurz Ausgangslage und Ziel. Wir klären, ob und in welchem Umfang eine Zusammenarbeit sinnvoll ist."
+  />
 </Base>
+
 <style>
-  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
-  .h3 { font-size: var(--fs-h3); }
-  .h3 a { text-decoration: none; }
-  .h3 a:hover { text-decoration: underline; }
+  /* Hero: Glossar-Hinweis unter dem Lead */
+  .hero__glossar { color: var(--c-text-2); max-width: var(--w-measure); margin: var(--s-4) 0 0; }
+
+  /* Register mit Datum statt Ziffer (Design-Spezifikation 6.16): Datum 9 rem links, Titel und Kernaussage rechts */
+  .register--einblicke > li { grid-template-columns: 9rem minmax(0, 1fr); }
+  .register--einblicke > li::before { display: none; }
+  .register--einblicke > li > time { grid-column: 1; grid-row: 1 / span 3; font-size: var(--fs-small); color: var(--c-text-2); font-variant-numeric: tabular-nums; padding-top: 0.3em; }
+  .register--einblicke h3 a { text-decoration: none; color: var(--c-text); }
+  /* Textlink Beitrag lesen: inline-block und Zielhoehe 44 px aus der globalen .textlink-Regel, Abstand aus .register .textlink */
+  @media (max-width: 640px) {
+    .register--einblicke > li { grid-template-columns: minmax(0, 1fr); }
+    .register--einblicke > li > * { grid-column: 1; }
+    .register--einblicke > li > time { grid-row: auto; padding-top: 0; margin-bottom: var(--s-1); }
+  }
+
+  /* Redaktionsgrundsaetze: Checkliste mit Titel und Satz, Unterabschnitt mit Haarlinie */
+  .grundsaetze { max-width: var(--w-text); margin: 0; }
+  .grundsaetze li { color: var(--c-text-2); margin-bottom: var(--s-3); }
+  .grundsaetze strong { color: var(--c-text); }
+  .echter-fall__titel { margin-top: var(--s-7); padding-top: var(--s-5); border-top: var(--rule); }
+  .echter-fall__intro { color: var(--c-text-2); max-width: var(--w-text); }
+  .echter-fall__hinweis { max-width: var(--w-text); margin-top: var(--s-5); }
+
+  @media (hover: hover) {
+    .register--einblicke h3 a:hover { text-decoration: underline; }
+  }
 </style>

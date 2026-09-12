@@ -1,153 +1,562 @@
 ---
+/**
+ * Asset-Management-Beratung, Hub der Beratungsseiten (docs/DESIGN-SPEC-V2.md 6.10, 6.11, 13.8; docs/CONTENT-PLAN-V2.md 4.2).
+ * Eigene Struktur auf Base.astro, Hero und Personenanker nach dem Muster von Fachseite.astro.
+ * Abschnittsfolge: Breadcrumb, Hero 8/4, Seitennav, Fragestellungen (#fragestellungen), Eigentuemerziele
+ * (#eigentuemerziele), Anlaesse (#anlaesse), Selbstpruefung (#selbstpruefung, Flaeche), Mandatsformen (#mandate,
+ * Kapitel A bis C mit ids portfolio-check, umsetzung, sparring), Vorgehen (#vorgehen, vier Schritte ohne Dauer),
+ * Entscheidungsunterlagen (#unterlagen),
+ * Muster Entscheidungsvorlage (#entscheidungsvorlage, Flaeche), Abgrenzung (#abgrenzung), Fragen (#fragen),
+ * Personenanker, Cta. Zwei Flaechen, ein dunkler Abschnitt.
+ * Alle Aussagen stammen aus Masterprompt und docs/FAKTENLISTE.md. Keine Zahlen zu Bestand, Mandaten, Zeitraeumen
+ * oder Honoraren. Der Wortlaut der fuenf Selbstpruefungsfragen ist Teil der allgemeinen Textfreigabe (Freigabepunkt 35).
+ */
 import Base from '../layouts/Base.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Seitennav, { type SeitennavEintrag } from '../components/Seitennav.astro';
 import Cta from '../components/Cta.astro';
-import Faq from '../components/Faq.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import Portrait from '../components/Portrait.astro';
+import { SITE } from '../data/site';
 import { breadcrumbLd, serviceLd, faqLd } from '../lib/seo';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
 
 const path = '/asset-management-beratung/';
 const title = 'Asset-Management-Beratung für Immobilien | Timo Müller';
-const description = 'Strategische Beratung für Immobilienbestandshalter: Eigentümerziele, Objektstrategien, Investitionsentscheidungen und Umsetzung. Drei Mandatsformen von Timo Müller.';
+const description = 'Beratung für Immobilienbestandshalter: Eigentümerziele, Objektstrategie, Investitionen, Reporting und Umsetzung. Drei Mandatsformen von Timo Müller.';
 const crumbs = [{ name: 'Beratung', href: path }];
 
-const mandate = [
+/* Freigabepunkt 23 (docs/CONTENT-PLAN-V2.md, Abschnitt 9): Honorarlogik je Mandatsform.
+   Ohne Freigabe bleibt es bei der neutralen Formulierung. honorarlogikText wird erst nach Freigabe befuellt. */
+const honorarlogikFreigabe = false;
+const honorarlogikText = '';
+const honorarAntwort = 'Individuell nach Mandatsform, Umfang und Datenlage. Vor Beginn erhalten Sie ein Angebot mit klar beschriebenem Leistungsumfang; die Kontaktaufnahme löst keinen Beratungsvertrag aus.';
+
+/* Bedingte Beitragslinks: nur freigegebene Beitraege, kein Hinweis auf kommende Beitraege. */
+const beitraege = await veroeffentlichteBeitraege();
+const beitrag = (slug: string) => beitraege.find((b) => b.id === slug);
+const beitragObjektstrategie = beitrag('objektstrategie-halten-entwickeln-verkaufen');
+const beitragDatenZuerst = beitrag('immobilienportfolio-optimieren-daten');
+
+/* Seitennav mit sechs Ankern, damit die Leiste auf Desktopbreiten einzeilig bleibt (Designspezifikation 6.11, ruhiger Kopf).
+   Die Abschnitte Eigentuemerziele, Vorgehen und Abgrenzung behalten ihre ids als Sprungziele (Glossar, Zusammenarbeit, Einblicke). */
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Fragestellungen', href: '#fragestellungen' },
+  { label: 'Anlässe', href: '#anlaesse' },
+  { label: 'Selbstprüfung', href: '#selbstpruefung' },
+  { label: 'Mandatsformen', href: '#mandate' },
+  { label: 'Entscheidungsunterlagen', href: '#unterlagen' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+const ziele = [
+  { t: 'Bestandserhalt.', d: 'Soll der Bestand in Substanz und Struktur erhalten bleiben, oder ist Veränderung ausdrücklich gewollt?' },
+  { t: 'Laufender Ertrag.', d: 'Welcher Überschuss wird je Periode erwartet, und was hat Vorrang, wenn Ertrag und Substanz konkurrieren?' },
+  { t: 'Liquidität.', d: 'Welche Reserven müssen jederzeit verfügbar bleiben, und welche Verpflichtungen stehen an?' },
+  { t: 'Wachstum.', d: 'Soll der Bestand wachsen? Wenn ja: aus eigener Kraft oder mit Fremdkapital?' },
+  { t: 'Anlagehorizont.', d: 'Wie lange soll der Bestand gehalten werden, und gibt es Zeitpunkte, an denen sich das ändern kann?' },
+  { t: 'Risikotragfähigkeit.', d: 'Welche Schwankungen bei Leerstand, Zins und Kosten sind tragbar, welche nicht?' },
+  { t: 'Übergabe- oder Verkaufsüberlegungen.', d: 'Gibt es Überlegungen, den Bestand oder Teile davon zu übergeben oder zu verkaufen, die heutige Entscheidungen bereits beeinflussen?' },
+];
+
+/* Anlaesse als Register. Zukauf und Finanzierungsentscheidung nur als Anlass mit einem Satz; die Ausfuehrung liegt auf
+   /portfoliooptimierung/ und /investitionspriorisierung/ (Heimatort-Prinzip, Inhaltsplan 1.2). */
+interface Anlass { t: string; d: string; mehr?: { label: string; href: string } }
+const anlaesse: Anlass[] = [
+  { t: 'Zukauf oder Zusammen­führung von Teilportfolios', d: 'Nach einem Zukauf ist zu klären, in welcher Reihenfolge Datenstand, Zuständigkeiten und Standards vereinheitlicht werden. Die Reihenfolge entscheidet über Aufwand und Ergebnis.' },
+  { t: 'Ergebnis­rückgang ohne klare Ursache', d: 'Das Ergebnis sinkt, aber Leerstand, Kosten, Forderungen und Instandhaltung erklären es nicht eindeutig. Gefragt ist eine unabhängige Einordnung statt weiterer Einzelmaßnahmen.' },
+  {
+    t: 'Anstehende Finanzierungs­entscheidung',
+    d: 'Vor einer Prolongation, also der Verlängerung einer auslaufenden Finanzierung, oder einer Umschuldung braucht die Eigentümerseite ein belastbares Bild von Ertragskraft und Investitionsbedarf. Wie die Unterlagen dafür entstehen, beschreibe ich auf einer eigenen Seite.',
+    mehr: { label: 'Investitions­priorisierung', href: '/investitionspriorisierung/' },
+  },
+  { t: 'Wechsel in Geschäfts­führung oder Verwaltung', d: 'Neue Verantwortliche brauchen schnell ein belastbares Bild des Bestands und eine Reihenfolge der offenen Themen, ohne sich auf überlieferte Einschätzungen verlassen zu müssen.' },
+  { t: 'Aufbau oder Entlastung einer eigenen Asset-Management-Funktion', d: 'Die Funktion soll intern entstehen oder ist mit dem Tagesgeschäft ausgelastet. Gefragt sind Struktur, Methode und Zweitmeinung, ohne eine dauerhafte Abhängigkeit von externer Beratung aufzubauen.' },
+];
+
+const selbstpruefung = [
+  { f: 'Können drei Beteiligte dieselbe Leerstandsquote nennen?', h: 'Verwaltung, Rechnungswesen und Eigentümerseite rechnen mit unterschiedlichen Stichtagen und Definitionen, wenn niemand sie festlegt. Die Leerstandsquote ist der Anteil der nicht vermieteten Einheiten oder Flächen.' },
+  { f: 'Ist der Instandhaltungsrückstand beziffert und priorisiert?', h: 'Ein bekannter Rückstand ist noch kein bezifferter. Erst die Reihenfolge macht ihn steuerbar.' },
+  { f: 'Hat jede beschlossene Maßnahme Verantwortlichen, Budget und Termin?', h: 'Fehlt eines der drei, bleibt der Beschluss eine Absicht.' },
+  { f: 'Beantwortet Ihr Reporting die Fragen der Geschäftsführung?', h: 'Oder liefert es Tabellen, aus denen sich die Antworten erst herauslesen lassen?' },
+  { f: 'Wissen Verwaltung und Eigentümerseite, wer bis zu welcher Grenze entscheidet?', h: 'Ohne klare Wertgrenzen, also Beträge, bis zu denen die Verwaltung allein entscheidet, landen kleine Fragen bei der Geschäftsführung und große im Tagesgeschäft.' },
+];
+
+interface Mandat {
+  id: string;
+  kenn: string;
+  titel: string;
+  ausgangslage: string;
+  leistung: string;
+  ergebnis: string;
+  zusammenarbeit: string;
+  vertiefung: { label: string; href: string }[];
+}
+
+const mandate: Mandat[] = [
   {
     id: 'portfolio-check',
-    titel: 'A. Portfolio-Check und Maßnahmenplan',
+    kenn: 'A',
+    titel: 'Portfolio-Check und Maßnahmenplan',
     ausgangslage: 'Sie wollen wissen, wo Ihr Portfolio wirtschaftlich und operativ steht, welche Themen Priorität haben und wer sie bearbeiten muss.',
     leistung: 'Strukturierte Bestandsaufnahme von wirtschaftlicher Entwicklung, Leerstand, Forderungen, Instandhaltung, Datenqualität und Zuständigkeiten. Gespräche mit Verwaltung, Technik und Eigentümerseite. Einordnung der Objekte nach Ausgangslage und Handlungsbedarf.',
     ergebnis: 'Priorisierte Handlungsfelder, nachvollziehbare Entscheidungsgrundlagen und ein Maßnahmenplan mit Verantwortlichkeiten.',
     zusammenarbeit: 'Zeitlich begrenztes Mandat. Umfang und Datentiefe werden vor Beginn vereinbart. Sie erhalten eine schriftliche Auswertung und eine Ergebnisbesprechung.',
+    vertiefung: [
+      { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+      ...(beitragDatenZuerst ? [{ label: 'Beitrag: Welche Daten zuerst auf den Tisch gehören', href: `/einblicke/${beitragDatenZuerst.id}/` }] : []),
+    ],
   },
   {
     id: 'umsetzung',
-    titel: 'B. Portfoliooptimierung und Umsetzungsbegleitung',
+    kenn: 'B',
+    titel: 'Portfoliooptimierung und Umsetzungsbegleitung',
     ausgangslage: 'Die Handlungsfelder sind bekannt, aber die Umsetzung stockt oder es fehlt jemand, der Verwaltung, Dienstleister und Eigentümerseite zusammenhält.',
     leistung: 'Überarbeitung von Objektstrategien, laufenden Abläufen, Investitionsprioritäten, Dienstleistersteuerung und Reporting. Maßnahmen werden hinsichtlich Aufwand, Risiken und erwarteter Wirkung bewertet und mit Verantwortlichen hinterlegt.',
     ergebnis: 'Abgestimmte Maßnahmen, klare Steuerung und dokumentierter Fortschritt.',
     zusammenarbeit: 'Begleitung über einen vereinbarten Zeitraum mit festen Abstimmungsterminen. Ich arbeite mit Ihren bestehenden Strukturen, nicht an ihnen vorbei.',
+    vertiefung: [
+      { label: 'Investitionspriorisierung', href: '/investitionspriorisierung/' },
+      { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/' },
+    ],
   },
   {
     id: 'sparring',
-    titel: 'C. Laufendes Sparring für Eigentümer und Geschäftsleitungen',
+    kenn: 'C',
+    titel: 'Laufendes Sparring für Eigentümer und Geschäftsleitungen',
     ausgangslage: 'Sie treffen regelmäßig Entscheidungen zu Portfolio, Investitionen und Finanzierung und wünschen sich eine unabhängige Gegenposition mit Eigentümerblick.',
     leistung: 'Regelmäßiger Austausch zu Portfoliostrategie, Investitionsentscheidungen, Finanzierungsfragen und operativen Engpässen. Vorbereitung von Entscheidungen, kritische Zweitmeinung, Nachverfolgung offener Punkte.',
     ergebnis: 'Vorbereitete Entscheidungen, kritische Zweitmeinung und konsequente Nachverfolgung.',
-    zusammenarbeit: 'Fester Rhythmus, zum Beispiel monatlich, plus Erreichbarkeit bei akuten Fragen. Diese persönliche Beratung ist keine Organ- oder Beiratsfunktion und ersetzt keine Rechts- oder Steuerberatung.',
+    zusammenarbeit: 'Austausch in festem Rhythmus, ergänzt um Abstimmungen zu akuten Fragen nach Vereinbarung. Diese persönliche Beratung ist keine Organ- oder Beiratsfunktion und ersetzt keine Rechts- oder Steuerberatung.',
+    vertiefung: [
+      { label: 'Zusammenarbeit: Rhythmus und Rollen', href: '/zusammenarbeit/' },
+    ],
   },
 ];
 
-const fragen = [
-  'Welche Objekte tragen das Ergebnis, welche binden Kapital und Aufmerksamkeit ohne Perspektive?',
-  'Welche Investitionen sind wirtschaftlich zwingend, welche sinnvoll, welche verzichtbar?',
-  'Wie sehen die Szenarien Halten, Entwickeln, Verkaufen für einzelne Objekte oder Teilportfolios aus?',
-  'Passt die Finanzierungsstruktur zur geplanten Bestandsentwicklung?',
-  'Liefert das Reporting die Informationen, die Eigentümer und Geschäftsleitung tatsächlich für Entscheidungen brauchen?',
-  'Wer ist für welche Maßnahme verantwortlich, und wie wird deren Wirkung nachgehalten?',
+/* Vorgehen: vier Schritte in fester Reihenfolge, gueltig fuer alle Mandatsformen. Keine Dauer- oder Rhythmusangaben. */
+const vorgehen = [
+  { t: 'Eigentümerziele klären', d: 'Bestandserhalt, Ertrag, Liquidität, Wachstum, Anlagehorizont und Risikotragfähigkeit werden mit Eigentümern und Geschäftsführung zu einem gemeinsamen Zielbild gefasst.' },
+  { t: 'Bestand einordnen und Objektstrategien ableiten', d: 'Jedes Objekt wird nach Ertragslage, Zustand und Handlungsbedarf eingeordnet. Daraus folgt je Objekt eine begründete Zielrichtung: halten, entwickeln oder verkaufen.' },
+  { t: 'Mandat und Maßnahmen festlegen', d: 'Aus Zielbild und Einordnung folgt, welche Mandatsform passt und welche Maßnahmen Vorrang haben. Entscheidungen werden als Vorlage aufbereitet, damit Eigentümer oder Gremium sie treffen können.' },
+  { t: 'Umsetzung steuern und nachhalten', d: 'Verwaltung, Technik und Dienstleister setzen um, ich steuere und halte nach. Fortschritt und Wirkung werden gegen den Plan geprüft, Abweichungen werden erklärt und führen zu Nachsteuerung.' },
 ];
 
-const unterlagen = [
-  { t: 'Portfolio-Einordnung', d: 'Objekte nach wirtschaftlicher Lage, Zustand und Handlungsbedarf geordnet.' },
-  { t: 'Objektstrategien', d: 'Je Objekt oder Cluster eine begründete Zielrichtung mit Maßnahmen und Zeitrahmen.' },
-  { t: 'Investitionsvorlagen', d: 'Entscheidungsvorlagen mit Annahmen, Alternativen, Risiken und Empfehlung.' },
-  { t: 'Maßnahmenplan', d: 'Verantwortliche, Budgetrahmen, Termine und Erfolgskriterien je Maßnahme.' },
-  { t: 'Reportingstruktur', d: 'Kennzahlen und Berichtsrhythmus, abgestimmt auf Eigentümer und Geschäftsleitung.' },
+const vorlage = [
+  { t: 'Fragestellung', d: 'Die Entscheidung in einem Satz: Was soll beschlossen werden, bis wann und von wem?', p: 'Ist klar, worüber entschieden wird?' },
+  { t: 'Ausgangslage', d: 'Objekt oder Teilportfolio, Ertragslage, Zustand, bekannter Rückstand und der Bezug zu den Eigentümerzielen.', p: 'Stimmt das Bild mit unserem Wissen überein?' },
+  { t: 'Optionen', d: 'Wenige echte Alternativen, einschließlich der Option, nichts zu tun.', p: 'Fehlt eine Option, die wir erwarten würden?' },
+  { t: 'Annahmen und Datenbasis', d: 'Woher die Zahlen stammen, mit welchem Stand, welche Lücken bestehen und wie damit umgegangen wurde.', p: 'Welche Annahme würde die Empfehlung kippen?' },
+  { t: 'Wirtschaftlichkeit und Risiken je Option', d: 'Wirkung auf Ertrag, Liquidität und Wert, Aufwand, Risiken und Abhängigkeiten, gleich strukturiert für jede Option.', p: 'Sind die Optionen vergleichbar dargestellt?' },
+  { t: 'Empfehlung', d: 'Eine begründete Empfehlung mit den Gründen gegen die anderen Optionen.', p: 'Folgt die Empfehlung aus den Annahmen?' },
+  { t: 'Benötigte Entscheidung', d: 'Der Beschlusstext mit Budgetrahmen, Wertgrenzen und Verantwortlichen.', p: 'Ist der Beschluss umsetzbar formuliert?' },
+  { t: 'Nächste Schritte und offene Punkte', d: 'Was nach dem Beschluss geschieht, wer es tut, welche Fragen offen bleiben und wann sie geklärt werden.', p: 'Wissen wir, was als Nächstes passiert?' },
 ];
 
-const faq = [
-  { q: 'Für welche Portfolios ist die Beratung gedacht?', a: 'Im Schwerpunkt für größere Wohnimmobilienbestände von Eigentümern, Family Offices, institutionellen Bestandshaltern und Fondsteams in Deutschland. Fachlich passende kleinere Portfolios sind ebenso willkommen. Entscheidend ist, dass Analyse, Entscheidung und Umsetzung zusammen gedacht werden sollen.' },
-  { q: 'Was unterscheidet die Beratung von einer laufenden Hausverwaltung?', a: 'Die Verwaltung führt das Tagesgeschäft: Mieterbetreuung, Abrechnung, Instandhaltung. Asset Management legt fest, wohin sich das Portfolio wirtschaftlich entwickeln soll, und steuert die Umsetzung. Ich berate auf dieser Ebene und arbeite mit Ihrer bestehenden Verwaltung zusammen.' },
-  { q: 'Übernehmen Sie auch Fondsverwaltung oder Kapitalanlagevermittlung?', a: 'Nein. Ich erbringe keine erlaubnispflichtigen Finanzdienstleistungen, keine Anlagevermittlung und keine Rechts- oder Steuerberatung. Wo diese Themen berührt werden, arbeite ich mit Ihren Beratern zusammen oder empfehle die Einbindung entsprechender Spezialisten.' },
-  { q: 'Wie werden Honorar und Umfang festgelegt?', a: 'Individuell nach Mandatsform, Portfoliogröße und Datenlage. Vor Beginn erhalten Sie ein Angebot mit klar beschriebenem Leistungsumfang. Die Kontaktaufnahme löst keinen Beratungsvertrag aus.' },
-  { q: 'Wie gehen Sie mit vertraulichen Daten um?', a: 'Vertraulichkeit wird vor Datenaustausch schriftlich vereinbart. Für die erste Kontaktaufnahme genügt eine grobe Beschreibung von Ausgangslage und Ziel. Detaildaten sind erst im Mandat erforderlich.' },
+const verwandt = [
+  { label: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
+  { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  { label: 'KI im Immobilienmanagement', href: '/ki-immobilienmanagement/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'passung',
+    q: 'Für welche Portfolios ist die Beratung gedacht?',
+    a: 'Im Schwerpunkt für größere Wohnimmobilienbestände in Deutschland; fachlich passende kleinere Portfolios sind willkommen.',
+    mehr: { label: 'Für wen die Beratung gedacht ist', href: '/#fuer-wen' },
+  },
+  {
+    id: 'teilportfolio',
+    q: 'Kann eine Zusammenarbeit mit einem einzelnen Objekt oder Teilportfolio beginnen?',
+    a: 'Ja. Der Umfang wird im Angebot festgelegt. Ein Teilportfolio ist ein möglicher Einstieg, weil Daten, Beteiligte und Fragestellung überschaubar bleiben. Eine Ausweitung ist möglich, aber kein Automatismus.',
+    mehr: { label: 'Ablauf einer Zusammenarbeit', href: '/zusammenarbeit/' },
+  },
+  {
+    id: 'hausverwaltung',
+    q: 'Was unterscheidet die Beratung von einer laufenden Hausverwaltung?',
+    a: 'Die Verwaltung führt das Tagesgeschäft: Mieterbetreuung, Abrechnung, Instandhaltung. Asset Management legt fest, wohin sich das Portfolio wirtschaftlich entwickeln soll, und steuert die Umsetzung. Ich berate auf dieser Ebene und arbeite mit Ihrer bestehenden Verwaltung zusammen.',
+    mehr: { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  },
+  {
+    id: 'finanzdienstleistung',
+    q: 'Übernehmen Sie auch Fondsverwaltung oder Kapitalanlagevermittlung?',
+    a: 'Nein. Ich erbringe keine erlaubnispflichtigen Finanzdienstleistungen, keine Anlagevermittlung und keine Rechts- oder Steuerberatung. Wo diese Themen berührt werden, arbeite ich mit Ihren Beratern zusammen oder empfehle die Einbindung entsprechender Spezialisten.',
+  },
+  {
+    id: 'honorar',
+    q: 'Wie werden Honorar und Umfang festgelegt?',
+    a: honorarlogikFreigabe && honorarlogikText ? `${honorarAntwort} ${honorarlogikText}` : honorarAntwort,
+    mehr: { label: 'Angebot und Vertrag unter Zusammenarbeit', href: '/zusammenarbeit/' },
+  },
+  {
+    id: 'vertraulichkeit',
+    q: 'Wie gehen Sie mit vertraulichen Daten um?',
+    a: 'Vertraulichkeit wird vor jedem Datenaustausch schriftlich vereinbart. Für die erste Kontaktaufnahme genügt eine grobe Beschreibung von Ausgangslage und Ziel; Detaildaten sind erst im Mandat erforderlich.',
+    mehr: { label: 'Vertraulichkeit und Daten unter Zusammenarbeit', href: '/zusammenarbeit/' },
+  },
 ];
 
 const ld = [
   breadcrumbLd(crumbs),
-  serviceLd({ name: 'Asset-Management-Beratung für Immobilienportfolios', description, path, serviceType: 'Asset-Management-Beratung' }),
-  faqLd(faq),
+  serviceLd({ name: 'Asset-Management-Beratung für Immobilienbestandshalter', description, path, serviceType: 'Asset-Management-Beratung' }),
+  faqLd(faq.map((f) => ({ q: f.q, a: f.a }))),
 ];
 ---
 <Base title={title} description={description} path={path} ld={ld}>
   <Breadcrumb crumbs={crumbs} />
+
   <section class="hero">
-    <div class="container">
-      <span class="eyebrow">Beratung</span>
-      <h1>Asset-Management-Beratung für Immobilienportfolios</h1>
-      <p class="hero-frage">Wohin soll sich Ihr Bestand wirtschaftlich entwickeln, und was muss dafür konkret passieren?</p>
-      <p class="lead">Ich berate Eigentümer, Geschäftsführungen und Asset-Management-Teams bei Objektstrategien, Investitionsentscheidungen, Reporting und Umsetzung. Drei Mandatsformen decken die typischen Anlässe ab.</p>
-      <div class="hero-actions">
+    <div class="container g hero__grid">
+      <div class="hero__text gc-1-8">
+        <span class="eyebrow">Beratung</span>
+        <h1>Asset-Management-Beratung für Immobilien&shy;bestandshalter</h1>
+        <p class="standfirst hero-frage">Wohin soll sich Ihr Bestand wirtschaftlich entwickeln, und was muss dafür konkret passieren?</p>
+      </div>
+      <p class="hero__intro gc-9-12">
+        <a href="/glossar/#asset-management">Asset Management</a> heißt hier: festlegen, wohin sich ein Bestand wirtschaftlich entwickeln soll, und die Umsetzung steuern.
+        Ich berate Eigentümer, Geschäftsführungen und Asset-Management-Teams von den Eigentümerzielen über die Strategie je Objekt bis zur Umsetzung.
+        Drei Mandatsformen decken die typischen Anlässe ab.
+      </p>
+      <div class="hero-actions gc-full">
         <a class="btn btn--primary" href="/kontakt/">Portfolio besprechen</a>
         <a class="textlink" href="#mandate">Zu den Mandatsformen</a>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <Seitennav items={seitennav} />
+
+  <section class="section" id="fragestellungen">
     <div class="container">
-      <div class="section-head">
-        <h2>Fragen, die in der Beratung bearbeitet werden</h2>
-        <p>Asset Management heißt hier: aus Eigentümerzielen belastbare Objektstrategien ableiten, Szenarien vergleichen, Investitionen entscheiden und die Umsetzung steuern.</p>
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Fragestellungen</span>
+          <h2>Fragen, die in der Beratung bearbeitet werden</h2>
+          <p>Aus Eigentümerzielen werden <a href="/glossar/#objektstrategie">Objektstrategien</a> abgeleitet, also je Objekt eine begründete Zielrichtung: halten, entwickeln oder verkaufen. Szenarien werden verglichen, Investitionen entschieden, die Umsetzung wird gesteuert.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register" role="list">
+            <li>
+              <h3>Welche Objekte tragen das Ergebnis, welche binden Kapital und Aufmerksamkeit ohne Perspektive?</h3>
+              <p>Die Antwort gibt die <a href="/glossar/#portfolio-einordnung">Portfolio-Einordnung</a>: jedes Objekt nach Ertragslage, Zustand und Handlungsbedarf geordnet, damit Budget und Aufmerksamkeit dorthin gehen, wo sie wirken.</p>
+            </li>
+            <li>
+              <h3>Welche Investitionen sind wirtschaftlich zwingend, welche sinnvoll, welche verzichtbar?</h3>
+              <p>Maßnahmen werden nach Dringlichkeit, Wirkung auf Ertrag und Wert sowie technischer Abhängigkeit geordnet. Die Methode dazu beschreibe ich auf einer eigenen Seite.</p>
+              <a class="textlink" href="/investitionspriorisierung/">Investitionspriorisierung</a>
+            </li>
+            <li>
+              <h3>Wie sehen die Szenarien Halten, Entwickeln, Verkaufen für einzelne Objekte oder Teilportfolios aus?</h3>
+              <p>Szenarien sind durchgerechnete Varianten mit offengelegten Annahmen. Sie werden nebeneinandergestellt und an den Eigentümerzielen gemessen, bevor eine Objektstrategie festgelegt wird.</p>
+              {beitragObjektstrategie && <a class="textlink" href={`/einblicke/${beitragObjektstrategie.id}/`}>Beitrag: Halten, Entwickeln oder Verkaufen</a>}
+            </li>
+            <li>
+              <h3>Passt die Finanzierungsstruktur zur geplanten Bestandsentwicklung?</h3>
+              <p>Ob Finanzierungsstruktur und Bestandsentwicklung zusammenpassen, prüfe ich an Maßnahmenplan und Liquiditätsplanung. Die Finanzierung selbst vermittle ich nicht.</p>
+              <a class="textlink" href="/investitionspriorisierung/#investitionsplan">Investitionsplan mit Zeitachse</a>
+            </li>
+            <li>
+              <h3>Liefert das Reporting die Informationen, die Eigentümer und Geschäftsleitung für Entscheidungen brauchen?</h3>
+              <p>Berichte werden von den Entscheidungen her aufgebaut, die sie auslösen sollen: wenige Kennzahlen mit klarer Definition statt vieler Tabellen.</p>
+              <a class="textlink" href="/reporting-und-kennzahlen/">Reporting und Kennzahlen</a>
+            </li>
+            <li>
+              <h3>Wer ist für welche Maßnahme verantwortlich, und wie wird deren Wirkung nachgehalten?</h3>
+              <p>Jede Maßnahme erhält Verantwortlichen, Budgetrahmen und Termin. Plan und Ist werden in festem Rhythmus verglichen, Abweichungen werden erklärt und führen zu Nachsteuerung.</p>
+            </li>
+          </ol>
+        </div>
       </div>
-      <ul class="checklist fragen prose">{fragen.map((f) => <li>{f}</li>)}</ul>
     </div>
   </section>
 
-  <section class="section section--flaeche" id="mandate">
+  <section class="section section--linie" id="eigentuemerziele">
+    <div class="container g">
+      <div class="gc-1-7">
+        <div class="section-head">
+          <span class="eyebrow eyebrow--still">Eigentümerziele</span>
+          <h2>Eigentümerziele klären, bevor die erste Objektstrategie entsteht</h2>
+          <p>Eine Objektstrategie ist nur so gut wie das Ziel, an dem sie gemessen wird. Diese Fragen kläre ich mit Eigentümern und Geschäftsführung zu Beginn. Das ist kein Beratungsangebot zu Nachfolge oder Steuern, sondern die Grundlage jeder späteren Entscheidung.</p>
+        </div>
+        <ul class="checklist ziele" role="list">
+          {ziele.map((z) => (<li><strong>{z.t}</strong> {z.d}</li>))}
+        </ul>
+      </div>
+      <aside class="ziele-aside gc-9-12" aria-labelledby="ziele-h">
+        <h3 id="ziele-h">Was daraus entsteht</h3>
+        <p>Ein Zielbild in wenigen Sätzen, das Eigentümer und Geschäftsführung gemeinsam tragen. An ihm werden jede Objektstrategie, jede Investitionsvorlage und jedes Reporting gemessen.</p>
+        <p class="small">Steuerliche und rechtliche Folgen dieser Ziele bewerten Ihr Steuerberater und Ihr Rechtsanwalt.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="anlaesse">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Anlässe</span>
+          <h2>Typische Anlässe für ein Mandat</h2>
+          <p>Situationen, in denen Analyse, Entscheidung und Umsetzung zusammen gedacht werden müssen. Keine Referenzen, sondern Anlässe, für die die Mandatsformen ausgelegt sind.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register register--2" role="list">
+            {anlaesse.map((a) => (
+              <li>
+                <h3>{a.t}</h3>
+                <p>{a.d}</p>
+                {a.mehr && <a class="textlink" href={a.mehr.href}>{a.mehr.label}</a>}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="selbstpruefung">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf">
+          <span class="eyebrow eyebrow--still">Selbstprüfung</span>
+          <h2>Fünf Fragen an Ihr Portfolio</h2>
+          <p>Keine Punkte, keine Auswertung. Die Fragen zeigen, ob Steuerung und Tagesgeschäft an denselben Zahlen und Zuständigkeiten hängen.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ul class="checklist selbstpruefung__liste" role="list">
+            {selbstpruefung.map((s) => (
+              <li>
+                <p class="selbstpruefung__frage">{s.f}</p>
+                <p class="selbstpruefung__hinweis">{s.h}</p>
+              </li>
+            ))}
+          </ul>
+          <p class="selbstpruefung__schluss">Bleiben zwei Fragen offen, lohnt ein Gespräch. <a class="textlink" href="/kontakt/">Portfolio besprechen</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="mandate">
     <div class="container">
       <div class="section-head">
+        <span class="eyebrow">Mandatsformen</span>
         <h2>Drei Mandatsformen</h2>
-        <p>Jede Mandatsform beschreibt Ausgangslage, Leistung, Arbeitsergebnis und Zusammenarbeit. Honorar, Verfügbarkeit und Zeitrahmen werden individuell vereinbart.</p>
+        <p>Jede Mandatsform beschreibt Ausgangslage, Leistung, Arbeitsergebnis und Zusammenarbeit. <a href="/glossar/#sparring">Sparring</a> steht dabei für den regelmäßigen, kritischen Austausch zu anstehenden Entscheidungen. Honorar, Verfügbarkeit und Zeitrahmen werden individuell vereinbart.</p>
       </div>
-      <div class="mandate">
-        {mandate.map((m) => (
-          <article class="mandat card" id={m.id}>
+      {mandate.map((m) => (
+        <section class="kapitel mandat" id={m.id}>
+          <div class="kapitel__kopf sticky-rand">
+            <span class="kapitel__kennung" aria-hidden="true">{m.kenn}</span>
             <h3>{m.titel}</h3>
+          </div>
+          <div class="kapitel__text">
             <dl class="dl-grid">
               <dt>Ausgangslage</dt><dd>{m.ausgangslage}</dd>
               <dt>Leistung</dt><dd>{m.leistung}</dd>
               <dt>Arbeitsergebnis</dt><dd>{m.ergebnis}</dd>
               <dt>Zusammenarbeit</dt><dd>{m.zusammenarbeit}</dd>
+              <dt>Vertiefung</dt>
+              <dd>
+                <ul class="vertiefung" role="list">
+                  {m.vertiefung.map((v) => (<li><a class="textlink" href={v.href}>{v.label}</a></li>))}
+                </ul>
+              </dd>
             </dl>
-          </article>
-        ))}
-      </div>
+          </div>
+        </section>
+      ))}
     </div>
   </section>
 
-  <section class="section">
+  <section class="section section--linie" id="vorgehen">
     <div class="container">
-      <div class="section-head"><h2>Entscheidungsunterlagen, die entstehen</h2></div>
-      <div class="grid grid--3">
-        {unterlagen.map((u) => (<div class="card card--flaeche"><h3>{u.t}</h3><p>{u.d}</p></div>))}
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Vorgehen</span>
+        <h2>Vom Eigentümerziel zur Umsetzung</h2>
+        <p>Vier Schritte in fester Reihenfolge, deren Tiefe und Umfang sich nach der vereinbarten Mandatsform richten.</p>
+      </div>
+      <ol class="steps" role="list">
+        {vorgehen.map((v) => (<li><h3>{v.t}</h3><p>{v.d}</p></li>))}
+      </ol>
+      <p class="section-foot">Wie ein Mandat vom Erstgespräch bis zur Übergabe abläuft, beschreibe ich auf einer eigenen Seite. <a class="textlink" href="/zusammenarbeit/#ablauf">Ablauf einer Zusammenarbeit</a></p>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="unterlagen">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Entscheidungsunterlagen</span>
+          <h2>Unterlagen, die im Mandat entstehen</h2>
+          <p>Jedes Mandat endet mit Dokumenten, die Ihr Haus ohne mich weiter nutzen kann. Welche davon entstehen, hängt von der Mandatsform ab.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register register--2" role="list">
+            <li>
+              <h3>Portfolio-Einordnung</h3>
+              <p>Objekte nach wirtschaftlicher Lage, Zustand und Handlungsbedarf geordnet. Sie zeigt, wo Aufmerksamkeit und Budget zuerst wirken.</p>
+            </li>
+            <li>
+              <h3>Objektstrategien</h3>
+              <p>Je Objekt oder Cluster, also je Gruppe vergleichbarer Objekte, eine begründete Zielrichtung mit Maßnahmen, Zeitrahmen und Kennzahlen. Halten, Entwickeln oder Verkaufen wird begründet, nicht behauptet.</p>
+            </li>
+            <li>
+              <h3>Entscheidungs&shy;vorlagen</h3>
+              <p>Eine <a href="/glossar/#entscheidungsvorlage">Entscheidungsvorlage</a> bündelt Fragestellung, Optionen, Annahmen, Risiken und Empfehlung auf wenigen Seiten, damit ein Gremium entscheiden kann.</p>
+              <a class="textlink" href="#entscheidungsvorlage">Aufbau als Muster</a>
+            </li>
+            <li>
+              <h3>Maßnahmenplan</h3>
+              <p>Verantwortliche, Budgetrahmen, Termine und Erfolgskriterien je Maßnahme. Das gemeinsame Arbeitsdokument für Verwaltung, Technik und Eigentümerseite.</p>
+            </li>
+            <li>
+              <h3>Reportingstruktur</h3>
+              <p>Kennzahlen und Berichtsrhythmus, abgestimmt auf die Entscheidungen von Eigentümern und Geschäftsleitung.</p>
+              <a class="textlink" href="/reporting-und-kennzahlen/">Reporting und Kennzahlen</a>
+            </li>
+          </ol>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--flaeche">
-    <div class="container prose">
-      <h2>Abgrenzung</h2>
-      <ul class="checklist">
-        <li>Keine laufende Hausverwaltung. Die operative Verwaltung bleibt bei Ihrem Verwalter. Wie Asset und Property Management zusammenarbeiten, beschreibe ich unter <a href="/property-management-optimierung/">Property-Management-Optimierung</a>.</li>
-        <li>Keine Fondsverwaltung, keine Anlagevermittlung, keine erlaubnispflichtige Finanzdienstleistung.</li>
-        <li>Keine Rechts- oder Steuerberatung. Diese Themen werden mit Ihren Beratern abgestimmt.</li>
-        <li>Persönliche Beratung, keine Organ- oder Beiratsfunktion.</li>
-      </ul>
+  <section class="section section--flaeche" id="entscheidungsvorlage">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Muster</span>
+        <h2>Aufbau einer Entscheidungs&shy;vorlage</h2>
+        <p>Acht Abschnitte, die eine Vorlage für Gesellschafter, Beirat oder Geschäftsführung beantworten sollte. Die Struktur ist ein Muster ohne Zahlen.</p>
+      </div>
+      <figure class="vorlage">
+        <p class="small tabelle-hinweis">Tabelle seitlich verschiebbar.</p>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Tabelle Aufbau einer Entscheidungsvorlage">
+          <table>
+            <caption>Schematische Struktur, kein Projektergebnis</caption>
+            <thead>
+              <tr>
+                <th scope="col">Abschnitt</th>
+                <th scope="col">Inhalt</th>
+                <th scope="col">Prüffrage des Gremiums</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vorlage.map((v) => (
+                <tr>
+                  <th scope="row">{v.t}</th>
+                  <td>{v.d}</td>
+                  <td>{v.p}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <figcaption class="bildunterschrift">Schematische Struktur, kein Projektergebnis. Vorlagen werden an die Gremienformate des Auftraggebers angepasst.</figcaption>
+      </figure>
+      <p class="small section-foot">Steuerliche und rechtliche Folgen einer Option bewerten Steuerberater und Rechtsanwalt.</p>
     </div>
   </section>
 
-  <Faq items={faq} />
+  <section class="section" id="abgrenzung">
+    <div class="container g">
+      <div class="gc-1-7">
+        <div class="section-head"><h2>Abgrenzung</h2></div>
+        <ul class="checklist abgrenzung" role="list">
+          <li>Keine laufende Hausverwaltung. Die operative Verwaltung, das <a href="/glossar/#property-management">Property Management</a>, bleibt bei Ihrem Verwalter. Wie beide Ebenen zusammenarbeiten, beschreibe ich unter <a href="/property-management-optimierung/">Property-Management-Optimierung</a>.</li>
+          <li>Keine Fondsverwaltung, keine Anlagevermittlung, keine erlaubnispflichtige Finanzdienstleistung.</li>
+          <li>Keine Rechts- oder Steuerberatung. Diese Themen werden mit Ihren Beratern abgestimmt.</li>
+          <li>Persönliche Beratung, keine Organ- oder Beiratsfunktion.</li>
+          <li>Verbundene Unternehmen und Interessen lege ich offen, bevor ich eine Empfehlung ausspreche. <a href="/zusammenarbeit/#interessen">Zu den Interessen</a></li>
+        </ul>
+      </div>
+      <aside class="verwandt-block gc-9-12" aria-labelledby="verwandt-h">
+        <h2 class="h3" id="verwandt-h">Verwandte Themen</h2>
+        <ul class="verwandt" role="list">{verwandt.map((v) => <li><a href={v.href}>{v.label}</a></li>)}</ul>
+      </aside>
+    </div>
+  </section>
+
+  <Faq id="fragen" items={faq} />
+
+  <section class="section section--tight section--linie personenanker" aria-label="Zur Person">
+    <div class="container personenanker__grid">
+      <Portrait nr={2} ratio="1/1" variant="hell" sizes="8rem" widths={[400, 800]} />
+      <div class="personenanker__text">
+        <p class="personenanker__name">{SITE.name}</p>
+        <p class="caps">{SITE.claim}</p>
+        <a class="textlink" href="/profil/">Zum Profil</a>
+      </div>
+    </div>
+  </section>
+
   <Cta />
 </Base>
 
 <style>
-  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  /* Hero 8/4 nach dem Muster von Fachseite.astro: Frage links, Intro rechts unten, Buttonzeile volle Breite */
+  .hero { padding-block: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: 0; }
+  .hero__grid { align-items: end; row-gap: var(--s-6); }
+  .hero__text { min-width: 0; }
   .hero h1 { max-width: 24ch; }
-  .hero-frage { font-size: 1.2rem; font-weight: 600; color: var(--c-text-2); max-width: 44ch; margin-bottom: var(--s-4); }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-5); align-items: center; margin-top: var(--s-5); }
-  .fragen li { font-size: 1.05em; }
-  .mandate { display: grid; gap: var(--s-5); }
-  .mandat h3 { margin-bottom: var(--s-4); }
+  .hero-frage { margin-bottom: 0; }
+  .hero__intro { color: var(--c-text-2); margin: 0; align-self: end; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-5); align-items: center; }
+
+  /* Eigentuemerziele: Checkliste links, Randnotiz mit 2 px Linie rechts */
+  .ziele { max-width: var(--w-text); }
+  .ziele li + li { margin-top: var(--s-3); }
+  .ziele-aside { border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .ziele-aside h3 { margin-bottom: var(--s-3); }
+  .ziele-aside p { color: var(--c-text-2); }
+  .ziele-aside p:last-child { margin-bottom: 0; }
+
+  /* Selbstpruefung: Fragen mit Haarlinien, Marker auf Hoehe der Frage; Schlusslink als eigene Zeile (sichtbarer Abstand --s-3,
+     der Rest ist der Innenabstand der 44-px-Zielflaeche aus .textlink), nur so breit wie sein Text */
+  .selbstpruefung__liste { margin: 0; border-top: var(--rule); }
+  .selbstpruefung__liste li { padding-block: var(--s-4); border-bottom: var(--rule); margin: 0; }
+  .selbstpruefung__liste li::before { top: calc(var(--s-4) + 0.62em); }
+  .selbstpruefung__frage { font-size: var(--fs-lead); font-weight: 600; line-height: 1.3; color: var(--c-text); margin: 0 0 var(--s-1); max-width: var(--w-measure); }
+  .selbstpruefung__hinweis { color: var(--c-text-2); font-size: var(--fs-small); margin: 0; max-width: 62ch; }
+  .selbstpruefung__schluss { margin: var(--s-6) 0 0; font-size: var(--fs-lead); font-weight: 600; }
+  .selbstpruefung__schluss .textlink { display: block; width: fit-content; margin-top: calc(var(--s-3) - 0.65rem); }
+
+  /* Mandate als Kapitel mit Kennung A bis C, dl-grid mit fester Begriffsspalte (unter 600 px einspaltig) */
   .mandat .dl-grid { grid-template-columns: 10rem 1fr; }
-  @media (max-width: 600px) { .mandat .dl-grid { grid-template-columns: 1fr; } }
+  .vertiefung { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--s-2) + 1.3rem) var(--s-5); }   /* Zeilenabstand: --s-2 plus 2 x 0.65rem, damit die 44-px-Zielflaechen der Textlinks (negativer Aussenabstand aus .textlink) beim Umbruch 8 px Abstand halten statt sich zu ueberlappen */
+  .vertiefung li { margin: 0; }
+  @media (max-width: 600px) {
+    .mandat .dl-grid { grid-template-columns: 1fr; }
+    .mandat .dl-grid dt { border-bottom: 0; padding-bottom: 0; }
+  }
+
+  /* Muster Entscheidungsvorlage: figure mit Tabelle, Mindestbreiten statt Quetschen (scrollt in .table-wrap),
+     Kennzeichnung als figcaption ausserhalb des Scrollbereichs, Scrollhinweis nur auf schmalen Ansichten */
+  .vorlage tbody th { min-width: 10rem; }
+  .vorlage td { min-width: 13rem; color: var(--c-text-2); }
+  .vorlage tbody th[scope="row"] { color: var(--c-text); }
+  .vorlage figcaption { margin-top: var(--s-4); max-width: var(--w-text); }
+  .tabelle-hinweis { display: none; color: var(--c-text-3); margin: 0 0 var(--s-2); }
+  @media (max-width: 640px) {
+    .tabelle-hinweis { display: block; }
+  }
+
+  /* Abgrenzung und Linkregister Verwandte Themen */
+  .abgrenzung { max-width: var(--w-text); }
+  .verwandt-block .h3 { margin-bottom: var(--s-4); }
+  .verwandt { list-style: none; padding: 0; margin: 0; border-top: var(--rule-strong); }
+  .verwandt li { border-bottom: var(--rule); margin: 0; }
+  .verwandt a { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); min-height: 44px; padding-block: var(--s-3); text-decoration: none; font-weight: 600; }
+  .verwandt a::after { content: "\2192"; font-weight: 400; color: var(--c-text-3); flex: none; }
+
+  /* Personenanker: Name, Claim und Link neben dem 1:1-Portrait */
+  .personenanker__grid { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--col-gap); align-items: center; }
+  .personenanker__text { min-width: 0; }
+  .personenanker__name { font-size: var(--fs-h3); font-weight: 600; line-height: var(--lh-heading); letter-spacing: -0.01em; margin: 0 0 var(--s-1); }
+  .personenanker .caps { margin-bottom: var(--s-3); }
+  @media (max-width: 520px) { .personenanker__grid { grid-template-columns: 6rem minmax(0, 1fr); } }
+
+  @media (hover: hover) {
+    .verwandt a:hover { text-decoration: underline; }
+  }
 </style>

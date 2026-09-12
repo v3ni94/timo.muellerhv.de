@@ -18,21 +18,21 @@ Viele Optimierungsprojekte beginnen mit einer Maßnahmenliste. Das ist verständ
 
 **2. Leerstand mit Ursache.** Nicht nur die Zahl leerer Einheiten, sondern je Einheit der Grund und die Dauer: Herrichtung offen, Vermarktung läuft, Budget nicht freigegeben, strukturell schwer vermietbar.
 
-**3. Offene Forderungen nach Alter und Status.** Wie alt sind die Posten, in welcher Mahnstufe, mit welcher Einbringlichkeit? Eine Summe allein sagt wenig.
+**3. Offene Forderungen nach Alter und Status.** Wie alt sind die Posten, wie ist ihr Bearbeitungsstand, und welche Zahlung ist noch zu erwarten? Eine Summe allein sagt wenig.
 
 **4. Laufende Kosten nach Umlagefähigkeit.** Welche Kosten tragen Mieter, welche der Eigentümer, welche sind vertraglich gebunden? Erst diese Ordnung zeigt, wo Einfluss besteht.
 
-**5. Instandhaltungshistorie und bekannter Rückstand.** Was wurde in den letzten Jahren je Objekt investiert, was ist bekannt offen, was ist noch nie begutachtet worden?
+**5. Instandhaltungshistorie und bekannter Rückstand.** Was wurde bisher je Objekt investiert, was ist bekannt offen, was ist noch nie begutachtet worden?
 
 **6. Verträge mit Laufzeiten.** Dienstleister, Versorger, Versicherungen, Finanzierungen. Kündigungsfristen und Prolongationstermine gehören in eine Übersicht.
 
 ## Wie Lücken sichtbar werden
 
-Der einfachste Test: Drei Beteiligte nach derselben Zahl fragen, etwa der aktuellen Leerstandsquote. Weichen die Antworten ab, ist der Datenstand nicht konsistent. Der zweite Test: Für zehn zufällig gewählte Einheiten alle sechs Bereiche zusammentragen. Wo das länger als einen Tag dauert, fehlt Struktur.
+Der einfachste Test: Drei Beteiligte nach derselben Zahl fragen, etwa der aktuellen Leerstandsquote. Weichen die Antworten ab, ist der Datenstand nicht konsistent. Der zweite Test: Für eine Stichprobe zufällig gewählter Einheiten alle sechs Bereiche zusammentragen. Wo das unverhältnismäßig lange dauert, fehlt Struktur.
 
 ## Was dieser Schritt nicht leistet
 
-Ein sauberer Datenstand ersetzt keine Entscheidung. Er macht sie nur begründbar. Und er ist kein einmaliges Projekt: Ohne festgelegte Zuständigkeit für die Datenpflege verfällt der Stand innerhalb weniger Monate.
+Ein sauberer Datenstand ersetzt keine Entscheidung. Er macht sie nur begründbar. Und er ist kein einmaliges Projekt: Ohne festgelegte Zuständigkeit für die Datenpflege verfällt der Stand schnell wieder.
 
 ## Grenzen
 

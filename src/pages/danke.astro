@@ -1,14 +1,127 @@
 ---
+/**
+ * Bestaetigungsseite nach erfolgreicher Uebermittlung (docs/DESIGN-SPEC-V2.md 6.16 und 9.6; docs/CONTENT-PLAN-V2.md 4.10).
+ * noindex bleibt, die Seite ist in astro.config.mjs aus der Sitemap ausgeschlossen. Ziel von contact.php (303) und
+ * des fetch-Pfads in ContactForm.astro.
+ * Abschnittsfolge: Hero kompakt mit E-Mail-Zeile, "Was jetzt passiert" (drei Schritte, ohne Fristzusage),
+ * "Zum Weiterlesen" als Linkregister in gc-1-8 (Zusammenarbeit, Fachseite, drei Vertiefungen, Einblicke nur mit
+ * veroeffentlichten Beitraegen). Kein Cta, keine Karten, kein Portrait, der Footer folgt direkt.
+ * Faktenregeln: Die Annahme durch den Mailserver ist kein Zustellnachweis (Masterprompt Abschnitt 12), deshalb
+ * "übermittelt" statt "eingegangen" und ein Direktkontakt als Rueckfallweg. Keine Reaktionszeit, keine Dauer.
+ * Flag Nr. 25 (Kostenfreiheit von Erstgespraech und Kurzeinschaetzung) rendert ohne Freigabe nichts.
+ */
 import Base from '../layouts/Base.astro';
-import { SITE } from '../data/site';
+import Hero from '../components/Hero.astro';
+import { anzahlFreigegeben } from '../lib/einblicke';
+
+const path = '/danke/';
+const title = 'Anfrage übermittelt | Timo Müller';
+const description = 'Ihre Anfrage an Timo Müller wurde übermittelt. Was jetzt passiert und was Sie für das Erstgespräch vorbereiten können.';
+
+/* ---------------------------------------------------------------------------
+   Freigabepunkt (docs/CONTENT-PLAN-V2.md Abschnitt 9, docs/FAKTENLISTE.md).
+   Nr. 25: Kostenfreiheit von Erstgespraech und Kurzeinschaetzung. Bis zur Freigabe bleibt es bei "unverbindlich".
+   Gleiches Flag wie in kontakt.astro; nach Freigabe an beiden Stellen denselben Wortlaut eintragen.
+--------------------------------------------------------------------------- */
+const kostenfreiFreigabe: boolean = false;
+const kostenfreiText = '';
+/** Ein Flag-Inhalt rendert nur, wenn Freigabe vorliegt und ein Wortlaut eingetragen ist. */
+const frei = (flag: boolean, text: string): boolean => flag && text.trim().length > 0;
+
+/* Zum Weiterlesen: Heimatort des Ablaufs zuerst, dann die Fachseite mit den Mandatsformen und die drei Vertiefungen.
+   Einblicke nur, wenn mindestens ein Beitrag freigegeben und veroeffentlicht ist (kein Link auf den Leerzustand). */
+interface WeiterLink { label: string; href: string; kurz: string }
+const weiterlesen: WeiterLink[] = [
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/', kurz: 'Ablauf vom Erstgespräch bis zur Übergabe, Datenbedarf, Vertraulichkeit und Interessen' },
+  { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/', kurz: 'Eigentümerziele, drei Mandatsformen und die Entscheidungsunterlagen, die entstehen' },
+  { label: 'Investitionspriorisierung', href: '/investitionspriorisierung/', kurz: 'Instandhaltung und Investitionen in eine begründete Reihenfolge bringen' },
+  { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/', kurz: 'Leistungsbeschreibung, Nachtrag und Abnahme als Steuerungskette' },
+  { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/', kurz: 'Berichte, die Entscheidungen auslösen' },
+];
+if ((await anzahlFreigegeben()) > 0) {
+  weiterlesen.push({ label: 'Einblicke', href: '/einblicke/', kurz: 'Fachbeiträge mit Kernaussage, Arbeitsschritten und Grenzen' });
+}
 ---
-<Base title="Anfrage übermittelt | Timo Müller" description="Ihre Anfrage wurde übermittelt." path="/danke/" noindex>
-  <section class="section">
-    <div class="container prose">
-      <span class="eyebrow">Kontakt</span>
-      <h1>Vielen Dank, Ihre Anfrage wurde übermittelt.</h1>
-      <p class="lead">Ich melde mich persönlich bei Ihnen. Falls Sie in den nächsten Werktagen nichts von mir hören, schreiben Sie mir bitte direkt an <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
-      <p><a class="btn btn--secondary" href="/">Zur Startseite</a></p>
+<Base title={title} description={description} path={path} noindex>
+  <Hero
+    eyebrow="Kontakt"
+    title="Vielen Dank, Ihre Anfrage wurde übermittelt."
+    lead="Ich melde mich persönlich bei Ihnen. Sollten Sie keine Rückmeldung erhalten, schreiben Sie mir bitte direkt per E-Mail."
+    mail
+    compact
+  >
+    <div class="hero-actions">
+      <a class="btn btn--secondary" href="/">Zur Startseite</a>
+    </div>
+  </Hero>
+
+  <section class="section ablauf" id="ablauf">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Ablauf</span>
+        <h2>Was jetzt passiert</h2>
+        <p>Drei Schritte bis zur Entscheidung, ob und in welchem Umfang eine Zusammenarbeit sinnvoll ist. Unterlagen brauchen Sie dafür noch nicht.</p>
+      </div>
+      <ol class="steps" role="list">
+        <li>
+          <h3>Rückmeldung</h3>
+          <p>Ich lese Ihre Anfrage selbst und melde mich persönlich bei Ihnen, per E-Mail oder, falls Sie eine Telefonnummer angegeben haben, telefonisch. Dabei schlage ich einen Termin für ein Erstgespräch vor oder stelle eine Rückfrage, wenn mir eine Angabe fehlt.</p>
+        </li>
+        <li>
+          <h3>Erstgespräch</h3>
+          <p>Telefon oder Video, unverbindlich und ohne Detaildaten oder Mieterdaten.{frei(kostenfreiFreigabe, kostenfreiText) && <> {kostenfreiText}</>}</p>
+        </li>
+        <li>
+          <h3>Vorbereitung</h3>
+          <p>Für das Gespräch genügen Art und ungefähre Größe des Bestands, Ihre Rolle und Ihr Ziel. Verträge, Mieterdaten oder andere vertrauliche Unterlagen bleiben bei Ihnen. Diese folgen erst im <a href="/glossar/#mandat">Mandat</a>, also im vereinbarten Beratungsauftrag, und erst nach einer schriftlichen Vereinbarung zur Vertraulichkeit.</p>
+          <a class="textlink" href="/zusammenarbeit/#vorbereitung">Was Sie vorbereiten können</a>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="weiterlesen">
+    <div class="container g">
+      <div class="gc-1-8">
+        <div class="section-head">
+          <h2>Zum Weiterlesen</h2>
+          <p>Bis zum Erstgespräch: wie eine Zusammenarbeit abläuft, welche Mandatsformen es gibt und wie ich in den einzelnen Handlungsfeldern vorgehe.</p>
+        </div>
+        <ul class="weiterlesen" role="list">
+          {weiterlesen.map((l) => (
+            <li>
+              <a href={l.href}>
+                <span class="weiterlesen__text">
+                  <span class="weiterlesen__label">{l.label}</span>
+                  <span class="weiterlesen__kurz">{l.kurz}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   </section>
 </Base>
+
+<style>
+  /* Hero: Button im Default-Slot der Hero-Komponente (Slot-Inhalt traegt das Scoping dieser Seite) */
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-5); align-items: center; margin-top: var(--s-6); }
+
+  /* Ablauf: Textlink im dritten Schritt mit 44 px Zielhoehe */
+  .ablauf .steps .textlink { margin-top: calc(var(--s-3) - 0.65rem); }   /* sichtbarer Abstand zum Absatz --s-3; Zielhoehe 44 px und inline-block aus der globalen .textlink-Regel */
+  .ablauf .steps p a { color: var(--c-text); }
+
+  /* Zum Weiterlesen: Linkregister mit Haarlinien, Titel und Kurzzeile, Pfeil rechts (wie Verwandte Themen) */
+  .weiterlesen { list-style: none; padding: 0; margin: 0; border-top: var(--rule-strong); }
+  .weiterlesen li { border-bottom: var(--rule); margin: 0; }
+  .weiterlesen a { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); min-height: 44px; padding-block: var(--s-4); text-decoration: none; }
+  .weiterlesen a::after { content: "\2192"; color: var(--c-text-3); flex: none; }
+  .weiterlesen__text { flex: 1 1 auto; min-width: 0; }
+  .weiterlesen__label { display: block; font-weight: 600; }
+  .weiterlesen__kurz { display: block; font-size: var(--fs-small); color: var(--c-text-2); margin-top: var(--s-1); }
+
+  @media (hover: hover) {
+    .weiterlesen a:hover .weiterlesen__label { text-decoration: underline; }
+  }
+</style>

@@ -1,17 +1,44 @@
 ---
-interface Props { items: { q: string; a: string }[]; title?: string }
-const { items, title = 'Fragen und Antworten' } = Astro.props;
+/**
+ * Fragen und Antworten als details/summary (docs/DESIGN-SPEC-V2.md 6.12).
+ * Marker als CSS-Kreuz (global.css .faq), Abschnitt mit Haarlinie oben, Inhalt in .gc-1-8.
+ * Prop id (Standard "fragen") fuer die Seitennavigation; jede Frage kann eine eigene id fuer Deep-Links tragen.
+ */
+export interface FaqItem {
+  q: string;
+  a: string;
+  /** Anker der einzelnen Frage, z. B. "honorar" */
+  id?: string;
+  /** Optionaler weiterfuehrender Link unter der Antwort */
+  mehr?: { label: string; href: string };
+}
+interface Props {
+  items: FaqItem[];
+  title?: string;
+  /** id der section, Standard "fragen" */
+  id?: string;
+  /** Haarlinie oben (section--linie), Standard true */
+  linie?: boolean;
+}
+const { items, title = 'Fragen und Antworten', id = 'fragen', linie = true } = Astro.props;
 ---
-<section class="section">
+<section class:list={['section', { 'section--linie': linie }]} id={id}>
   <div class="container">
-    <div class="section-head"><h2>{title}</h2></div>
-    <div class="faq prose">
-      {items.map((i) => (
-        <details>
-          <summary>{i.q}</summary>
-          <div class="faq-body"><p>{i.a}</p></div>
-        </details>
-      ))}
+    <div class="g">
+      <div class="gc-1-8">
+        <div class="section-head"><h2>{title}</h2></div>
+        <div class="faq">
+          {items.map((i) => (
+            <details id={i.id}>
+              <summary>{i.q}</summary>
+              <div class="faq-body">
+                <p>{i.a}</p>
+                {i.mehr && <p><a class="textlink" href={i.mehr.href}>{i.mehr.label}</a></p>}
+              </div>
+            </details>
+          ))}
+        </div>
+      </div>
     </div>
   </div>
 </section>

@@ -1,18 +1,55 @@
 ---
+/**
+ * Layout der Fachseiten und Vertiefungen (docs/DESIGN-SPEC-V2.md 6.11 und 9.2, docs/CONTENT-PLAN-V2.md 1.6).
+ * Abschnittsfolge: Breadcrumb, Hero 8/4, Seitennav, Passende Situationen (#situationen), Leistungsumfang (#leistung,
+ * Flaeche), Slot methodik, Vorgehen (#vorgehen), Slot szenario, Abgrenzung mit Verwandten Themen (#abgrenzung),
+ * Fragen und Antworten (#fragen), Personenanker, Cta.
+ * Die bestehenden Props bleiben kompatibel. h1 darf weiche Trennstellen (U+00AD) enthalten; Title, Breadcrumb und
+ * JSON-LD werden davon bereinigt.
+ * Flaechenregel: das Layout traegt eine Flaeche (Leistungsumfang) und, wenn der Slot szenario belegt ist, mit dem
+ * Szenario eine zweite. Abschnitte im Slot methodik deshalb auf Weiss mit .section--linie anlegen.
+ */
 import Base from './Base.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
+import Seitennav, { type SeitennavEintrag } from '../components/Seitennav.astro';
 import Cta from '../components/Cta.astro';
-import Faq from '../components/Faq.astro';
-import { breadcrumbLd, serviceLd, faqLd } from '../lib/seo';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import Portrait from '../components/Portrait.astro';
+import { SITE } from '../data/site';
+import { breadcrumbLd, serviceLd, faqLd, type Crumb } from '../lib/seo';
 
-export interface Block { t: string; d: string }
+export interface Link { label: string; href: string }
+export interface Block {
+  t: string;
+  d: string;
+  /** Optionaler Textlink unter dem Absatz, z. B. auf eine Vertiefung */
+  mehr?: Link;
+}
+/** Abgrenzungspunkt: reiner Text oder Text mit einem Link am Satzende (ein Satz plus Link). */
+export type Absatz = string | { text: string; mehr?: Link };
+
+/** Standard der Seitennavigation: fuenf Anker in DOM-Reihenfolge. */
+export const SEITENNAV_STANDARD: SeitennavEintrag[] = [
+  { label: 'Passende Situationen', href: '#situationen' },
+  { label: 'Leistungsumfang', href: '#leistung' },
+  { label: 'Vorgehen', href: '#vorgehen' },
+  { label: 'Abgrenzung', href: '#abgrenzung' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
 interface Props {
-  title: string;            // <title>
+  /** <title>, hoechstens 65 Zeichen, eindeutig je Seite */
+  title: string;
+  /** Meta-Description, hoechstens 160 Zeichen */
   description: string;
+  /** Pfad mit fuehrendem und abschliessendem Slash, z. B. "/portfoliooptimierung/" */
   path: string;
+  /** H1, darf U+00AD als weiche Trennstelle enthalten */
   h1: string;
   eyebrow: string;
-  frage: string;            // praezise Ausgangsfrage
+  /** Praezise Ausgangsfrage, gerendert als Standfirst */
+  frage: string;
+  /** Einleitung, rechts neben der Frage in --fs-body */
   intro: string;
   serviceName: string;
   serviceType: string;
@@ -20,96 +57,188 @@ interface Props {
   leistungen: Block[];
   ergebnisse: string[];
   vorgehen: Block[];
-  abgrenzung: string[];
-  faq: { q: string; a: string }[];
-  verwandt: { label: string; href: string }[];
+  abgrenzung: Absatz[];
+  faq: FaqItem[];
+  verwandt: Link[];
+  /** Breadcrumb ohne "Start"; Standard: Beratung / h1. Vertiefungen: Beratung / Fachseite / Vertiefung */
+  crumbs?: Crumb[];
+  /** Seitennavigation; Standard SEITENNAV_STANDARD */
+  seitennav?: SeitennavEintrag[];
+  /** H2 des Abschnitts Situationen, Standard "Passende Situationen" */
+  situationenTitel?: string;
+  /** Einleitung in der Randspalte des Abschnitts Situationen */
+  situationenIntro?: string;
+  /** Hinweiszeile unter den Arbeitsergebnissen */
+  ergebnisseHinweis?: string;
+  /** Einleitung unter der H2 "Vorgehen" */
+  vorgehenIntro?: string;
+  /** Cta-Texte, Standard aus Cta.astro */
+  ctaTitle?: string;
+  ctaText?: string;
+  ctaButton?: string;
 }
 const p = Astro.props;
-const crumbs = [{ name: 'Beratung', href: '/asset-management-beratung/' }, { name: p.h1, href: p.path }];
+
+/* Weiche Trennstellen aus Texten entfernen, die nicht im Fliesstext stehen (Title, Breadcrumb, JSON-LD). */
+const rein = (s: string) => s.replace(/­/g, '');
+const h1Rein = rein(p.h1);
+const crumbs: Crumb[] = (p.crumbs ?? [
+  { name: 'Beratung', href: '/asset-management-beratung/' },
+  { name: h1Rein, href: p.path },
+]).map((c) => ({ name: rein(c.name), href: c.href }));
+const nav = p.seitennav ?? SEITENNAV_STANDARD;
+const hatMethodik = Astro.slots.has('methodik');
+const hatSzenario = Astro.slots.has('szenario');
+const ergebnisseHinweis = p.ergebnisseHinweis ?? 'Umfang, Datentiefe und Zeitrahmen werden mandatsbezogen vereinbart. Keine pauschalen Ergebniszusagen.';
+
 const ld = [
   breadcrumbLd(crumbs),
-  serviceLd({ name: p.serviceName, description: p.description, path: p.path, serviceType: p.serviceType }),
-  faqLd(p.faq),
+  serviceLd({ name: rein(p.serviceName), description: rein(p.description), path: p.path, serviceType: rein(p.serviceType) }),
+  faqLd(p.faq.map((f) => ({ q: rein(f.q), a: rein(f.a) }))),
 ];
 ---
-<Base title={p.title} description={p.description} path={p.path} ld={ld}>
+<Base title={rein(p.title)} description={rein(p.description)} path={p.path} ld={ld}>
   <Breadcrumb crumbs={crumbs} />
+
   <section class="hero">
-    <div class="container">
-      <span class="eyebrow">{p.eyebrow}</span>
-      <h1>{p.h1}</h1>
-      <p class="hero-frage">{p.frage}</p>
-      <p class="lead">{p.intro}</p>
-      <div class="hero-actions">
+    <div class="container g hero__grid">
+      <div class="hero__text gc-1-8">
+        <span class="eyebrow">{p.eyebrow}</span>
+        <h1>{p.h1}</h1>
+        <p class="standfirst hero-frage">{p.frage}</p>
+      </div>
+      <p class="hero__intro gc-9-12">{p.intro}</p>
+      <div class="hero-actions gc-full">
         <a class="btn btn--primary" href="/kontakt/">Portfolio besprechen</a>
         <a class="textlink" href="#leistung">Leistungsumfang</a>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <Seitennav items={nav} />
+
+  <section class="section" id="situationen">
     <div class="container">
-      <div class="section-head"><h2>Passende Situationen</h2></div>
-      <div class="grid grid--3">
-        {p.situationen.map((s) => (<div class="card card--flaeche"><h3>{s.t}</h3><p>{s.d}</p></div>))}
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <h2>{p.situationenTitel ?? 'Passende Situationen'}</h2>
+          {p.situationenIntro && <p>{p.situationenIntro}</p>}
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register register--2" role="list">
+            {p.situationen.map((s) => (
+              <li>
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+                {s.mehr && <a class="textlink" href={s.mehr.href}>{s.mehr.label}</a>}
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="section section--flaeche" id="leistung">
-    <div class="container zwei-spalten">
-      <div>
+    <div class="container g">
+      <div class="gc-1-7">
         <div class="section-head"><h2>Leistungsumfang</h2></div>
-        <div class="leistungen">
-          {p.leistungen.map((l) => (<div class="leistung"><h3>{l.t}</h3><p>{l.d}</p></div>))}
-        </div>
+        <ol class="register" role="list">
+          {p.leistungen.map((l) => (
+            <li>
+              <h3>{l.t}</h3>
+              <p>{l.d}</p>
+              {l.mehr && <a class="textlink" href={l.mehr.href}>{l.mehr.label}</a>}
+            </li>
+          ))}
+        </ol>
       </div>
-      <aside class="ergebnisse">
-        <h2 class="h3">Arbeitsergebnisse</h2>
-        <ul class="checklist">{p.ergebnisse.map((e) => <li>{e}</li>)}</ul>
-        <p class="small">Umfang, Datentiefe und Zeitrahmen werden mandatsbezogen vereinbart. Keine pauschalen Ergebniszusagen.</p>
+      <aside class="ergebnisse gc-9-12 sticky-rand" aria-labelledby="ergebnisse-h">
+        <h2 class="h3" id="ergebnisse-h">Arbeitsergebnisse</h2>
+        <ul class="checklist" role="list">{p.ergebnisse.map((e) => <li>{e}</li>)}</ul>
+        <p class="small ergebnisse__hinweis">{ergebnisseHinweis}</p>
       </aside>
     </div>
   </section>
 
-  <section class="section">
+  <slot name="methodik" />
+
+  <section class:list={['section', { 'section--linie': hatMethodik }]} id="vorgehen">
     <div class="container">
-      <div class="section-head"><h2>Vorgehen</h2></div>
-      <ol class="steps">{p.vorgehen.map((v) => (<li><h3>{v.t}</h3><p>{v.d}</p></li>))}</ol>
+      <div class="section-head">
+        <h2>Vorgehen</h2>
+        {p.vorgehenIntro && <p>{p.vorgehenIntro}</p>}
+      </div>
+      <ol class="steps" role="list">{p.vorgehen.map((v) => (<li><h3>{v.t}</h3><p>{v.d}</p></li>))}</ol>
     </div>
   </section>
 
-  <section class="section section--flaeche">
-    <div class="container zwei-spalten">
-      <div class="prose">
-        <h2>Abgrenzung</h2>
-        <ul class="checklist">{p.abgrenzung.map((a) => <li>{a}</li>)}</ul>
+  <slot name="szenario" />
+
+  <section class:list={['section', { 'section--linie': !hatSzenario }]} id="abgrenzung">
+    <div class="container g">
+      <div class="gc-1-7">
+        <div class="section-head"><h2>Abgrenzung</h2></div>
+        <ul class="checklist abgrenzung" role="list">
+          {p.abgrenzung.map((a) => (
+            <li>{typeof a === 'string' ? a : <>{a.text}{a.mehr && <> <a href={a.mehr.href}>{a.mehr.label}</a></>}</>}</li>
+          ))}
+        </ul>
       </div>
-      <aside>
-        <h2 class="h3">Verwandte Themen</h2>
-        <ul class="verwandt">{p.verwandt.map((v) => <li><a href={v.href}>{v.label}</a></li>)}</ul>
+      <aside class="verwandt-block gc-9-12" aria-labelledby="verwandt-h">
+        <h2 class="h3" id="verwandt-h">Verwandte Themen</h2>
+        <ul class="verwandt" role="list">{p.verwandt.map((v) => <li><a href={v.href}>{v.label}</a></li>)}</ul>
       </aside>
     </div>
   </section>
 
-  <Faq items={p.faq} />
-  <Cta />
+  <Faq id="fragen" items={p.faq} />
+
+  <section class="section section--tight section--linie personenanker" aria-label="Zur Person">
+    <div class="container personenanker__grid">
+      <Portrait nr={2} ratio="1/1" variant="hell" sizes="8rem" widths={[400, 800]} />
+      <div class="personenanker__text">
+        <p class="personenanker__name">{SITE.name}</p>
+        <p class="caps">{SITE.claim}</p>
+        <a class="textlink" href="/profil/">Zum Profil</a>
+      </div>
+    </div>
+  </section>
+
+  <Cta title={p.ctaTitle} text={p.ctaText} button={p.ctaButton} />
 </Base>
 
 <style>
-  .hero { padding-block: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  /* Hero 8/4: Eyebrow, H1 und Frage links, Intro rechts unten ausgerichtet, Buttonzeile volle Breite */
+  .hero { padding-block: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: 0; }
+  .hero__grid { align-items: end; row-gap: var(--s-6); }
+  .hero__text { min-width: 0; }
   .hero h1 { max-width: 24ch; }
-  .hero-frage { font-size: 1.2rem; font-weight: 600; color: var(--c-text-2); max-width: 44ch; margin-bottom: var(--s-4); }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-5); align-items: center; margin-top: var(--s-5); }
-  .zwei-spalten { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem); align-items: start; }
-  .leistung + .leistung { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--c-linie); }
-  .leistung h3 { margin-bottom: var(--s-2); }
-  .leistung p { color: var(--c-text-2); max-width: 62ch; }
-  .ergebnisse { background: #fff; border: 1px solid var(--c-linie); border-top: 3px solid var(--c-orange); padding: var(--s-5); position: sticky; top: 6rem; }
-  .h3 { font-size: var(--fs-h3); }
-  .verwandt { list-style: none; padding: 0; margin: 0; }
-  .verwandt li { border-bottom: 1px solid var(--c-linie); padding-block: var(--s-3); margin: 0; }
-  .verwandt a { text-decoration: none; font-weight: 600; }
-  .verwandt a:hover { text-decoration: underline; }
-  @media (max-width: 860px) { .zwei-spalten { grid-template-columns: 1fr; } .ergebnisse { position: static; } }
+  .hero-frage { margin-bottom: 0; }
+  .hero__intro { color: var(--c-text-2); margin: 0; align-self: end; }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-5); align-items: center; }
+
+  /* Arbeitsergebnisse als Aside mit 2 px Linie, sticky ueber .sticky-rand */
+  .ergebnisse { background: transparent; border: 0; border-top: var(--rule-strong); padding: var(--s-4) 0 0; }
+  .ergebnisse .h3 { margin-bottom: var(--s-4); }
+  .ergebnisse__hinweis { color: var(--c-text-2); margin-top: var(--s-4); }
+
+  /* Abgrenzung und Linkregister Verwandte Themen */
+  .abgrenzung { max-width: var(--w-text); }
+  .verwandt-block .h3 { margin-bottom: var(--s-4); }
+  .verwandt { list-style: none; padding: 0; margin: 0; border-top: var(--rule-strong); }
+  .verwandt li { border-bottom: var(--rule); margin: 0; }
+  .verwandt a { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); min-height: 44px; padding-block: var(--s-3); text-decoration: none; font-weight: 600; }
+  .verwandt a::after { content: "\2192"; font-weight: 400; color: var(--c-text-3); flex: none; }
+
+  /* Personenanker: Name, Claim und Link neben dem 1:1-Portrait, ohne Satzwiederholung */
+  .personenanker__grid { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--col-gap); align-items: center; }
+  .personenanker__text { min-width: 0; }
+  .personenanker__name { font-size: var(--fs-h3); font-weight: 600; line-height: var(--lh-heading); letter-spacing: -0.01em; margin: 0 0 var(--s-1); }
+  .personenanker .caps { margin-bottom: var(--s-3); }
+  @media (max-width: 520px) { .personenanker__grid { grid-template-columns: 6rem minmax(0, 1fr); } }
+
+  @media (hover: hover) {
+    .verwandt a:hover { text-decoration: underline; }
+  }
 </style>

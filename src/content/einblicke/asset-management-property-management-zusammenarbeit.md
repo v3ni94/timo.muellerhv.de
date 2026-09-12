@@ -10,7 +10,7 @@ quellen: []
 
 ## Zwei Ebenen, eine Verantwortung
 
-Asset Management legt fest, wohin sich ein Bestand wirtschaftlich entwickeln soll. Property Management setzt im Tagesgeschäft um: Vermietung, Instandhaltung, Abrechnung, Mieterkontakt. Beide brauchen einander, und beide schieben sich gern die Verantwortung zu, wenn Ergebnisse ausbleiben.
+Asset Management legt fest, wohin sich ein Bestand wirtschaftlich entwickeln soll. Property Management setzt im Tagesgeschäft um: Vermietung, Instandhaltung, Abrechnung, Mieterkontakt. Beide brauchen einander, und wenn Ergebnisse ausbleiben, verweist jede Ebene auf die andere.
 
 ## Fünf Punkte, an denen es konkret wird
 

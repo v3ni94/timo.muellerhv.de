@@ -1,35 +1,35 @@
 ---
+/**
+ * Fuss der Seite (docs/DESIGN-SPEC-V2.md 6.9, docs/CONTENT-PLAN-V2.md 6.3).
+ * Absender klar, HVM als dezenter Betreiber. Drei Linkspalten aus FOOTER_SPALTEN (aus NAV abgeleitet),
+ * dazu Absenderzeile oben und Betreiberblock. Pflichtangaben und Kennlinie unten unveraendert.
+ */
 import { Image } from 'astro:assets';
 import logo from '../assets/logo-hvm.png';
-import { OPERATOR, SITE, NAV, FOOTER_LEGAL } from '../data/site';
+import { OPERATOR, SITE, FOOTER_SPALTEN } from '../data/site';
 ---
 <footer class="site-footer">
   <div class="container">
-    <div class="footer-grid">
-      <div>
-        <p class="footer-name">Timo Müller</p>
-        <p class="footer-claim">{SITE.claim}</p>
-        <p><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+    <div class="footer-grid g">
+      <div class="footer-brand">
+        <div>
+          <p class="footer-name">Timo Müller</p>
+          <p class="footer-claim caps">{SITE.claim}</p>
+        </div>
+        <p class="footer-mail"><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
       </div>
-      <nav aria-label="Beratung">
-        <p class="footer-head">Beratung</p>
-        <ul>
-          {NAV[0].children.map((c) => <li><a href={c.href}>{c.label}</a></li>)}
-        </ul>
-      </nav>
-      <nav aria-label="Weitere Seiten">
-        <p class="footer-head">Weitere Seiten</p>
-        <ul>
-          <li><a href="/profil/">Profil</a></li>
-          <li><a href="/einblicke/">Einblicke</a></li>
-          <li><a href="/kontakt/">Kontakt</a></li>
-          {FOOTER_LEGAL.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
-        </ul>
-      </nav>
+      {FOOTER_SPALTEN.map((sp, i) => (
+        <nav class={`footer-nav footer-nav-${i + 1}`} aria-label={sp.titel}>
+          <p class="footer-head caps">{sp.titel}</p>
+          <ul role="list">
+            {sp.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+          </ul>
+        </nav>
+      ))}
       <div class="footer-operator">
-        <p class="footer-head">Ein Angebot der</p>
+        <p class="footer-head caps">Ein Angebot der</p>
         <a href={OPERATOR.website} class="footer-logo" rel="noopener">
-          <Image src={logo} alt="Hausverwaltung Müller GmbH" width="150" height="130" loading="lazy" densities={[1, 2]} />
+          <Image src={logo} alt="Zur Website der Hausverwaltung Müller GmbH" width="150" height="130" loading="lazy" densities={[1, 2]} />
         </a>
         <p class="small">{OPERATOR.firma}<br />{OPERATOR.strasse}<br />{OPERATOR.plzOrt}</p>
       </div>
@@ -42,16 +42,34 @@ import { OPERATOR, SITE, NAV, FOOTER_LEGAL } from '../data/site';
 </footer>
 
 <style>
-  .site-footer { border-top: 1px solid var(--c-linie); background: var(--c-flaeche); margin-top: var(--s-8); font-size: var(--fs-small); }
-  .footer-grid { display: grid; gap: var(--s-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); padding-block: var(--s-7) var(--s-6); }
-  .footer-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; }
-  .footer-claim { color: var(--c-text-2); text-transform: uppercase; letter-spacing: 0.04em; font-size: var(--fs-xs); }
-  .footer-head { font-weight: 600; margin-bottom: var(--s-3); color: var(--c-text-2); font-size: var(--fs-xs); letter-spacing: 0.06em; text-transform: uppercase; }
+  .site-footer { background: #fff; border-top: var(--rule-strong); margin-top: 0; font-size: var(--fs-small); }
+  .footer-grid { padding-block: var(--s-8) var(--s-7); row-gap: var(--s-6); }
+  .footer-brand { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--s-3) var(--s-6); border-bottom: var(--rule); padding-bottom: var(--s-5); }
+  .footer-nav-1 { grid-column: 1 / span 3; }
+  .footer-nav-2 { grid-column: 4 / span 3; }
+  .footer-nav-3 { grid-column: 7 / span 3; }
+  .footer-operator { grid-column: 10 / -1; }
+  .footer-name { font-size: 1.5rem; font-weight: 700; letter-spacing: var(--ls-heading); margin-bottom: var(--s-1); line-height: 1.1; }
+  .footer-claim { margin: 0; }
+  .footer-mail { margin: 0; font-weight: 600; }
+  .footer-head { margin-bottom: var(--s-3); }
   ul { list-style: none; padding: 0; margin: 0; }
   li + li { margin-top: var(--s-2); }
   a { text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  /* Zielhoehe 44 px (Spezifikation 5.6): fester Innenabstand statt reiner Mindesthoehe, damit ein- und zweizeilige Links
+     denselben Abstand zum Text tragen; der kleine Listenabstand haelt zweizeilige Links vom naechsten Link getrennt */
+  .footer-nav a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-block: 0.6rem; }
+  .footer-nav li + li { margin-top: var(--s-1); }
   .footer-logo { display: inline-block; margin-bottom: var(--s-3); }
-  .footer-logo img { width: 110px; height: auto; }
-  .footer-bottom { border-top: 1px solid var(--c-linie); padding-block: var(--s-4); color: var(--c-text-2); }
+  .footer-logo img { width: 96px; height: auto; }
+  .footer-operator .small { color: var(--c-text-2); }
+  .footer-bottom { border-top: var(--rule); padding-block: var(--s-5); color: var(--c-text-2); }
+  @media (hover: hover) { .site-footer a:hover { text-decoration: underline; } }
+  @media (max-width: 860px) {
+    .footer-grid > * { grid-column: 1 / -1; }
+    .footer-brand { align-items: flex-start; flex-direction: column; }
+  }
+  @media (min-width: 600px) and (max-width: 860px) {
+    .footer-grid > .footer-nav, .footer-grid > .footer-operator { grid-column: span 6; }   /* zwei Spalten je Reihe; drei Spalten waeren fuer lange Seitentitel zu schmal */
+  }
 </style>

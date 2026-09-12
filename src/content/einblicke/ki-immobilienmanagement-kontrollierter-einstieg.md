@@ -10,7 +10,7 @@ quellen: []
 
 ## Vier Kriterien für die Prozessauswahl
 
-**Häufigkeit.** Ein Vorgang, der hundertmal im Monat vorkommt, rechtfertigt Einrichtungsaufwand. Ein Vorgang, der zweimal im Jahr auftritt, nicht.
+**Häufigkeit.** Ein Vorgang, der täglich vorkommt, rechtfertigt Einrichtungsaufwand. Ein seltener Einzelfall nicht.
 
 **Regelhaftigkeit.** Lässt sich beschreiben, was ein richtiges Ergebnis ist? Dokumentenzuordnung ja, die Entscheidung über eine Modernisierung nein.
 
@@ -28,7 +28,7 @@ quellen: []
 
 ## Was vorher geklärt sein muss
 
-Rechtsgrundlage und Datenschutz für personenbezogene Daten, insbesondere Mieterdaten. Zugriffsrechte: Wer darf welche Daten an welches System geben? Verantwortung: Wer gibt Ergebnisse frei und haftet für Fehler? Erfolgskriterien: Woran wird gemessen, ob der Einsatz etwas bringt?
+Rechtsgrundlage und Datenschutz für personenbezogene Daten, insbesondere Mieterdaten. Zugriffsrechte: Wer darf welche Daten an welches System geben? Verantwortung: Wer gibt Ergebnisse frei und verantwortet Fehler? Erfolgskriterien: Woran wird gemessen, ob der Einsatz etwas bringt?
 
 ## Was nicht automatisiert wird
 
@@ -36,4 +36,4 @@ Zahlungsfreigaben, Investitionsentscheidungen, Kündigungen, rechtlich relevante
 
 ## Grenzen
 
-Dieser Beitrag beschreibt Auswahlkriterien und ein Vorgehen. Eigene Anwendungen in der Unternehmensgruppe werden in ihrem tatsächlichen Entwicklungsstand beschrieben und sind kein Nachweis institutioneller Projekterfahrung.
+Dieser Beitrag beschreibt Auswahlkriterien und ein Vorgehen. Eigene Anwendungen in der Unternehmensgruppe sind kein Nachweis institutioneller Projekterfahrung und nicht Gegenstand dieses Beitrags.

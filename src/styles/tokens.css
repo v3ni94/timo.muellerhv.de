@@ -2,7 +2,7 @@
   Design-Tokens timo.muellerhv.de
   Quelle der Markenfarben: HVM-CI (Skill hvm-ci, Abschnitt 2). Werte mit Kennzeichnung
   "abgeleitet" sind keine Original-CI-Werte, sondern fuer Web-Kontraste (WCAG 2.2 AA)
-  aus der CI-Farbwelt abgeleitet. Siehe docs/DESIGN-SYSTEM.md.
+  aus der CI-Farbwelt abgeleitet. Siehe docs/DESIGN-SYSTEM.md und docs/DESIGN-SPEC-V2.md.
 */
 :root {
   /* HVM-CI Original */
@@ -16,13 +16,13 @@
   /* abgeleitet */
   --c-dunkel: #2F3032;        /* dunkle Akzentflaechen, Buttons */
   --c-dunkel-2: #3D3E41;      /* Hover auf dunklen Flaechen */
-  --c-text-2: #55565A;        /* Sekundaertext, Kontrast 7,0:1 auf Weiss */
-  --c-text-3: #6B6C70;        /* Meta-Text, Kontrast 5,3:1 auf Weiss */
+  --c-text-2: #55565A;        /* Sekundaertext, Kontrast 7,33:1 auf Weiss, 6,79:1 auf --c-flaeche (berechnet, docs/TESTBERICHT.md Stand v2) */
+  --c-text-3: #6B6C70;        /* Meta-Text, Kontrast 5,24:1 auf Weiss, 4,86:1 auf --c-flaeche; auch Rahmen von Eingabefeldern und Sekundaerbuttons (Nicht-Text-Kontrast 3:1) */
   --c-flaeche: #F6F6F7;       /* helle Sektionsflaechen */
   --c-flaeche-2: #EFEFF0;
   --c-linie: #D7D8DA;
   --c-weiss: #FFFFFF;
-  --c-fokus: #B67F1E;         /* Fokusring, dunkleres Orange (Kontrast 3,6:1 auf Weiss) */
+  --c-fokus: #B67F1E;         /* Fokusring, dunkleres Orange (Kontrast 3,47:1 auf Weiss, Anforderung fuer Nicht-Text 3:1) */
   --c-fehler: #A32D2D;
   --c-erfolg: #2E6B3A;
 
@@ -31,8 +31,8 @@
   --fs-body: clamp(1.0625rem, 1rem + 0.2vw, 1.125rem); /* 17 bis 18 px */
   --fs-small: 0.9375rem;
   --fs-xs: 0.8125rem;
-  --fs-h1: clamp(1.75rem, 1rem + 2.4vw, 3.25rem);
-  --fs-h2: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --fs-h1: clamp(1.875rem, 1.1rem + 2.4vw, 3.5rem);   /* 30 bis 56 px */
+  --fs-h2: clamp(1.75rem, 1.25rem + 1.8vw, 2.75rem);  /* 28 bis 44 px */
   --fs-h3: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
   --fs-eyebrow: 0.8125rem;
   --lh-body: 1.6;
@@ -44,12 +44,53 @@
   --gutter: clamp(1rem, 4vw, 2.5rem);
   --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem;
   --s-6: 2rem; --s-7: 3rem; --s-8: 4rem; --s-9: 6rem;
-  --section-y: clamp(3.5rem, 6vw, 6rem);
+  --section-y: clamp(4rem, 8vw, 8rem);                /* 64 bis 128 px */
 
   --radius: 4px;
   --shadow-soft: 0 1px 2px rgba(26,26,26,.06);
   --dur: 160ms;
 }
+
+/* v2 Ergaenzungen. Farbwerte sind abgeleitet, keine CI-Originale. */
+:root {
+  --c-dunkel-3: #232426;                    /* abgeleitet: Flaeche des typografischen Portraetplatzhalters */
+  --c-weiss-75: rgba(255, 255, 255, .75);   /* abgeleitet: Sekundaertext auf dunklen Flaechen */
+  --c-weiss-60: rgba(255, 255, 255, .60);   /* abgeleitet: Meta auf dunklen Flaechen */
+  --c-weiss-16: rgba(255, 255, 255, .16);   /* abgeleitet: Haarlinie auf dunklen Flaechen, rein dekorativ */
+
+  --fs-display: clamp(2rem, 1.1rem + 3vw, 3.75rem);            /* 32 bis 60 px, nur H1 Start und Profil; 60 px, damit die Start-H1 bei 1440 px in drei Zeilen steht */
+  --fs-lead: clamp(1.125rem, 1.02rem + 0.45vw, 1.375rem);      /* 18 bis 22 px */
+  --fs-standfirst: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);   /* 20 bis 26 px */
+  --fs-zahl: clamp(1.5rem, 1.1rem + 1.6vw, 3.5rem); /* Mindestwert 24 px: Anthrazit nur als grosse Schrift */
+  --lh-heading: 1.12;
+  --lh-display: 1.04;
+  --ls-display: -0.028em;
+  --ls-heading: -0.015em;
+  --ls-caps: 0.08em;
+
+  --w-measure: 60ch;
+  --w-narrow: 44ch;
+  --cols: 12;
+  --col-gap: clamp(1rem, 2.4vw, 2rem);
+  --row-gap: clamp(2rem, 4vw, 3rem);
+  --num-w: 3.5rem;
+  --s-10: 8rem;
+  --section-y-tight: clamp(2.5rem, 5vw, 4.5rem);
+  --header-h: 4.5rem;
+
+  --rule: 1px solid var(--c-linie);
+  --rule-strong: 2px solid var(--c-text);
+  --rule-dark: 1px solid var(--c-weiss-16);
+  --rule-akzent: 3px solid var(--c-orange);
+
+  --ar-portrait: 4 / 5;
+  --ar-landscape: 3 / 2;
+  --ar-square: 1 / 1;
+  --radius-media: 2px;
+
+  --dur-slow: 240ms;
+  --ease: cubic-bezier(.2, .6, .2, 1);
+}
 @media (prefers-reduced-motion: reduce) {
-  :root { --dur: 0ms; }
+  :root { --dur: 0ms; --dur-slow: 0ms; }
 }

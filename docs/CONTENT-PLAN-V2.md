@@ -461,7 +461,7 @@ Gruppe "Vertiefung und Ablauf":
 
 Das Glossar erscheint nicht im Hauptmenü, sondern auf /einblicke/, in Beiträgen, in Fachseiten (Begriffslinks) und im Footer.
 
-Technik: NAV in src/data/site.ts erhält je Hauptpunkt optional `gruppen: { titel, children }[]`. Header.astro rendert Gruppen als zwei Listen mit Gruppenüberschrift (Element p mit aria-hidden plus aria-labelledby oder eine Überschrift im Untermenü). Escape und Klick außerhalb schließen alle offenen details-Elemente (querySelectorAll statt querySelector). aria-current auf aktivem Haupt- und Untermenüpunkt bleibt; `beratungActive` berücksichtigt alle Gruppen. Mobil unter 1080 px: Toggle wie bisher, Gruppen untereinander mit sichtbarer Gliederung, Kurzbeschreibungen bleiben.
+Technik: NAV in src/data/site.ts erhält je Hauptpunkt optional `gruppen: { titel, children }[]`. Header.astro rendert Gruppen als zwei Listen mit Gruppenüberschrift (Element p mit aria-hidden plus aria-labelledby oder eine Überschrift im Untermenü). Escape und Klick außerhalb schließen alle offenen details-Elemente (querySelectorAll statt querySelector). aria-current auf aktivem Haupt- und Untermenüpunkt bleibt; `beratungActive` berücksichtigt alle Gruppen. Mobil bis 1120 px (Umsetzung; der Plan nannte 1080 px, zwischen 1081 und 1089 px brach die Desktop-Navigation in der Testumgebung unter die Marke): Toggle wie bisher, Gruppen untereinander mit sichtbarer Gliederung, Kurzbeschreibungen bleiben.
 
 ### 6.2 Breadcrumbs
 
@@ -620,3 +620,282 @@ Jeder Punkt erhält Status offen, Quelle "fehlt" und die Verwendung, damit die z
 - Porträtplätze rendern in beiden Zuständen mit identischen Außenmaßen; kein Stockfoto, kein KI-Bild.
 - Einblicke-Leerzustand ist noindex und nicht in der Sitemap.
 - 15 indexierbare Seiten, alle in Sitemap, alle mit selbstreferenzierendem Canonical, einer H1, Title bis 65 und Description bis 160 Zeichen.
+
+## 12. Abweichungen in der Umsetzung
+
+Stand: 12.09.2026, nach dem Integrationsbuild (Runde 1). Die Inhaltsagenten haben je Seite ihre Abweichungen von diesem Plan gemeldet. Der Integrationsagent hat sie hier gesammelt, die technischen Prüfpunkte im Build abgearbeitet (Abschnitt 12.14) und seine eigenen Änderungen ergänzt (Abschnitt 12.13). Wo dieser Plan und docs/DESIGN-SPEC-V2.md sich widersprechen, gilt die umgesetzte Fassung nach Designspezifikation; die Stellen sind unten benannt.
+
+### 12.1 Startseite (/)
+
+- Abschnitt "Für wen" liegt auf Weiß mit `.section--linie` statt auf `section--flaeche` (Plan 4.1), weil die Zwei-Flächen-Regel der Designspezifikation (9.1) mit Beratung und Szenario ausgeschöpft ist. Umgesetzt als `.abschnitt` mit Randspalte und Register ohne Ziffern (scoped `.rollen`), nicht als dl-grid oder Karten.
+- Fakten-Band nach Designspezifikation 6.3 (Klasse `fakten-band`, Weiß, Haarlinie oben, 2 px Linien je Aussage) statt `.kurzprofil-leiste` mit heller Fläche und Orange-Linie (Plan 4.1). Texte wortgleich übernommen.
+- Einleitung des Abschnitts Ausgangslagen umformuliert: "Typische Situationen, mit denen Eigentümer und Geschäftsleitungen zu mir kommen" entfiel, weil es einen bestehenden Mandantenkreis nahelegt. Neu: "Oft fehlt es nicht an Erkenntnis, sondern an Umsetzung. Typische Situationen, in denen ein unabhängiger Blick von außen hilft:". Die fünf Register-Einträge bleiben im Wortlaut.
+- Fußsatz im Abschnitt Beratung um die Erläuterung "also der wirtschaftlichen Steuerung eines Bestands aus Eigentümersicht" ergänzt (Fachbegriffsregel). Section-Head Beratung mit zwei Einleitungssätzen (eigenständig beauftragbar, Umfang und Datentiefe vor Beginn vereinbart).
+- Verweisblock Vertiefungen mit vier Zeilen (Investitionspriorisierung, Dienstleistersteuerung, Reporting und Kennzahlen, Zusammenarbeit); Plan 4.1 nennt drei.
+- Eyebrow im Abschnitt Arbeitsweise als `eyebrow--still`, damit der erste Schritt die einzige Orange-Geste des Abschnitts bleibt.
+- Persönlicher Ansatz mit Portrait Nr. 2 als 3:2 (Designspezifikation 9.1 und 7.7); Plan 1.5 sah portrait-2 als 1:1 nur für Autorenkasten und Kontakt vor und wollte die Startseite auf ein Porträt beschränken.
+- Szenario-Abschnitt trägt id `vorgehen` (Designspezifikation 9.1) statt Komponentenstandard `szenario`. H2 "Einstieg in einen Wohnungsbestand mit mehreren Verwaltungseinheiten" statt "Ein typischer Einstieg, dargestellt als Methode."; Zahlen neutralisiert ("zehn größten" zu "größten", "drei größten Investitionsfragen" zu "wichtigsten Investitionsfragen", "monatlich" zu "in festem Rhythmus"). Alle sieben Felder im Konjunktiv.
+- Bedingter Einblicke-Block als Register mit Datum (scoped `.register--einblicke`) statt Karten; höchstens drei Beiträge; Link "Beitrag lesen" mit visuell verborgenem Titel.
+- Glossar-Links im Abschnitt Für wen sind gesetzt (family-office, bestandshalter); die Rollen 1 und 2 erläutern Family Office und Bestandshalter beim ersten Auftreten, der Wortlaut ist Teil der Textfreigabe Nr. 35 (Runde 2). Der frühere Hinweis, Glossar-Links seien zunächst nicht gesetzt, ist überholt.
+- Display-H1 des Heros ab 861 px mit `max-width: none` innerhalb von gc-1-7 statt 18ch (Designspezifikation 4.1 und 6.2 nachgezogen); unter 640 px kompaktere Hero-Abstände und Lead in `--fs-body`, unter 480 px Eyebrow mit `letter-spacing: 0.04em` (Fünf-Sekunden-Test, Runde 2).
+
+### 12.2 /asset-management-beratung/
+
+- Kein Glossar-Link auf einen Eintrag Szenario im Text der Seite; der Begriff wird im Text erläutert ("durchgerechnete Varianten mit offen gelegten Annahmen"). Verlinkt sind sparring, portfolio-einordnung, entscheidungsvorlage (Plan 4.2). Das Glossar enthält inzwischen dennoch einen Eintrag szenario (12.7).
+- Abschnitt Anlässe als `ol.register.register--2` in `.abschnitt` statt `.checklist` (Plan 4.2), weil Aufzählungen mit Titel und Text laut Designspezifikation Register sind. Selbstprüfung bleibt `.checklist`, ergänzt um je einen Hinweissatz.
+- Abschnitt Fragestellungen als Register mit Frage (h3) und Arbeitsergebnis (p) statt reiner Frageliste. Der Beitragslink zur Szenarienfrage rendert nur bei freigegebenem Beitrag `objektstrategie-halten-entwickeln-verkaufen` (Plan 5.1).
+- Entscheidungsvorlage: Gliederung aus Auftrag und Plan 4.2 zu acht Abschnitten zusammengeführt; als Tabelle (th scope=col und scope=row) mit Caption "Schematische Struktur, kein Projektergebnis" und dritter Spalte "Prüffrage des Gremiums". Hinweis zu Gremienformaten steht in der figcaption der figure (außerhalb des Scrollbereichs), nicht als section-foot; darunter nur noch der Satz zu Steuerberater und Rechtsanwalt.
+- Meta-Description neu formuliert (bisher 164 Zeichen, jetzt 148).
+- Seitennav mit sechs Ankern statt der fünf Standardanker der Fachseite, weil der Hub eine eigene Struktur trägt: Fragestellungen, Anlässe, Selbstprüfung, Mandatsformen, Entscheidungsunterlagen, Fragen und Antworten (Runde 1 hatte neun; auf sechs reduziert in Runde 2, damit die Leiste bei 1440 px einzeilig und bei 390 px höchstens dreizeilig bleibt). Hero-Textlink "Zu den Mandatsformen" (#mandate) statt "Leistungsumfang".
+- Mandat C: "zum Beispiel monatlich" zu "in festem Rhythmus"; "plus Erreichbarkeit bei akuten Fragen" zu "ergänzt um Abstimmungen zu akuten Fragen nach Vereinbarung" (keine Verfügbarkeitsaussage, Freigabepunkt 30).
+- Flächenrhythmus: Selbstprüfung und Muster Entscheidungsvorlage sind die zwei Flächen; die Mandate stehen auf Weiß als Kapitelfolge mit Haarlinien. Abgrenzung folgt ohne `.section--linie` direkt auf die zweite Fläche.
+- Breadcrumb bleibt Start / Beratung (die Seite ist selbst der Menüpunkt Beratung).
+- Flag `honorarlogikFreigabe` mit `honorarlogikText` (Nr. 23): FAQ "Wie werden Honorar und Umfang festgelegt?" rendert ohne Freigabe nur die neutrale Antwort plus Link auf /zusammenarbeit/; mit Freigabe wird der Wortlaut angehängt, auch im FAQPage-JSON-LD.
+- Abschnitt Vorgehen (#vorgehen) ergänzt, den Plan 4.2 nicht vorsah: H2 "Vom Eigentümerziel zur Umsetzung", vier Steps in fester Reihenfolge ohne Dauerangaben, Fußzeile mit Link auf /zusammenarbeit/#ablauf. Grund: Masterprompt Abschnitt 8 verlangt für jede Fachseite ein Vorgehen; die Seite ist selbst Fachseite und nicht nur Hub.
+- H1 lautet "Asset-Management-Beratung für Immobilienbestandshalter" statt "Asset-Management-Beratung für Immobilienportfolios" (Plan 2 und SEO-Matrix v1), damit sie sich von der Display-H1 der Startseite ("Asset-Management-Beratung für Immobilienportfolios.") unterscheidet (Masterprompt Abschnitt 10, eindeutige Hauptüberschrift je Seite). Title und Description unverändert; docs/SEO-MATRIX.md nachgezogen.
+
+### 12.3 /portfoliooptimierung/ und /investitionspriorisierung/
+
+- Glossar-Links auf der Portfolio-Seite nur als mehr-Textlinks unter Situationen, Leistungsblöcken und FAQ: Fachseite.astro rendert Block.d, intro und FAQ-Antworten als reinen Text, Inline-Links sind dort nicht möglich. Die FAQ CAPEX/OPEX erhält deshalb einen mehr-Link auf /glossar/#capex.
+- Vertiefung: Begriffserläuterung CAPEX im Hero-Intro, der Glossar-Link folgt im ersten Slot-Abschnitt Datengrundlage.
+- Gliederungspunkt 10 des Plans (Von der Priorisierung zur Vergabe und zum Nachhalten) als Aside "Danach: Vergabe und Nachhalten" im Abschnitt Investitionsplan statt als eigener Abschnitt nach dem Szenario (kein Slot zwischen Szenario und Abgrenzung).
+- Bewertungsmatrix mit vier Feldern, aber drei Einstufungen: beide oberen Felder sind "Zwingend" mit Unterzeilen ("Pflicht und Risiko zuerst", "Pflicht mit Ertragswirkung"). Bündelung als dritte Achse nur im Text und in der Figcaption.
+- Seitennavigation der Vertiefung mit sechs Ankern (Passende Situationen, Leistungsumfang, Methode, Investitionsplan, Szenario, Fragen und Antworten; Runde 1 hatte neun): bei 1440 px einzeilig, bei 390 px dreizeilig (Runde 3: Spaltenabstand der Seitennavigation unter 641 px auf --s-5 verkleinert, zuvor vier Zeilen).
+- Verwandte Themen der Portfolio-Seite um Investitionspriorisierung, Reporting und Kennzahlen und Zusammenarbeit erweitert (sechs Einträge).
+- Arbeitsergebnis "CAPEX-Plan mit Zeitachse und Budgetrahmen" der Portfolio-Seite zu "Instandhaltungs- und Investitionsmaßnahmen in begründeter Reihenfolge" (Heimatort-Prinzip 1.2, der Investitionsplan gehört auf /investitionspriorisierung/).
+- Vorgehen der Portfolio-Seite: "monatlich prüfen" zu "in festem Rhythmus prüfen" (Faktenregel 1.3).
+- Portfolio-Description von 164 auf 146 Zeichen gekürzt.
+- Bedingte Beitragslinks (Leerstand je Einheit, Objektstrategie) fallen ohne freigegebenen Beitrag auf den passenden Glossar-Anker zurück (/glossar/#leerstand, /glossar/#objektstrategie).
+- Portfolio-Seite: optionale Prop `situationenIntro` ergänzt, Abgrenzung um die Zeile "Keine Rechts- oder Steuerberatung" erweitert, FAQ "daten" mit mehr-Link auf /zusammenarbeit/.
+- Keine Flags auf beiden Seiten, weil keine Aussage an den Freigabepunkten 22 bis 35 hängt. Der Satz "Ich arbeite persönlich am Mandat ... Interessen lege ich vorher offen" ist die Formulierung aus Masterprompt Abschnitt 9, gekürzt auf einen Satz plus Link auf /zusammenarbeit/#interessen.
+- Weiche Trennstellen in beiden h1-Strings als U+00AD-Literal (im Editor unsichtbar). Der Integrationsagent hat weitere Trennstellen auf dieselbe Weise ergänzt (12.13).
+
+### 12.4 /property-management-optimierung/ und /dienstleistersteuerung/
+
+- Zuständigkeitsmatrix mit den Spalten Vorgang, Verwaltung entscheidet, Eigentümerseite entscheidet, Antwortfrist und Eskalation (Plan 4.4 nennt Antwortfrist vereinbart, der Auftrag Eskalation; zusammengeführt). Zeilen Instandsetzung, Herrichtung leerer Wohnungen, Vergabe von Aufträgen, Mietanpassung, Forderungsmaßnahme mit Stufe 1 und Stufe 2, ohne Beträge und Fristen. Die Tabelle liegt in einer figure mit figcaption "Schematische Darstellung der Struktur ...".
+- PM-Leistungsblock Dienstleisterkoordination auf einen Satz plus Link gekürzt (Heimatort-Prinzip); Kennzahlen und Reporting ebenfalls ein Satz plus Link.
+- PM-FAQ: neben den beiden Ersatzfragen aus dem Plan eine vierte Frage ergänzt: "Muss die Verwaltung dafür ihre Software wechseln?".
+- PM-Arbeitsergebnisse angepasst: Standards für Auftragsvergabe, Nachträge und Abnahmen sowie Kennzahlenset mit Berichtsvorlage entfernt (Heimatorte Dienstleistersteuerung und Reporting), stattdessen Eskalationsregel mit Dokumentation und Wiedervorlage sowie Rückstandsliste mit Priorität, Verantwortlichen und Abbauplan.
+- PM-Situationen: Situation 5 "Mehrere Verwaltungen nach Zukauf" ergänzt (fünf Einträge, Waisenregel des `register--2` greift). Situationen 1 und 3 sprachlich leicht erweitert.
+- PM: kein Szenario im Slot szenario (Plan 1.6 sieht Szenarien nur für Startseite und Vertiefungen vor); die Seite trägt eine Fläche (Leistungsumfang).
+- DS-Steuerungskette mit neun Schritten laut Plan 3.3 (der Auftrag nannte sechs Begriffe; Beauftragung ist im Schritt Vergabe enthalten). Ab 861 px per scoped Style dreispaltig.
+- DS-Seitennav mit sechs Ankern in DOM-Reihenfolge (Passende Situationen, Leistungsumfang, Methode, Zuständigkeiten, Szenario, Fragen und Antworten; Runde 1 hatte elf): bei 1440 px einzeilig, bei 390 px höchstens dreizeilig.
+- PM-Abgrenzung (Runde 2 und 3): Punkt 1 lautet bis zur Freigabe der Faktenlistenzeile Nr. 38 ohne Nennung von Wohnungseigentümergemeinschaften und Mietobjekten "Dies ist keine Seite für die Suche nach einer Hausverwaltung. Das laufende Verwaltungsangebot der Hausverwaltung Müller GmbH finden Sie auf der Website der Verwaltung." mit dem mehr-Link "muellerhv.de" auf `OPERATOR.website` (derzeit https://www.muellerhv.de; Host-Variante offen, siehe 12.16). Punkt 3 nennt die eigene Interessenlage als Geschäftsführer einer Hausverwaltung mit Link auf /zusammenarbeit/#interessen.
+- DS-Abschnitt Netzwerk und Interessen ohne den Satz "Ich arbeite persönlich am Mandat und binde bei Bedarf Spezialisten ein" (Heimatort /zusammenarbeit/#interessen). Enthalten sind Netzwerk als Einschätzungsquelle, die Negation von Handwerkerorganisation und bundesweiter Kapazität sowie ein Satz Offenlegung plus Link.
+- DS-Situation 4 heißt "Abhängigkeit oder uneinheitliche Dienstleisterlandschaft" und trägt den bedingten Beitragslink "Nach dem Zukauf" (einziger Beitragslink der Seite, Regel 6.4).
+- DS: Fachbegriffe Leistungsbeschreibung, Nachtrag und Abnahme werden in den Situationen erläutert; die Glossar-Links stehen bei den drei Steuerungspunkten im Slot methodik.
+- Flag `referenzfallFreigabe` (Faktenliste Nr. 16) auf der DS-Seite: Szenario "Nachträge und Abnahmen ohne Regel" rendert als schematische Methode; Fallstudienfelder nicht befüllt.
+
+### 12.5 /ki-immobilienmanagement/ und /reporting-und-kennzahlen/
+
+- KI-Seite: "Was ein Pilot enthält" als Register mit fünf Phasen (Prozessauswahl, Datenprüfung, Freigabekonzept, Testphase, Auswertung); die Checkliste aus Plan 4.5 folgt darunter als Block "Was der Pilotplan festhält".
+- KI-Seite: Flag als `entwicklungsstand = false` plus Textarray `entwicklungsstandText` (nicht `string | null` wie in Plan 4.5); Abschnitt rendert nur mit Flag und mindestens einem Absatz, auch kein Seitennav-Eintrag ohne Freigabe.
+- KI-Seite: Slot methodik in `<Fragment slot="methodik">` gekapselt.
+- KI-Seite: bestehende Abgrenzung zu Mandantendaten auf einen Satz plus Link auf #mandantendaten gekürzt; Punkt "Keine Rechtsberatung zu Datenschutz oder Auftragsverarbeitung" ergänzt.
+- Reporting-Seite: Kennzahlentabelle mit den Spalten Kennzahl, Frage die sie beantwortet, Datenquelle, Rhythmus (Beispiel); die Ebenen (Ertrag, Kosten, Substanz, Prozess, Liquidität) als Zeilengruppen mit th scope=rowgroup statt als eigene Spalte. Caption "Schematische Auswahl, keine Zielwerte", figcaption beginnt mit "Schematische Darstellung".
+- Reporting-Seite: Abschnitte 6 und 7 des Plans (Steckbrief, Eine Quelle je Kennzahl) in #steckbrief zusammengefasst; Abschnitte 9 und 10 (Rhythmus und Adressaten, KI-Schnittstelle) in #rhythmus. Die "Einführung in Schritten" ist in Vorgehen und Leistungsblock 5 aufgegangen.
+- Reporting-Seite: Abgrenzung um "Keine Softwareauswahl und keine Systemeinführung" und den Ein-Satz-Verweis auf /zusammenarbeit/#interessen ergänzt.
+- Reporting-Seite: Seitennavigation mit sechs Ankern (Passende Situationen, Leistungsumfang, Kennzahlen, Berichtsaufbau, Szenario, Fragen und Antworten; Runde 1 hatte elf): bei 1440 px einzeilig, bei 390 px höchstens dreizeilig.
+
+### 12.6 /zusammenarbeit/
+
+- Portrait im Hero ist Nr. 1 (4:5, `priority`, `sizes` wie Startseiten-Hero) statt Slot 3 (Variante arbeit, 3:2), den Plan 1.5 dem Zusammenarbeit-Hero zuordnet. Grund: Nach Designspezifikation 7.8 wird Slot 3 ohne Datei nicht gerendert (`nurMitBild`) und hat keinen Platzhalter; die Einsatztabelle 7.7 führt den Zusammenarbeit-Hero nicht. Bis zur Freigabe von portrait-1 rendert der typografische Platzhalter 4:5. Nach Freigabe von portrait-3 kann der Hero auf Slot 3 umgestellt werden (eigener Arbeitsschritt, Bildunterschrift nur mit freigegebenem Text).
+- Regeln im Abschnitt Interessen als nummeriertes `ol.register` (Regel 01 bis 03, mit Flags bis 05) statt `.checklist` (Plan 3.1 Nr. 9).
+- Datenbedarf je Mandatsform als `ol.register` mit `ul.checklist` der sieben Kategorien im Eintrag Portfolio-Check.
+- Kapitel 02 "Einschätzung, Angebot und Vertrag" ist nicht ausgeblendet, sondern auf den neutralen Satz plus vier bereits veröffentlichte Aussagen der AM-Seite reduziert. Honorarlogik, Vertragspartner und Kostenfreiheit hängen an den Flags 22, 23, 25.
+- Abschnitte 6, 7 und 8 des Plans (Vertraulichkeit, Angebot, Verantwortung) als `.kapitel`-Folge 01 bis 03 in einer Section #rahmen.
+- Seitennav.astro mit sechs Ankern direkt unter dem Hero (Ablauf, Vorbereitung, Datenbedarf, Vertraulichkeit und Vertrag, Interessen, Fragen und Antworten; Runde 1 hatte acht; Plan 3.1 listet keine Seitennavigation); Hero mit `ohneLinie`. Kapitel 01 (Vertraulichkeit) verlinkt zusätzlich auf /ki-immobilienmanagement/ (KI-Einsatz mit Mandantendaten).
+- Abschnitt Mandatsende zusätzlich mit Checkliste "Was bei der Übergabe vorliegt" (vier Punkte).
+- Unter "Was das für Sie bedeutet" steht die Zeile "Direkter Link zu diesem Abschnitt" mit der Adresse aus SITE.url plus /zusammenarbeit/#interessen. Auf Staging zeigt sie den Staging-Host.
+- Zwei Flächen (Datenbedarf #daten und Interessen #interessen); der Plan sah nur Interessen als Fläche vor.
+- Fachbegriffe erläutert: Mandat, Kick-off, Portfolio-Check, Umsetzungsbegleitung, Sparring, Forderungen nach Alter, Umlagefähigkeit, Vertraulichkeitsvereinbarung, Auftragsverarbeitung, Entscheidungsvorlage.
+- Flags: `vertragspartnerFreigabe` (22), `honorarlogikFreigabe` (23), `verguetungDritterFreigabe` (24, Regel 5), `kostenfreiFreigabe` (25, Zusatzsatz Schritt 02), `ankaufsregelFreigabe` (26, Regel 4), `datenhaltungFreigabe` (28), `vorOrtFreigabe` (29, FAQ id arbeitsform), `vertraulichkeitsstandardFreigabe` (33), jeweils mit Textkonstante. Ohne Freigabe rendert keiner dieser Bausteine; das Register zeigt drei Regeln, die FAQ fünf Einträge, das Wort "kostenfrei" kommt im sichtbaren Text nicht vor.
+
+### 12.7 /glossar/
+
+- Umfang: 34 statt 25 Einträge. Grund: Vorrang des Plans 3.5, der weitere Begriffe nennt, und die von den umgebauten Seiten bereits verlinkten ids (prolongation, kennzahlensteckbrief, vertraulichkeitsvereinbarung, portfolio-einordnung, entscheidungsvorlage, eskalation). Alle Links der Form /glossar/#id lösen auf (Build-Test).
+- Kontaktabschluss als Cta-Komponente mit angepasstem Titel statt des in Plan 3.5 Nr. 11 vorgesehenen reduzierten Textlinks.
+- ids: Für die Langformen aus Abschnitt 5 (stammdaten-datenqualitaet, zustaendigkeitsmatrix-wertgrenze, leerstandsquote-leerstandstage) sind die Kurzformen datenqualitaet, zustaendigkeitsmatrix, leerstand kanonisch. Die Langformen stehen in `GLOSSAR_ALIAS`; `glossarHref()`, `glossarId()` und `glossarEintrag()` lösen sie auf, der Build-Test ebenfalls.
+- Datenmodell: zusätzlich zu den sechs geplanten Feldern gibt es `heimatortLabel` sowie die Exporte `GLOSSAR_BLOECKE`, `GLOSSAR_ALIAS`, `GLOSSAR_IDS`, `glossarId()`, `glossarEintrag()`, `glossarNachBlock()`.
+- Layout: je Themenblock ein `section.kapitel` (Designspezifikation 6.10); Einträge als dl mit div-Gruppen (id am Gruppen-Container) mit eigenen scoped Klassen statt `.dl-grid`. Die in Abschnitt 8 genannte Klasse `.glossar-nav` existiert nicht; die Ankernavigation nutzt Seitennav.astro.
+- Hero: Ausgangsfrage als Standfirst, Aufbau und Auswahl als `dl.dl-grid` im Hero-Slot. H1 mit weicher Trennstelle in "Portfoliosteuerung"; Title, Description und Breadcrumb ohne.
+- Modernisierung ist ein vollständiger Eintrag mit Abgrenzung zur Instandhaltung und Verweis auf Rechtsberatung.
+
+### 12.8 /profil/
+
+- Kapiteltexte 01 bis 04 nicht vollständig wortgleich zur Vorgabe in Designspezifikation 6.10: Kapitel 01 zweiter Satz umgestellt und nach der Prüfung Runde 1 auf die Funktionen Nr. 5 und 6 gekürzt (die Aufzählung Beteiligungen, Unternehmensstrukturen, Bestandshaltung, Projektentwicklung und der Satz zu Wohnungseigentümergemeinschaften und Mietobjekten entfallen bis zur Freigabe der Faktenlistenzeilen 37 und 38, siehe 12.14), Kapitel 02 Schlusssätze ersetzt (umgangssprachliches "dranhängt", impliziter Vergleich entfernt), Kapitel 03 mit Begriffserläuterung Objektstrategie und "Prüfung von Angeboten und Nachträgen", Kapitel 04 um einen Satz zum Netzwerk ergänzt und "Künstliche Intelligenz (KI)" ausgeschrieben.
+- Kapitel 05 ist "Arbeitsprinzipien"; der frühere fünfte Abschnitt "Zusammenarbeit" steht als unnummeriertes sechstes `.kapitel` (ein Satz plus Textlink auf /zusammenarbeit/#interessen) am Ende der Kapitelfolge.
+- Kurzprofil mit fünf Sätzen plus Kontaktzeile (Plan nennt drei bis vier); die ersten beiden Sätze werden aus PERSON.funktionen erzeugt.
+- FAQ "Wie halten Sie Beratung und eigene Interessen auseinander?" ohne den Satz zur Anbieterunabhängigkeit (Heimatort /zusammenarbeit/#interessen), Antwort mit Link dorthin.
+- Description von 164 auf 159 Zeichen gekürzt ("Umsetzungsnähe" statt "Umsetzungskompetenz").
+- `.note` im Kurzprofil per scoped Style auf Fließtextgröße und Textfarbe angehoben. Das Kurzprofil ist ein `div.note`, kein `blockquote`, weil es kein fremdes Zitat ist (Runde 2).
+- Flags: `beraterprofilPdf` (Nr. 20, Button erst mit Dateipfad), `linkedin` aus PERSON.linkedin (Nr. 19, dt/dd-Zeile mit rel=me erst mit URL), `arbeitsformFreigabe` mit `arbeitsformText` (Nr. 29, Zusatz zur FAQ "Wo arbeiten Sie?"), `stationen[].freigabe` (Nr. 14, Timeline rendert nichts ohne freigegebene Station; keine Klammer-Platzhalter im Quelltext).
+
+### 12.9 /kontakt/ und /danke/
+
+- Legende des ersten Fieldsets lautet "Ihre Kontaktdaten" (Auftrag) statt "Ihre Angaben" (Designspezifikation 6.13).
+- Label der Textarea von "Ihr Anliegen" auf "Beschreibung Ihres Anliegens" geändert, weil die Legende des zweiten Fieldsets bereits "Ihr Anliegen" heißt. id, name, Attribute, Placeholder und Validierung unverändert.
+- Kontakt-Hero nutzt die Hero-Komponente (Props eyebrow, title, lead, mail, compact); die E-Mail-Zeile kommt aus Hero.astro.
+- H2 "Anfrage senden" über dem Formular als `.caps`; Hierarchie H1, H2, Legenden, H2 "Direkt erreichen", H3.
+- Der Link im Aside "Was Sie vorbereiten können" zielt auf /zusammenarbeit/#vorbereitung.
+- Danke, "Zum Weiterlesen": Zusammenarbeit, Asset-Management-Beratung, Investitionspriorisierung, Dienstleistersteuerung, Reporting und Kennzahlen; Einblicke nur bei mindestens einem freigegebenen Beitrag.
+- Danke-Lead ohne "in den nächsten Werktagen" (Plan 1.3); Ersatz: "Sollten Sie keine Rückmeldung erhalten, schreiben Sie mir bitte direkt per E-Mail" plus E-Mail-Zeile im Hero.
+- Kontakt-Title "Kontakt: Portfolio besprechen | Timo Müller" (43 Zeichen), Description neu gefasst (159 Zeichen); Danke-Description ausformuliert (118 Zeichen).
+- Flag `kostenfreiFreigabe` mit `kostenfreiText` (Nr. 25) in kontakt.astro und danke.astro (beide Seiten führen den Schritt Erstgespräch); nach Freigabe an beiden Stellen denselben Wortlaut eintragen.
+- Kein Cta auf /kontakt/ und /danke/ (Designspezifikation 9.6).
+- robots.txt sperrt /danke/ nicht mehr (Runde 2): Die Seite trägt noindex, nofollow und steht nicht in der Sitemap; ein per robots gesperrter Crawler könnte das noindex nicht lesen und eine verlinkte URL ohne Inhalt indexieren. Gesperrt bleibt nur der Formular-Endpunkt /api/ (src/pages/robots.txt.ts, docs/SEO-MATRIX.md Technik).
+- Der Satz "in der Regel innerhalb weniger Werktage" im Kontakt-Aside ist entfallen; Plan 1.3 wollte ihn unverändert belassen. Grund: docs/FAKTENLISTE.md führt Reaktionszeiten unter "Ausdrücklich nicht verwendet", und der Masterprompt (Abschnitt 4) lässt Bearbeitungsfristen offen. Das Aside "Direkt erreichen" nennt jetzt nur E-Mail, persönliche Rückmeldung und die Vorbereitung; die Website enthält damit keine Reaktionszeit mehr.
+
+### 12.10 /einblicke/ und Beiträge
+
+- Title der Übersicht "Einblicke: Fachbeiträge zur Portfoliosteuerung | Timo Müller" (60 Zeichen); H1 "Einblicke in die Arbeitsweise".
+- Beitragsseite (Runde 2): optionales Frontmatter-Feld `seoTitle` in src/content.config.ts (vollständiger Title mit Namenszusatz " | Timo Müller", höchstens 65 Zeichen, Schema prüft die Länge). [slug].astro nimmt `seoTitle`, sonst den vollen Titel mit Namenszusatz, sonst "Einblicke: <Teil vor dem Doppelpunkt> | Timo Müller"; ist kein Title bis 65 Zeichen ableitbar, bricht der Build mit dem Hinweis auf `seoTitle` ab. Der frühere letzte Fallback "<Teil> | Einblicke" entfällt. Description-Schema höchstens 160 Zeichen.
+- Glossar-ids im Frontmatter der neuen Beiträge in kanonischer Schreibweise; je Beitrag eine zusätzliche, im Text verwendete id (szenario, reporting, kennzahl).
+- Querverweise zwischen Beiträgen nicht als Textlink im Beitrag (alle Ziele sind Entwürfe), sondern ausschließlich über das Frontmatter `verwandt` (rendert nur veröffentlichte Ziele, ab drei freigegebenen Beiträgen). Ersatzlinks im Text auf /portfoliooptimierung/#leistung, /glossar/#leerstand und /asset-management-beratung/#eigentuemerziele.
+- Redaktionsgrundsätze mit sieben statt sechs Punkten.
+- Leerzustand der Übersicht als `.prose` in `.gc-1-8` (Designspezifikation 6.16), gefüllter Zustand als `.abschnitt` mit `ol.register.register--einblicke`.
+- [slug].astro bricht den Build ab, wenn eine Glossar-id im Frontmatter unbekannt ist; zusätzlich prüft scripts/test-build.mjs die Frontmatter-ids aller Beiträge.
+- Beitragskopf als eigenes Markup im Fachseiten-Hero-Muster 8/4 (Eyebrow, H1, Kernaussage als Standfirst mit Caps-Label, rechts dl.dl-grid mit Autor, Veröffentlicht, Aktualisiert).
+- Reihenfolge am Beitragsende: Begriffe in diesem Beitrag, Quellen, Hinweis "Passende Beratung", Autorenkasten, Verwandte Beiträge, Cta. JSON-LD Article um isPartOf ergänzt.
+- Cta auf der Übersicht mit eigener Frage ("Sie möchten eine dieser Thesen an Ihrem Bestand prüfen?").
+
+### 12.11 Dokumentation
+
+- FAKTENLISTE.md: Teil A (1 bis 21) und Teil B (22 bis 35, mit Spalten "Bis zur Freigabe" und "Flag im Code"); Verwendung der Punkte 5 bis 7, 9, 15, 16 und 20 an den neuen Stand angepasst; Abschnitt "Ablauf einer Freigabe" ergänzt. Nach der Prüfung Runde 1 zusätzlich Teil C (Nachträge 36 bis 38, siehe 12.14) und die Verwendungsspalte der Nr. 8 und 9 um Investitionspriorisierung und Dienstleistersteuerung erweitert.
+- SEO-MATRIX.md: vollständiger Wortlaut von Title und Description je Seite (im Integrationsbuild gegen dist geprüft, alle Zeilen stimmen), /impressum/ und /datenschutz/ getrennt, /404/ und /einblicke/[slug]/ als eigene Zeilen, Abschnitt Verlinkungsregeln und Hinweis Kurzprofil zum Weitergeben. H1 der Rechtstexte dort nicht gegen die Dateien geprüft.
+- ARCHITEKTUR.md: Abschnitte Navigation und Footer, Layout Fachseite.astro, Flags für offene Freigabepunkte und Porträts ergänzt.
+- DESIGN-SYSTEM.md vollständig neu gegliedert (zwölf Abschnitte); Kontrasttabelle aus DESIGN-SPEC-V2 2.3 übernommen, Verifikation siehe TESTBERICHT.md, Stand v2.
+- LAUNCH-CHECKLISTE.md: Abschnitte "Prüfung des Builds vor Launch" und "Freigabepunkte 22 bis 35"; Erlaubnisprüfung um Reporting und Kennzahlen erweitert; Datenschutzabgleich für Regel 3 und Datenhaltung als kritischer Punkt.
+- BILDER-LIZENZEN.md: portrait-1.jpg bis portrait-3.jpg als offene Zeilen mit Hinweis, dass eine Zeile erst mit ausgefüllten Spalten gilt.
+- README.md: `npm run check` sowie Hinweise zu Porträtablage und Flag-Prinzip.
+
+### 12.12 Flags im Code (Übersicht)
+
+| Flag | Datei | Freigabepunkt |
+|---|---|---|
+| `referenzfallFreigabe` | src/pages/index.astro, src/pages/dienstleistersteuerung.astro | Faktenliste Nr. 16 |
+| `honorarlogikFreigabe`, `honorarlogikText` | src/pages/asset-management-beratung.astro, src/pages/zusammenarbeit.astro | Nr. 23 |
+| `vertragspartnerFreigabe`, `vertragspartnerText` | src/pages/zusammenarbeit.astro | Nr. 22 |
+| `verguetungDritterFreigabe`, `verguetungDritterText` | src/pages/zusammenarbeit.astro | Nr. 24 |
+| `kostenfreiFreigabe`, `kostenfreiText` | src/pages/zusammenarbeit.astro, src/pages/kontakt.astro, src/pages/danke.astro | Nr. 25 |
+| `ankaufsregelFreigabe`, `ankaufsregelText` | src/pages/zusammenarbeit.astro | Nr. 26 |
+| `datenhaltungFreigabe`, `datenhaltungText` | src/pages/zusammenarbeit.astro | Nr. 28 |
+| `vorOrtFreigabe`, `vorOrtAntwort` | src/pages/zusammenarbeit.astro | Nr. 29 |
+| `arbeitsformFreigabe`, `arbeitsformText` | src/pages/profil.astro | Nr. 29 |
+| `vertraulichkeitsstandardFreigabe`, `vertraulichkeitsstandardText` | src/pages/zusammenarbeit.astro | Nr. 33 |
+| `entwicklungsstand`, `entwicklungsstandText` | src/pages/ki-immobilienmanagement.astro | Nr. 32 |
+| `beraterprofilPdf` | src/pages/profil.astro | Faktenliste Nr. 20 |
+| `PERSON.linkedin` | src/data/site.ts, gerendert in src/pages/profil.astro | Faktenliste Nr. 19 |
+| `stationen[].freigabe` | src/pages/profil.astro | Faktenliste Nr. 14 |
+
+Stichprobe im Integrationsbuild: keiner dieser Bausteine ist im dist sichtbar (kein "Fallstudie", kein "kostenfrei", kein Honorar mit Zahl, kein EUR, Register Interessen mit drei Regeln, FAQ Zusammenarbeit mit fünf und Profil mit vier Einträgen, kein Abschnitt #entwicklungsstand, kein PDF-Button, kein LinkedIn-Link, keine Timeline).
+
+### 12.13 Änderungen des Integrationsagenten (Runde 1)
+
+Nur Änderungen für Build, Tests, Barrierefreiheit und Layout; Formulierungen blieben unangetastet.
+
+- scripts/test-build.mjs erweitert: Description-Grenze 160 (Title 65) mit dekodierten Entities und ohne weiche Trennstellen; Porträt-Slot-Ausgabe für /, /profil/, /kontakt/ und /portfoliooptimierung/; Dateinamenprüfung in src/assets/portraits; Lizenzeintrag je Porträtdatei in docs/BILDER-LIZENZEN.md; alt-Pflicht für Bilder in `.portrait`; Glossar-ids aus Frontmatter aller Beiträge und aus allen href="/glossar/#..." im dist gegen GLOSSAR und GLOSSAR_ALIAS aus src/data/glossar.ts; jede figure außer Porträts mit figcaption "Schematisch"; Tabellen mit caption und th scope; alle 14 immer indexierbaren Routen in der Sitemap, /einblicke/ im Leerzustand noindex und nicht in der Sitemap (mit freigegebenem Beitrag umgekehrt), Anker #redaktionsgrundsaetze; freigegebene Beiträge gebaut, Entwürfe nicht; interne Links und Anker über alle Seiten (jedes Ziel gebaut, jeder Anker vorhanden); keine "EUR", kein Euro-Zeichen, kein "Honorar" mit Zahl, kein "kostenfrei" oder "kostenlos"; Ohne-JavaScript-Regeln im CSS (`html.no-js .site-nav {display:block}`, `html.no-js .site-header {position:static}`), Untermenü und FAQ als details/summary, Formular mit method="post" und action; Gedankenstriche zusätzlich im JSON-LD.
+- scripts/screenshots.mjs: alle 17 Routen, Ausgabe der Verursacher bei horizontalem Scroll, Durchscrollen und Warten auf alle Bilder (lazy geladenes Footer-Logo), Exit-Code bei horizontalem Scroll.
+- scripts/a11y-check.mjs: alle 17 Routen.
+- axe-Befund "scrollable-region-focusable" bei 390 px behoben: `.table-wrap` in asset-management-beratung.astro, property-management-optimierung.astro und reporting-und-kennzahlen.astro mit tabindex="0", role="region" und aria-label.
+- global.css: `.textlink::after` mit geschütztem Leerzeichen vor dem Pfeil, weil in `inline-flex`-Links (Profil-Kapitel, Vertiefungsblock, Kontakt-Steps, Einblicke-Register) das normale Leerzeichen entfiel und der Pfeil am Wort klebte.
+- profil.astro: Kapitelfolge mit Klasse `kapitel-folge` (padding-bottom 0), damit zwischen Schlusslinie des letzten Kapitels und Kurzprofil kein doppelter Abschnittsabstand entsteht.
+- zusammenarbeit.astro: dt "Berührungspunkte" mit weicher Trennstelle, weil der Begriff in der 9-rem-Spalte über die Beschreibungsspalte lief.
+- Weiche Trennstellen (U+00AD als unsichtbares Literal in Frontmatter-Strings, `&shy;` im Template) in Überschriften, die in der Testumgebung ohne Silbentrennungswörterbuch mitten im Wort umbrachen: zweispaltige Situationen-Register (Ergebnisrückgang, Finanzierungsentscheidung, Geschäftsführung, Zusammenführung, Leistungsbeschreibung, Dienstleisterlandschaft, Pflichtmaßnahmen, Ertragsmaßnahmen, Investitionsplan, Instandhaltungsstau, Bearbeitungsrückstände, Eigentümerseite, Verwaltungsreport, Eigentümerbericht, Portfoliomanagement-Teams), Leistungsblöcke (Finanzierungsschnittstelle, Dienstleisterkoordination), Steps der Steuerungskette (Leistungsbeschreibung, Ausführungskontrolle, Dienstleisterbewertung), Randspalten-H2 (Beratungsperspektive, Informationen, wiederkehrende, Eigentümerbericht, Kennzahlensteckbrief, Redaktionsgrundsätze, Entscheidungsvorlage, Dienstleistersteuerung), Szenario-Titel (Verwaltungseinheiten, Finanzierungsentscheidung) sowie H1 "Datenschutzerklärung" und H2 "Umsatzsteuer-Identifikationsnummer" der Rechtstexte (nur Trennstelle, kein Wortlaut geändert). Szenario-Titel werden als JSX-Ausdruck übergeben, weil Astro Entities in Prop-Strings nicht auflöst.
+- Footer.astro, Aufbau: Absenderzeile (Name, Claim, E-Mail) über die volle Breite mit Haarlinie unten, darunter drei Linkspalten aus `FOOTER_SPALTEN` (Beratung, Vertiefung, Wissen und Weiteres) und der Betreiberblock in den Spalten 10 bis 12. Das weicht von Plan 6.3 (vier Spalten im auto-fit-Raster, Spalte 1 mit Name, Claim und E-Mail, dazu der Absenderblock) und von Designspezifikation 6.9 (Absenderblock in den Spalten 1 bis 4, zwei Linkspalten `footer-nav-1` und `footer-nav-2`, Betreiberblock) ab: Name, Claim und E-Mail stehen als Zeile über den Spalten, die drei Linkspalten des Plans (2 bis 4) bleiben, feste Zuweisung im Zwölfspaltenraster (1 bis 3, 4 bis 6, 7 bis 9, Betreiberblock 10 bis 12) statt auto-fit. docs/DESIGN-SYSTEM.md Abschnitt 7 beschreibt den gebauten Stand.
+- Footer.astro: zwischen 600 und 860 px zwei Spalten je Reihe statt drei, weil "Investitionspriorisierung" die Drittelspalte überlief.
+- index.astro: Linkspalte des Vertiefungsblocks mindestens 16 rem (Überlauf bei 1024 px).
+- Header.astro: ohne JavaScript ist der Kopf unterhalb von 1080 px nicht mehr sticky, weil die dann dauerhaft ausgeklappte Navigation den Inhalt verdeckte (im Test bei 390 px ohne JavaScript war die FAQ nicht erreichbar).
+- tokens.css: Kontrastangaben in den Kommentaren an die berechneten Werte angeglichen (siehe TESTBERICHT.md, Stand v2).
+- docs/TESTBERICHT.md: Abschnitt "Stand v2" mit den tatsächlichen Ergebnissen.
+
+### 12.14 Offene Fragen und Prüfpunkte
+
+Im Integrationsbuild erledigt oder verifiziert:
+
+- Alle 803 internen Links und Anker lösen auf, darunter /asset-management-beratung/#selbstpruefung und #mandate, /zusammenarbeit/#interessen und #vorbereitung, /einblicke/#redaktionsgrundsaetze, alle /glossar/#id (34 ids, Aliasse aufgelöst, Eintrag eskalation vorhanden).
+- src/pages/einblicke/index.astro ist im v2-Stand (Redaktionsgrundsätze, noindex im Leerzustand, kein Kartenraster, keine Ankündigungsliste); /einblicke/ fehlt im Leerzustand in der Sitemap; 14 URLs in der Sitemap.
+- Astro-Syntax der Inhaltsagenten (Fragment mit slot, mehrere section-Elemente je Slot, Fragment in dl-map, tbody-Mapping, th scope=rowgroup, readonly-Tupel in [slug].astro, dl mit div-Gruppen) kompiliert; `astro check` 0 Fehler, 0 Warnungen.
+- Layoutprüfpunkte (Display-H1 bei 360 px, Register ohne Ziffern, Seitennavigationen mit acht bis elf Ankern bei 1024 und 1440 px, Tabellen in .table-wrap bei 390 px, Steps 3x2 ab 861 px, dl-grid Rollen, sticky Kapitelkopf im Glossar, Portrait im Hero-Slot und im Kontakt-Aside, Portrait vor H1 im mobilen Profil): in den Screenshots geprüft, Befunde behoben (12.13).
+- FAQPage-JSON-LD: Zusammenarbeit fünf, Profil vier Einträge; JSON-LD aller Seiten parsbar, DefinedTermSet enthalten.
+- docs/SEO-MATRIX.md stimmt mit den gebauten Titles und Descriptions aller 17 Seiten überein.
+- Beitragsslugs objektstrategie-halten-entwickeln-verkaufen, nach-dem-zukauf-reihenfolge und leerstand-je-einheit existieren als Dateien mit status entwurf; die bedingten Links rendern deshalb nicht.
+- Faktenlistenzeilen 36 bis 38 angelegt (docs/FAKTENLISTE.md, Teil C): Nr. 36 handwerkliches Kostenverständnis und Umsetzungsnähe als Auftraggeberangabe (Profil Kapitel 03, Investitionspriorisierung Achse 3, Dienstleistersteuerung); Nr. 37 Verantwortungsfelder der Müller Holding AG und Nr. 38 Verwaltungsgegenstand der Hausverwaltung Müller GmbH ohne Beleg, Status offen. Profil Kapitel 01 ist deshalb auf die Funktionen Nr. 5 und 6 gekürzt, der Satz zu Wohnungseigentümergemeinschaften und Mietobjekten entfällt; kein Flag, nach Freigabe wird der Wortlaut in profil.astro ergänzt.
+
+Weiterhin offen (Entscheidung oder Freigabe durch Timo Müller beziehungsweise die Geschäftsführung, nicht durch die Umsetzung zu lösen):
+
+- Freigabepunkte 22 bis 35 laut docs/FAKTENLISTE.md Teil B; insbesondere Nr. 22 (Vertragspartner, rechtlich zu klären, ob der Hinweis im Impressum ohne Nennung ausreicht), Nr. 25 (Kostenfreiheit, Wortlaut für kontakt.astro und danke.astro), Nr. 27 (Regel 3 rendert ohne Flag; wird der Wortlaut nicht bestätigt, braucht zusammenarbeit.astro ein zusätzliches Flag), Nr. 29 (Schritt 02 nennt "Telefon oder Video", keine Aussage zu vor Ort oder remote), Nr. 34 und 35.
+- Textfreigabe aller neuen und geänderten Seiten (Plan Abschnitt 10), darunter: Profil Kapitel 01 (bis zur Freigabe der Faktenlistenzeilen 37 und 38 auf die Funktionen Nr. 5 und 6 gekürzt), Kurzprofil, Arbeitsprinzipien, Profil-FAQ; Zusammenarbeit Hero-Lead, Regeln 1 bis 3, Kapitel 03; Kontakt und Danke (Verhaltenszusagen: ich lese Ihre Anfrage selbst, melde mich per E-Mail oder telefonisch, schlage einen Termin vor, Erstgespräch per Telefon oder Video); KI-Seite Satz "Eingaben aus dem Kontaktformular dieser Website gehen in kein KI-System" (mit Datenschutzerklärung und Praxis abgleichen) sowie Abschnitt Mandantendaten (Auftragsverarbeitung ohne Normzitat, Rechtsberatung empfohlen); Reporting-FAQ "Wer erstellt den Bericht"; Dienstleistersteuerung Hero-Frage, Abschnitt Netzwerk und Interessen, Aside "Woher die Einschätzung kommt", FAQ handwerkliche Erfahrung; PM-Abgrenzungssatz zur eigenen Interessenlage; Investitionspriorisierung (Aussagen zu Finanzierungsunterlagen als Vorbereitung ohne Vermittlung); Redaktionsgrundsätze und "Was ein echter Fall zusätzlich braucht"; die drei neuen Beiträge; Glossar-Einträge Umlagefähige Kosten, Modernisierung, Abnahme, Nachtrag, Prolongation, Vertraulichkeitsvereinbarung (Gegenlesen durch Rechtsanwalt empfohlen).
+- Redaktionelle Entscheidungen: Heimatorte für datenqualitaet und freigabe (derzeit /ki-immobilienmanagement/#pilot), Doppelbedeutung des Eintrags Szenario, Heimatort des Eintrags Mandat (AM-Seite oder Zusammenarbeit), Caps-Label "Kernaussage" im Beitragskopf, optionales ContactPage-Markup auf /kontakt/.
+- Erlaubnisprüfung vor Launch: docs/LAUNCH-CHECKLISTE.md nennt Investitionspriorisierung, Dienstleistersteuerung und Reporting und Kennzahlen bereits; die Prüfung selbst steht aus.
+- Beiträge: vor Freigabe datum setzen, status auf freigegeben, `verwandt`-Ziele prüfen; die drei bestehenden Entwürfe haben noch keine Felder glossar und verwandt; immobilienportfolio-optimieren-daten.md enthält Zeit- und Mengenangaben ("innerhalb weniger Monate", "zehn zufällig gewählte Einheiten", "länger als einen Tag"), vor Freigabe redaktionell prüfen. Das Feld `seoTitle` ist seit Runde 2 vorhanden (12.10).
+- Porträtdateien (Faktenliste Nr. 15 und 34): alle Slots rendern den typografischen Platzhalter; der gefüllte Zustand der Porträts, der Einblicke-Übersicht und der Blöcke Begriffe und Verwandte Beiträge ist ohne Datei beziehungsweise ohne freigegebenen Beitrag nicht getestet.
+- Widersprüche zwischen diesem Plan und der Designspezifikation (Kurzprofil-Leiste, Fläche des Abschnitts Für wen, Einsatz von portrait-2, Regeln als Register statt Checkliste, Cta auf dem Glossar): umgesetzt nach Designspezifikation und Aufgabenstellung, hier nachgetragen; die Abschnitte 3 und 4 dieses Plans wurden nicht rückwirkend umgeschrieben.
+
+### 12.15 Änderungen des Integrationsagenten (Runde 2)
+
+Stand: 12.09.2026, zweiter Integrationsbuild nach den Korrekturagenten. Die Abweichungs- und Fragenlisten der Inhaltsagenten waren bereits in 12.1 bis 12.14 aufgenommen; Runde 2 brachte keine neuen Abweichungen der Inhaltsagenten. Nur Änderungen für Build, Tests, Barrierefreiheit und Layout; Formulierungen blieben unangetastet, mit zwei Ausnahmen aus der Wortregel zu "Baustelle" (unten).
+
+Code und Skripte:
+
+- scripts/test-build.mjs: Fehlerseite 404 darf weder Canonical noch og:url tragen und muss noindex sein (bisher meldete der Test "kein Canonical", weil 404.astro inzwischen `ohneCanonical` nutzt); alle anderen Seiten brauchen og:url. Neu geprüft werden außerdem: eindeutige H1 über alle Seiten (16), Überschriftenhierarchie ohne Sprünge, BreadcrumbList beginnt mit "Start" und dem Wurzel-Item (auf /portfoliooptimierung/ wörtlich Start / Beratung / Portfoliooptimierung), Service-Knoten mit provider `#person`, sichtbarer Breadcrumb mit Start und aria-current="page", role="list" auf `ul.checklist`, `ol.register` und `ul.verwandt`, seiteninterne Anker (Seitennavigation, Sprunglinks) existieren auf der Seite, /einblicke/ im Leerzustand mit "noindex, follow" und selbstreferenzierendem Canonical, und die redaktionellen Wortregeln der Prüfung: "Netzwerk aus", "Werktage", "tatsächlichen Entwicklungsstand", "gehört eine Hausverwaltung", "ohne Dauerangaben" dürfen nirgends vorkommen; "Keine Referenzen, sondern" nur auf /asset-management-beratung/; "Baustelle" (als eigenes Wort) nur auf /profil/; "handwerklich" nur auf /dienstleistersteuerung/. Negativtest mit injizierten Verstößen im dist (Canonical auf 404, h4 nach h1, "Werktage", nofollow auf /einblicke/, fehlender Anker #vorgehen, Service ohne provider): alle gemeldet.
+- scripts/screenshots.mjs: `scroll-behavior: auto` vor dem Durchscrollen und ein Frame Wartezeit nach dem Rücksprung. Zuvor lief scrollTo als Animation weiter, und der sticky Kopf stand in den Ganzseitenaufnahmen mitten im Hero (Artefakt der Aufnahme, kein Fehler der Seite). Seitenliste und axe-Liste waren seit Runde 1 vollständig (17 Routen).
+- property-management-optimierung.astro: horizontaler Scroll bei 360 px (Skriptmeldung, 6 px) durch "Wohnungseigentümergemeinschaften" in der Abgrenzung; weiche Trennstellen im Wort. Zusätzlich "Leistungsbeschreibung" in Situation 4 mit Trennstelle (Wortbruch bei 1024 px im zweispaltigen Register).
+- asset-management-beratung.astro: "Investitionspriorisierung" im Text und im Linktext des Anlasses Finanzierung mit Trennstelle; bei 1024 px brach das Wort mitten im Wort um, bei 1440 px stand der Pfeil des Textlinks allein in der Zeile.
+- dienstleistersteuerung.astro: "Leistungsbeschreibung" in Situation 1 mit Trennstelle (Wortbruch bei 1024 px).
+- Wortbruch-Prüfung (Scratch-Skript, Range je Wort, mehrere ClientRects ohne weiche Trennstelle) über alle 17 Routen bei 360, 390, 768, 1024 und 1440 px: nach den Trennstellen 0 Treffer.
+- Wortregel "Baustelle": Der Korrekturbefund verlangt das Wort nur im Profil-Lead. Zwei eigenständige Verwendungen wurden umformuliert, ohne den Sinn zu ändern: investitionspriorisierung.astro ("mit einer ohnehin offenen Baustelle verbinden lässt" zu "mit einer ohnehin laufenden Maßnahme verbinden lässt") und src/data/glossar.ts, Eintrag Technische Abhängigkeit und Bündelung (gleicher Satz). Das Kompositum "Baustelleneinrichtung" (Fachbegriff für Einrichtung und Gerüst, in Investitionspriorisierung Achse 3 und im Glossar) bleibt; der Build-Test prüft mit Wortgrenze, sodass Komposita nicht anschlagen.
+- src/content.config.ts: `z` aus `astro/zod` statt aus `astro:content` (Deprecation-Hinweise von astro check von 20 auf 1 reduziert; keine Funktionsänderung).
+
+Entscheidungen zu den nicht behobenen Befunden der Korrekturagenten (Auftrag Nr. 8):
+
+- 1 (a) Test-Ausnahme für 404: umgesetzt (oben). (b) docs/DESIGN-SPEC-V2.md 6.1 nennt jetzt `.site-nav__link[aria-current]` mit Kommentar. (c) docs/DESIGN-SYSTEM.md nennt die Feldtitel des Dossiers bereits mit 1,2 rem, keine Änderung. (d) Breadcrumb-Höhe: Vorgabe --s-3 beibehalten, keine Änderung.
+- 2 (KI-Seite, Satz zum tatsächlichen Entwicklungsstand): im Quelltext und im dist nicht mehr vorhanden; der Build-Test sperrt die Formulierung.
+- 3 (Plan 12.8 zu Kapitel 01): Spiegelpunkt in 12.8 ergänzt (oben).
+- 4, 6, 7 (danke.astro, kontakt.astro: eyebrow--still über den Steps, Textlink als inline-block): im Quelltext bereits so umgesetzt, in den Screenshots geprüft (eine Orange-Geste je Abschnitt, Pfeil am letzten Wort).
+- 5 (Plan 12.6 Portrait Nr. 1, DESIGN-SPEC 7.7): 12.6 war bereits aktualisiert; 7.7 um die Zeile Zusammenarbeit Hero ergänzt.
+- 8, 10, 11, 12 (Formel "Keine Referenzen, sondern" und "ohne Dauerangaben"): im dist nur noch auf /asset-management-beratung/ beziehungsweise nirgends; Begründung trägt, Build-Test sichert den Stand.
+- 9 (SEO-MATRIX H1 und interne Links der AM-Seite, Plan 12.2, ARCHITEKTUR): SEO-MATRIX-Zeile mit tatsächlichen Linkzielen aus dem dist, 12.2 (neun Anker, Gremienformate in der figcaption) und ARCHITEKTUR-Zeile (Vorgehen, Seitennav) nachgezogen.
+- 13 (404 Checkliste ohne role="list"): bereits gesetzt; Build-Test prüft alle Checklisten und Register.
+- 14 (ältere Entwürfe ohne glossar und verwandt): Begründung trägt, Schema liefert Standardwerte, kein Build-Einfluss; bleibt offener Punkt vor Freigabe der Beiträge.
+- 15 (LAUNCH-CHECKLISTE Hash-CSP, DEPLOYMENT Cache-Staffelung): der CSP-Punkt stand bereits in der Checkliste; docs/DEPLOYMENT.md hat jetzt den Abschnitt Caching und Sicherheitsheader.
+- 16 (CLS-Nachmessung): mit dem neuen Build durchgeführt (scratchpad/cls.mjs, gedrosselte Verbindung): mobil 390 x 844 px / 0, /kontakt/ 0, /profil/ 0,0012; Desktop 1440 x 900 px / 0, /kontakt/ 0,0062, /profil/ 0,0078 (Quelle NAV.site-nav). Alle unter 0,1; eingetragen in docs/TESTBERICHT.md und docs/LAUNCH-CHECKLISTE.md.
+- 17 (Faktenliste Nr. 8 ohne Investitionspriorisierung): Begründung trägt, keine Änderung.
+
+Prüfung der Flags im dist (Stichprobe Runde 2): kein "Fallstudie", kein "kostenfrei", kein EUR, kein Honorar mit Zahl (Build-Test), kein Abschnitt #entwicklungsstand, kein PDF-Button, kein LinkedIn-Link, keine Timeline; Register Interessen mit drei Regeln, FAQ Zusammenarbeit fünf und Profil vier Einträge (Screenshots 390 und 1440 px).
+
+### 12.16 Änderungen des Integrationsagenten (Runde 3)
+
+Stand: 12.09.2026, dritter Integrationsbuild nach den Korrekturagenten der zweiten Prüfung (Fundament-Gruppe Header, global.css, Cta, Footer, ContactForm; danach die Seitengruppen). Die Abweichungs- und Fragenlisten der Inhaltsagenten waren bereits in 12.1 bis 12.14 aufgenommen; die Nachträge der Runden 2 und 3 stehen jetzt in 12.1 bis 12.10 (Glossar-Links und Begriffserläuterungen im Abschnitt Für wen, Display-H1 ohne 18ch-Grenze, Ankerzahl der Seitennavigationen, PM-Abgrenzung mit muellerhv.de-Link, Kurzprofil als div, robots ohne Disallow /danke/, seoTitle). Nur Änderungen für Build, Tests, Barrierefreiheit, Layout und Dokumentation; Formulierungen blieben unangetastet, mit Ausnahme zweier Glossarsätze (unten). Prüfergebnisse: docs/TESTBERICHT.md, Stand v2, Runde 3.
+
+Code und Skripte:
+
+- Textlink-Zielflächen (Korrekturbefunde 8.1 bis 8.3): Die globale Regel `.textlink { display: inline-block; padding-block: 0.65rem; margin-block: -0.65rem }` liefert 44,8 px Zielhöhe bei unverändertem Zeilenrhythmus. Seitenregeln mit `padding-block: 0.6rem` (profil.astro, index.astro, einblicke/index.astro, glossar.astro mit 0.625rem) sind entfallen; Seitenregeln mit `margin-top` oder `margin-bottom` an `.textlink` sind um 0.65rem reduziert, damit der sichtbare Abstand dem bisherigen entspricht (index.astro `.ansatz__text`, kontakt.astro und danke.astro `.ablauf .steps`, zusammenarbeit.astro `.rahmen .kapitel__text`, reporting-und-kennzahlen.astro `.quelle`, dienstleistersteuerung.astro `.rollen` und `.kennzahlarten`, investitionspriorisierung.astro `.plan-aside`). Textlinks am Ende eines Absatzes (kontakt.astro `.ablauf__mehr`, zusammenarbeit.astro `.ablauf__mandatsformen`) stehen jetzt als eigene Zeile (`display: block; width: fit-content`) nach dem Muster `.selbstpruefung__schluss`, weil die Zielfläche sonst in die Zeile mit dem Glossar-Link Sparring ragte (Überlappung 76 x 6 px) und der Absatz eine Leerzeile vor der letzten Zeile zeigte. asset-management-beratung.astro `.vertiefung`: Zeilenabstand `calc(var(--s-2) + 1.3rem)`, damit untereinander stehende Zielflächen 8 px Abstand halten. Gemessen: kleinste Zielhöhe 44 px (Footer, Seitennavigation, Breadcrumb), `.textlink` 44,8 px, `.kontakt-direkt__link` 44,8 px, keine Überlappungen mehr.
+- Seitennav.astro: Spaltenabstand unter 641 px `--s-5` (24 px) statt `--s-6`, damit sechs Anker bei 390 px in höchstens drei Zeilen stehen (Auftrag 7.6). Ab 641 px unverändert 32 px (Designspezifikation 10).
+- Header.astro: Rahmen des Menü-Toggles in `--c-text-3` wie Formularfelder und Sekundärbutton (Korrekturbeobachtung 8.5; kein WCAG-Verstoß zuvor).
+- src/data/glossar.ts: satzinitiales "Sie" in den Einträgen Vertraulichkeitsvereinbarung ("Die Vereinbarung steht vor jedem Datenaustausch.") und Leistungsbeschreibung ("Die Leistungsbeschreibung ist der erste von drei Steuerungspunkten ...") aufgelöst, analog zum Korrekturbefund 3 der Runde 2 (Beobachtung 8.10 b). Einzige Textänderung dieser Runde.
+- scripts/screenshots.mjs: Breiten als drittes Argument oder Umgebungsvariable WIDTHS; Kopfprüfung mit 1081, 1100 und 1120 px ausgeführt.
+- src/layouts/Base.astro: Kommentar zum mobilen Bruchpunkt von 1080 auf 1120 px angeglichen (Korrekturbefund 8.4).
+
+Entscheidungen zu den nicht behobenen Befunden der Korrekturagenten (Auftrag Nr. 8):
+
+- 1 bis 3 (Textlink-Seitenregeln, Überlappung in `.vertiefung`): Begründung trägt (fremde Dateien der Korrekturagenten), in dieser Runde umgesetzt wie oben.
+- 4 (Dokumentation Bruchpunkt 1120, focusout, `.register--2 h3`, Rahmenfarbe `--c-text-3`): umgesetzt in DESIGN-SPEC-V2 (1.6, 2.3, 6.1, 6.3), CONTENT-PLAN-V2 6.1, DESIGN-SYSTEM.md, TESTBERICHT.md, Base.astro.
+- 5 (`.nav-toggle`-Rahmen): Begründung trägt (kein WCAG-Verstoß); trotzdem auf `--c-text-3` gesetzt, damit die Rahmenregel der Kontrasttabelle einheitlich gilt.
+- 6 (Messungen ohne Build): in dieser Runde mit Build und Playwright nachgeholt (TESTBERICHT.md, Runde 3).
+- 7 (Fünf-Sekunden-Test 360 x 780): nachgemessen, E-Mail-Zeile bei 850 px, Button bei 750 px; Begründung des Korrekturagenten trägt (Regeln außerhalb der Zuständigkeit, DOM-Umstellung wäre eine Entscheidung und reichte rechnerisch allein nicht). Bleibt offen (unten). Bei 390 x 844 px bestanden.
+- 8 (Nachträge 12.1, DESIGN-SPEC 4.1 und 6.2): eingearbeitet.
+- 9 (OPERATOR.website): Begründung trägt (Prüfung aus der Build-Umgebung nicht möglich, Skill hvm-ci führt die www-Variante); unverändert, offen (unten).
+- 10 (a: "offen gelegt"): im Quellcode nicht mehr vorhanden, keine Änderung nötig; im Plan bleibt die frühere Schreibweise als Zitat des Plans stehen. (b: zwei satzinitiale "Sie" in glossar.ts): umgesetzt wie oben.
+- 11 (12.3 mit neun Ankern, Reporting- und DS-Anker): 12.3, 12.4, 12.5 nachgezogen; die Seiten selbst hatten die Korrekturagenten der Runde 2 auf sechs Anker reduziert.
+- 12 (weiche Trennstellen in den Rechtstexten, danke.astro "Diese folgen"): Begründung trägt, keine Änderung.
+- 13 (Descriptions mit 159 Zeichen, 163 Bytes): Begründung trägt, der Build-Test zählt Zeichen; keine Kürzung.
+- 14 (kein Build durch Inhaltsagenten): in dieser Runde gebaut, geprüft, bestanden.
+- 15 (SEO-MATRIX Beitragszeile, Plan 749 und 828): nachgezogen (SEO-MATRIX /einblicke/[slug]/, hier 12.10).
+
+Offen (nicht durch die Umsetzung zu lösen; Freigaben laut docs/LAUNCH-CHECKLISTE.md bleiben bestehen):
+
+- Fünf-Sekunden-Test bei 360 x 780 px: E-Mail-Zeile 70 px unter dem ersten Bildschirm (Werte in TESTBERICHT.md). Mögliche Maßnahmen berühren Vorgaben: DOM-Reihenfolge Button, E-Mail, Textlink (Designspezifikation 6.2, Masterprompt 7A; rechnerisch E-Mail bei etwa 797 px, allein nicht ausreichend), Display-H1 unter 32 px (Spezifikation untersagt), kürzerer Lead (Wortlaut des Masterprompts). Entscheidung durch Timo Müller beziehungsweise die Redaktion; bis dahin liegt der Button "Portfolio besprechen" als direkter Kontaktweg auf dem ersten Bildschirm.
+- Kanonische Host-Variante der HVM-Website (https://www.muellerhv.de oder https://muellerhv.de): aus der Build-Umgebung nicht prüfbar (Proxy antwortet 403). Manuell durch Timo Müller oder die IT feststellen, danach `OPERATOR.website` in src/data/site.ts und docs/FAKTENLISTE.md Nr. 1 angleichen. Betroffen: Footer-Logo-Link, mehr-Link der PM-Abgrenzung, Organization.url im JSON-LD.
+- Freigaben durch Timo Müller beziehungsweise die Geschäftsführung: Wortlaut Regel 3 (Nr. 27), Abschnitt Für wen und Selbstprüfung einschließlich der Begriffserläuterungen Family Office und Bestandshalter (Nr. 35), Verhaltenszusagen auf Kontakt und Danke (Faktenliste Nr. 39), Verwaltungsgegenstand der HVM (Nr. 38, danach PM-Abgrenzung ergänzen), Vertragspartner und `provider` im Service-Markup (Nr. 22), Gruppenzugehörigkeit weiterer Unternehmen (Nr. 6). Vor Launch außerdem Erlaubnisprüfung und Rechtstexte laut Checkliste.
+- Redaktionelle Entscheidungen aus 12.14 (Heimatorte datenqualitaet und freigabe, Doppelbedeutung Szenario, Heimatort Mandat, Caps-Label Kernaussage, ContactPage-Markup) bleiben offen.

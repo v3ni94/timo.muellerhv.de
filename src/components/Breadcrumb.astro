@@ -4,7 +4,7 @@ interface Props { crumbs: Crumb[] }
 const { crumbs } = Astro.props;
 ---
 <nav class="breadcrumb container" aria-label="Sie befinden sich hier">
-  <ol>
+  <ol role="list">
     <li><a href="/">Start</a></li>
     {crumbs.map((c, i) => (
       i === crumbs.length - 1

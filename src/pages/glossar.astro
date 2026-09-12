@@ -1,0 +1,155 @@
+---
+/**
+ * Glossar: Begriffe aus Asset Management und Portfoliosteuerung (docs/CONTENT-PLAN-V2.md 3.5, 1.6;
+ * docs/DESIGN-SPEC-V2.md 6.2, 6.10, 6.11). Eine Seite mit Ankernavigation, keine Einzelseiten je Begriff.
+ * Daten ausschliesslich aus src/data/glossar.ts; die Seite enthaelt keine eigenen Begriffstexte.
+ * Aufbau: Breadcrumb Start / Einblicke / Glossar, Hero, Seitennav mit den Themenbloecken, je Block ein
+ * .kapitel (Nummer und H2 links, Eintraege rechts), Hinweis zur Einordnung, Cta.
+ * Eintraege sind dl-Gruppen (div mit id am Begriff), damit Seiten und Beitraege auf /glossar/#id verlinken koennen.
+ * JSON-LD: BreadcrumbList und DefinedTermSet mit einem DefinedTerm je sichtbarem Eintrag (keine Rich-Result-Erwartung).
+ * Faktenregeln: keine Zahlen, keine Paragraphen, keine Richtwerte; rechtlich gepraegte Begriffe nur allgemein.
+ */
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Hero from '../components/Hero.astro';
+import Seitennav, { type SeitennavEintrag } from '../components/Seitennav.astro';
+import Cta from '../components/Cta.astro';
+import { absolute, breadcrumbLd, type Crumb } from '../lib/seo';
+import { GLOSSAR, GLOSSAR_BLOECKE, glossarHref, glossarNachBlock } from '../data/glossar';
+
+const path = '/glossar/';
+const title = 'Glossar Asset Management und Portfoliosteuerung | Timo Müller';
+const description =
+  'Begriffe der Portfoliosteuerung, wie sie auf dieser Website verwendet werden: Asset und Property Management, CAPEX, OPEX, Instandhaltungsstau, Objektstrategie.';
+
+const crumbs: Crumb[] = [
+  { name: 'Einblicke', href: '/einblicke/' },
+  { name: 'Glossar', href: path },
+];
+
+/* Ankernavigation nach Themenbloecken, DOM-Reihenfolge der Kapitel. */
+const seitennav: SeitennavEintrag[] = GLOSSAR_BLOECKE.map((b) => ({ label: b.titel, href: `#${b.id}` }));
+
+/* Kapitelnummer als echter Text mit aria-hidden (Design-Spezifikation 6.10). */
+const nummer = (i: number): string => String(i + 1).padStart(2, '0');
+
+/* Strukturierte Daten: ein DefinedTerm je sichtbarem Eintrag, url mit Anker. */
+const termSetId = `${absolute(path)}#begriffe`;
+const ld = [
+  breadcrumbLd(crumbs),
+  {
+    '@type': 'DefinedTermSet',
+    '@id': termSetId,
+    name: 'Glossar Asset Management und Portfoliosteuerung',
+    description: 'Begriffe der Portfoliosteuerung, wie sie auf timo.muellerhv.de verwendet werden.',
+    url: absolute(path),
+    inLanguage: 'de',
+    hasDefinedTerm: GLOSSAR.map((e) => ({
+      '@type': 'DefinedTerm',
+      '@id': absolute(glossarHref(e.id)),
+      name: e.begriff,
+      description: e.definition,
+      url: absolute(glossarHref(e.id)),
+      inDefinedTermSet: { '@id': termSetId },
+    })),
+  },
+];
+---
+<Base title={title} description={description} path={path} ld={ld}>
+  <Breadcrumb crumbs={crumbs} />
+
+  <Hero
+    eyebrow="Einblicke"
+    title={'Glossar: Begriffe aus Asset Management und Portfolio­steuerung'}
+    frage="Meinen Geschäftsführung, Verwaltung und Rechnungswesen dasselbe, wenn sie vom Instandhaltungsstau sprechen?"
+    lead="Das Glossar erklärt die Begriffe, die auf dieser Website vorkommen, an einer Stelle und in der Bedeutung, in der ich sie verwende. Es ergänzt die Erläuterung beim ersten Auftreten auf den Seiten und ersetzt sie nicht."
+    ohneLinie
+  >
+    <dl class="dl-grid aufbau">
+      <dt>Aufbau</dt>
+      <dd>Jeder Eintrag folgt demselben Muster: eine allgemeine Definition in zwei bis drei Sätzen, ein Satz zur Bedeutung für die Steuerung eines Bestands und der Verweis auf die Seite, auf der der Begriff ausgeführt wird.</dd>
+      <dt>Auswahl</dt>
+      <dd>Nur Begriffe, die auf dieser Website vorkommen, geordnet in sieben Themenblöcken. Kein Lexikon und kein Verwaltungsvokabular.</dd>
+    </dl>
+  </Hero>
+
+  <Seitennav items={seitennav} label="Themenblöcke des Glossars" />
+
+  <section class="section glossar" aria-label="Begriffe nach Themenblöcken">
+    <div class="container">
+      {GLOSSAR_BLOECKE.map((b, i) => (
+        <section class="kapitel glossar-block" id={b.id}>
+          <div class="kapitel__kopf sticky-rand">
+            <span class="kapitel__nr" aria-hidden="true">{nummer(i)}</span>
+            <h2>{b.titel}</h2>
+            <p class="glossar-block__intro">{b.intro}</p>
+          </div>
+          <div class="kapitel__text">
+            <dl class="glossar-liste">
+              {glossarNachBlock(b.id).map((e) => (
+                <div class="begriff" id={e.id}>
+                  <dt class="begriff__name">{e.begriff}</dt>
+                  <dd class="begriff__definition">
+                    <p>{e.definition}</p>
+                  </dd>
+                  <dd class="begriff__bedeutung">
+                    <span class="caps">Bedeutung für die Steuerung</span>
+                    <p>{e.bedeutung}</p>
+                  </dd>
+                  <dd class="begriff__ort">
+                    <span class="caps">Auf dieser Website</span>
+                    <a class="textlink" href={e.heimatort}>{e.heimatortLabel}</a>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="section section--tight section--linie glossar-hinweis" aria-labelledby="hinweis-h">
+    <div class="container g">
+      <div class="gc-1-8">
+        <h2 id="hinweis-h" class="h3">Wozu die Definitionen dienen</h2>
+        <p>Das Glossar ergänzt die Erläuterungen auf den Seiten dieser Website und ersetzt sie nicht. Die Definitionen dienen der Orientierung und beschreiben, wie ich die Begriffe in der Portfoliosteuerung verwende. Sie sind keine Rechts- oder Steuerberatung. Rechtliche und steuerliche Einordnungen, etwa zur Umlagefähigkeit von Kosten, zu den Folgen einer Abnahme oder zur mietrechtlichen Bewertung einer Modernisierung, erfolgen durch Ihren Rechtsanwalt und Ihren Steuerberater.</p>
+        <p>Die Fachbeiträge unter Einblicke verweisen auf die Begriffe dieses Glossars, die Beratungsseiten erläutern sie beim ersten Auftreten. <a class="textlink" href="/einblicke/">Zu den Einblicken</a></p>
+      </div>
+    </div>
+  </section>
+
+  <Cta
+    title="Sie möchten einen dieser Begriffe auf Ihren Bestand beziehen?"
+    text="Schildern Sie mir kurz Ausgangslage und Ziel. Wir klären, ob und in welchem Umfang eine Zusammenarbeit sinnvoll ist."
+  />
+</Base>
+
+<style>
+  /* Hero: Aufbau und Auswahl als kompakte Definitionsliste unter dem Lead */
+  .aufbau { margin-top: var(--s-6); max-width: var(--w-measure); grid-template-columns: 7rem 1fr; }
+  .aufbau dd { font-size: var(--fs-small); }
+  @media (max-width: 520px) { .aufbau { grid-template-columns: 1fr; } }
+
+  /* Kapitel je Themenblock: Nummer, H2 und Einordnung links, Eintraege rechts (global .kapitel) */
+  .glossar-block__intro { margin: var(--s-3) 0 0; color: var(--c-text-2); font-size: var(--fs-small); max-width: 28ch; }
+
+  /* Eintraege: dl mit einer Gruppe je Begriff, Haarlinie zwischen den Gruppen, id am Gruppen-Container */
+  .glossar-liste { margin: 0; }
+  .begriff { padding-block: var(--s-5); border-top: var(--rule); }
+  .begriff:first-child { border-top: 0; padding-top: 0; }
+  .begriff:last-child { padding-bottom: 0; }
+  .begriff__name { font-size: var(--fs-h3); font-weight: 600; line-height: var(--lh-heading); letter-spacing: -0.01em; color: var(--c-text); margin: 0 0 var(--s-3); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; -webkit-hyphens: auto; }
+  .begriff dd { margin: 0; }
+  .begriff dd + dd { margin-top: var(--s-4); }
+  .begriff dd p { margin: 0; }
+  .begriff__definition p { color: var(--c-text); }
+  .begriff__bedeutung p { color: var(--c-text-2); }
+  .begriff .caps { display: block; margin-bottom: var(--s-1); }
+  .begriff__ort { font-size: var(--fs-small); }
+  /* .begriff__ort a traegt .textlink: Zielhoehe 44 px (15-px-Text, Zeile 24 px plus 2 x 0.65rem) aus der globalen Regel */
+
+  /* Hinweis */
+  .glossar-hinweis p { color: var(--c-text-2); max-width: var(--w-text); }
+  .glossar-hinweis p + p { margin-top: var(--s-4); }
+</style>

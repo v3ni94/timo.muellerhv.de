@@ -1,79 +1,242 @@
 ---
+/**
+ * Profil (docs/DESIGN-SPEC-V2.md 6.10, 7.7 und 9.3; docs/CONTENT-PLAN-V2.md 4.6).
+ * Abschnittsfolge: Breadcrumb, Hero 5/6 mit Portrait 1 (Bild vor Text im DOM, mobil Bild vor der H1), Kapitel 01 bis 03,
+ * Portrait 3 (nur mit Datei), Kapitel 04 und 05, Zusammenarbeit (ein Satz plus Link auf den Heimatort
+ * /zusammenarbeit/#interessen), Kurzprofil zum Weitergeben (#kurzprofil), Fragen an mich (#fragen-an-mich, FAQPage),
+ * Stationen (nur freigegebene), Cta. Keine Flaeche, ein dunkler Abschnitt (Cta).
+ * Alle Aussagen zur Person stammen aus docs/FAKTENLISTE.md Nr. 3 bis 10. Keine Zahlen zu Bestand, Mandaten, Jahren oder
+ * Volumina, keine Referenzen, keine Qualifikationen.
+ * Flags ohne Freigabe rendern nichts: beraterprofilPdf (Nr. 20), Stationen mit freigabe (Nr. 14), LinkedIn ueber
+ * PERSON.linkedin (Nr. 19), arbeitsformFreigabe (Nr. 29, Antwort "Wo arbeiten Sie?" ohne Arbeitsform).
+ */
 import Base from '../layouts/Base.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
-import Cta from '../components/Cta.astro';
+import Portrait from '../components/Portrait.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
 import Timeline, { type Station } from '../components/Timeline.astro';
-import { breadcrumbLd, ID, absolute } from '../lib/seo';
+import Cta from '../components/Cta.astro';
+import { hatPortrait } from '../lib/portraits';
+import { breadcrumbLd, faqLd, ID, absolute, type Crumb } from '../lib/seo';
 import { PERSON, SITE } from '../data/site';
 
 const path = '/profil/';
 const title = 'Timo Müller | Profil, Haltung und Funktionen';
-const description = 'Timo Müller: Vorstand der Müller Holding AG, Geschäftsführer mehrerer Unternehmen, Immobilieneigentümer. Beratung mit Eigentümerperspektive und Umsetzungskompetenz.';
-const crumbs = [{ name: 'Profil', href: path }];
+const description = 'Timo Müller: Vorstand der Müller Holding AG, Geschäftsführer mehrerer Unternehmen, Immobilieneigentümer. Beratung mit Eigentümerperspektive und Umsetzungsnähe.';
+const crumbs: Crumb[] = [{ name: 'Profil', href: path }];
+
+/* ---------------------------------------------------------------------------
+   Freigabepunkte (docs/FAKTENLISTE.md, docs/CONTENT-PLAN-V2.md Abschnitt 9).
+   Ohne Freigabe rendert der jeweilige Inhalt nichts. Keine sichtbaren Platzhalter.
+--------------------------------------------------------------------------- */
+/** Nr. 20: Downloadbutton erst, wenn die freigegebene Datei im Repository liegt, z. B. '/downloads/beraterprofil-timo-mueller.pdf'. */
+const beraterprofilPdf: string | null = null;
+/** Nr. 19: LinkedIn-Profil wird in src/data/site.ts gepflegt und erst nach Freigabe eingetragen. */
+const linkedin: string = PERSON.linkedin;
+/** Nr. 29: Arbeitsform vor Ort und remote. Bis zur Freigabe bleibt die Antwort auf "Wo arbeiten Sie?" ohne Arbeitsform. */
+const arbeitsformFreigabe: boolean = false;
+const arbeitsformText = '';
 
 /**
- * Vita: Es werden nur Stationen mit freigabe: true gerendert.
- * Zeitraeume, Funktionen und Verantwortungsbereiche sind vom Auftraggeber zu bestaetigen (docs/FAKTENLISTE.md).
- * Aktuell liegen keine bestaetigten Zeitraeume vor, daher bleibt die Timeline leer.
+ * Nr. 14: Vita. Es werden nur Stationen mit freigabe: true gerendert. Zeitraeume, Funktionen und Verantwortungsbereiche
+ * sind vom Auftraggeber zu bestaetigen. Aktuell liegen keine bestaetigten Zeitraeume vor, die Timeline bleibt leer.
  */
 const stationen: Station[] = [
-  { zeitraum: '[Zeitraum bestätigen]', titel: 'Vorstand, Müller Holding AG', text: '[Verantwortungsbereich bestätigen]', freigabe: false },
-  { zeitraum: '[Zeitraum bestätigen]', titel: 'Geschäftsführer, Hausverwaltung Müller GmbH', text: '[Verantwortungsbereich bestätigen]', freigabe: false },
+  { zeitraum: '', titel: 'Vorstand, Müller Holding AG', text: '', freigabe: false },
+  { zeitraum: '', titel: 'Geschäftsführer, Hausverwaltung Müller GmbH', text: '', freigabe: false },
 ];
 
-// Downloadbutton fuer das Beraterprofil erst anzeigen, wenn die Datei tatsaechlich vorliegt.
-const beraterprofilPdf: string | null = null; // z. B. '/downloads/beraterprofil-timo-mueller.pdf'
+/* Kapitel 05: Arbeitsprinzipien, einziger Heimatort der Haltungssaetze (docs/CONTENT-PLAN-V2.md 4.6). */
+const prinzipien = [
+  { t: 'Bestehendes unabhängig prüfen.', d: 'Ich übernehme keine Bewertung ungeprüft, weder die der Verwaltung noch die des Eigentümers. Nicht jeder Bestand braucht eine Neuaufstellung. Wo Bestehendes trägt, sage ich das ebenso deutlich.' },
+  { t: 'Prioritäten begründen.', d: 'Jede Reihenfolge hat einen nachvollziehbaren Grund: Wirkung, Aufwand, Risiko und Abhängigkeiten. Was zuerst kommt, muss sich gegenüber Gesellschaftern und Gremien erklären lassen.' },
+  { t: 'Annahmen und Datenlücken offenlegen.', d: 'Fehlende oder widersprüchliche Daten werden benannt, nicht überspielt. Jede Empfehlung zeigt, auf welchen Annahmen sie beruht und wie belastbar sie ist.' },
+  { t: 'Verwaltung von Anfang an einbinden.', d: 'Ohne das Prozesswissen der Verwaltung entsteht kein Umsetzungsergebnis. Sie ist bei Datenlieferung, Priorisierung und Umsetzung beteiligt, nicht erst am Ende.' },
+  { t: 'Wirkung nachhalten.', d: 'Eine Maßnahme ist mit dem Beschluss nicht erledigt. Umsetzung, Wirkung und Abweichungen werden regelmäßig geprüft und erklärt.' },
+  { t: 'Keine Ergebnisversprechen.', d: 'Maßnahmen bewerte ich nach Aufwand, Risiko und erwarteter Wirkung. Was ich nicht belegen kann, sage ich nicht zu.' },
+];
+
+/* Kurzprofil zum Weitergeben: neutrale dritte Person, ausschliesslich Faktenliste Nr. 4 bis 10.
+   Die ersten beiden Saetze entstehen aus PERSON.funktionen (src/data/site.ts), wie im Autorenkasten. */
+const verbinde = (teile: readonly string[]): string =>
+  teile.length <= 1 ? (teile[0] ?? '') : `${teile.slice(0, -1).join(', ')} und ${teile[teile.length - 1]}`;
+const f = PERSON.funktionen;
+const kurzprofil: string[] = [
+  `${PERSON.name} ist ${verbinde(f.slice(0, 2))}.`,
+  f.length > 2 ? `Er ist ${verbinde(f.slice(2))}.` : '',
+  'Als Berater unterstützt er Eigentümer, Geschäftsführungen und Asset-Management-Teams dabei, Wohnimmobilienportfolios wirtschaftlich und operativ weiterzuentwickeln: von der Bestandsaufnahme über die Priorisierung bis zur Umsetzung.',
+  'Praktische Immobilien- und Verwaltungserfahrung verbindet er mit einem operativen Netzwerk, das Bezüge zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär hat.',
+  'KI und Automatisierung entwickelt er als zusätzlichen unternehmerischen Hebel für bessere Daten und Abläufe.',
+].filter((s) => s.length > 0);
+
+/* Fragen an mich (docs/CONTENT-PLAN-V2.md 4.6). Antworten sind reiner Text, weil sie auch ins FAQPage-Markup gehen. */
+const woAntwort = 'In Deutschland. Ob ein Mandat passt, klären wir im Erstgespräch anhand von Ausgangslage und Ziel. Die Arbeitsform vereinbaren wir im Angebot.';
+const faq: FaqItem[] = [
+  {
+    id: 'warum-beraten',
+    q: 'Warum beraten Sie, obwohl Sie selbst investieren?',
+    a: 'Weil beides zusammengehört. Die Fragen, die ich in eigenen Objekten beantworten muss, stellen Eigentümer und Geschäftsführungen auch an ihren Bestand: Was trägt sich, was hat Vorrang, wer setzt um. Als Berater bringe ich diese Eigentümerperspektive ein und begründe Empfehlungen so, wie ich sie für mein eigenes Kapital begründen würde.',
+  },
+  {
+    id: 'fremde-verwaltung',
+    q: 'Beraten Sie auch Eigentümer, deren Bestand nicht von der Hausverwaltung Müller verwaltet wird?',
+    a: 'Ja. Die Beratung richtet sich an Eigentümer und Bestandshalter unabhängig davon, wer ihren Bestand verwaltet. Ihre bestehende Verwaltung ist ab Beginn eingebunden, weil ohne ihr Prozesswissen kein Umsetzungsergebnis entsteht. Ein Verwalterwechsel ist kein Ziel der Beratung.',
+    mehr: { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  },
+  {
+    id: 'wo',
+    q: 'Wo arbeiten Sie?',
+    a: arbeitsformFreigabe && arbeitsformText.trim().length > 0 ? `${woAntwort} ${arbeitsformText.trim()}` : woAntwort,
+  },
+  {
+    id: 'interessen-trennung',
+    q: 'Wie halten Sie Beratung und eigene Interessen auseinander?',
+    a: 'Durch Offenlegung, bevor ich eine Empfehlung ausspreche. Welche Funktionen ich habe, wo sie ein Mandat berühren können und welche Regeln dafür gelten, steht an einer Stelle: unter Zusammenarbeit im Abschnitt Interessen.',
+    mehr: { label: 'Interessen und verbundene Unternehmen', href: '/zusammenarbeit/#interessen' },
+  },
+];
 
 const ld = [
   breadcrumbLd(crumbs),
   { '@type': 'ProfilePage', '@id': `${absolute(path)}#profilepage`, url: absolute(path), name: title, mainEntity: { '@id': ID.person }, inLanguage: 'de' },
+  faqLd(faq),
 ];
 ---
 <Base title={title} description={description} path={path} ld={ld} ogType="profile">
   <Breadcrumb crumbs={crumbs} />
+
   <section class="hero">
-    <div class="container profil-hero">
-      <div>
+    <div class="container g hero__grid">
+      <div class="hero__media gc-1-5">
+        <Portrait nr={1} ratio="4/5" priority sizes="(max-width: 860px) 20rem, (max-width: 1300px) 40vw, 500px" widths={[480, 800, 1000, 1200]} />
+      </div>
+      <div class="hero__text gc-7-12">
         <span class="eyebrow">Profil</span>
-        <h1>Timo Müller</h1>
-        <p class="lead">Unternehmer, Eigentümer und Berater für Asset Management und Portfoliooptimierung. Ich verbinde die Eigentümerperspektive mit operativer Umsetzungskompetenz.</p>
+        <h1 class="display">Timo Müller</h1>
+        <p class="lead">Unternehmer, Eigentümer und Berater für <a href="/glossar/#asset-management">Asset Management</a>, also die wirtschaftliche Steuerung von Immobilienbeständen aus Eigentümersicht. Ich verbinde diese Perspektive mit der Umsetzung im Betrieb: von der Entscheidung bis zur Baustelle.</p>
         <dl class="dl-grid funktionen">
           <dt>Funktionen</dt>
           <dd>
-            <ul>{PERSON.funktionen.map((f) => <li>{f}</li>)}</ul>
+            <ul>{PERSON.funktionen.map((fn) => <li>{fn}</li>)}</ul>
           </dd>
           <dt>Kontakt</dt>
           <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+          {linkedin && (
+            <>
+              <dt>LinkedIn</dt>
+              <dd><a href={linkedin} rel="me">Profil auf LinkedIn</a></dd>
+            </>
+          )}
         </dl>
-        {beraterprofilPdf && <a class="btn btn--secondary" href={beraterprofilPdf}>Beraterprofil als PDF</a>}
-      </div>
-      <div class="portrait" aria-hidden="true">
-        <!-- Typografische Variante bis zur Freigabe eines echten Portraets. Kein KI-Bild, kein Platzhalterfoto. -->
-        <span class="portrait__initialen">TM</span>
-        <span class="portrait__linie"></span>
-        <span class="portrait__claim">Asset Management &amp; Portfoliooptimierung</span>
+        {beraterprofilPdf && <p class="hero__pdf"><a class="btn btn--secondary" href={beraterprofilPdf}>Beraterprofil als PDF</a></p>}
       </div>
     </div>
   </section>
 
-  <section class="section">
-    <div class="container prose">
-      <h2>Verantwortung</h2>
-      <p>Als Vorstand der Müller Holding AG und Geschäftsführer mehrerer Unternehmen verantworte ich Beteiligungen, Unternehmensstrukturen, Bestandshaltung und Projektentwicklung. Über die Hausverwaltung Müller GmbH verantworte ich die Verwaltung von Wohnungseigentümergemeinschaften und Mietobjekten. Ich halte selbst Immobilien und treffe Entscheidungen über Ankauf, Instandhaltung, Finanzierung und Vermietung mit eigenem Kapital.</p>
+  <div class="section kapitel-folge">
+    <div class="container">
+      <section class="kapitel" id="verantwortung">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">01</span>
+          <h2>Verantwortung</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Ich bin Vorstand der Müller Holding AG und Geschäftsführer mehrerer Unternehmen, darunter die Hausverwaltung Müller GmbH. In diesen Funktionen verantworte ich unternehmerische Entscheidungen und ihre wirtschaftlichen Folgen.</p>
+          <p>Dazu kommt ein eigener Immobilienbestand. Ankauf, Instandhaltung, Finanzierung und Vermietung kenne ich dort als Entscheidungen mit Konsequenzen, nicht nur als Beratungsthemen. Ich treffe sie mit eigenem Kapital und trage ihre Folgen selbst.</p>
+        </div>
+      </section>
 
-      <h2>Wie ich als Eigentümer denke</h2>
-      <p>Jede Maßnahme muss drei Fragen beantworten: Was bringt sie wirtschaftlich, was kostet sie an Kapital und Aufmerksamkeit, und welches Risiko entsteht, wenn sie unterbleibt? Diese Fragen stelle ich in eigenen Objekten genauso wie im Mandat. Ein Berater, der nicht selbst investiert, kann analysieren. Ein Eigentümer, der berät, weiß auch, wie sich Entscheidungen anfühlen, wenn das eigene Geld dranhängt.</p>
+      <section class="kapitel" id="eigentuemer">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">02</span>
+          <h2>Wie ich als Eigentümer denke</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Jede Maßnahme muss drei Fragen beantworten: Was bringt sie wirtschaftlich, was kostet sie an Kapital und Aufmerksamkeit, und welches Risiko entsteht, wenn sie unterbleibt? Diese Fragen stelle ich in eigenen Objekten genauso wie im Mandat.</p>
+          <p>Ich kenne die Folgen einer Entscheidung, weil ich sie im eigenen Bestand mit eigenem Kapital trage. Das schärft den Blick für das, was sich rechnet, und für das, was auf dem Papier überzeugt, aber im Betrieb nicht trägt.</p>
+        </div>
+      </section>
 
-      <h2>Warum ich Strategie und Betrieb verbinde</h2>
-      <p>Die beste Objektstrategie scheitert, wenn Verwaltung, Handwerker und Eigentümerseite nicht zusammenarbeiten. Ich kenne das Tagesgeschäft der Verwaltung und die Baustelle. Mein operatives Netzwerk hat Bezüge zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär. Das gibt mir ein realistisches Verständnis von Kosten, Dauer und Qualität, das in Angebotsprüfung, Nachtragsbewertung und Dienstleistersteuerung einfließt. Es bedeutet nicht, dass ich eine bundesweit verfügbare eigene Handwerkerorganisation anbiete.</p>
+      <section class="kapitel" id="strategie-und-betrieb">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">03</span>
+          <h2>Warum ich Strategie und Betrieb verbinde</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Auch eine sorgfältig entwickelte <a href="/glossar/#objektstrategie">Objektstrategie</a>, also die begründete Entscheidung je Objekt zwischen Halten, Entwickeln und Verkaufen, scheitert, wenn Verwaltung, Handwerker und Eigentümerseite nicht zusammenarbeiten. Ich kenne das Tagesgeschäft der Verwaltung und die Sicht der ausführenden Betriebe.</p>
+          <p>Mein operatives Netzwerk hat Bezüge zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär. Das gibt mir ein realistisches Kostenverständnis, das in die Prüfung von Angeboten und <a href="/glossar/#nachtrag">Nachträgen</a>, also Änderungen eines bereits erteilten Auftrags, und in die Steuerung von Dienstleistern einfließt. Es bedeutet nicht, dass ich eine bundesweit verfügbare eigene Handwerkerorganisation anbiete.</p>
+          <p><a class="textlink" href="/dienstleistersteuerung/">Wie ich Dienstleister steuere</a></p>
+        </div>
+      </section>
 
-      <h2>Finanzierung, Netzwerk und KI</h2>
-      <p>Die Finanzierungsperspektive gehört zu jeder Portfolioentscheidung: Welche Investition trägt sich, welche Struktur passt zur Bestandsentwicklung, welche Unterlagen erwarten Finanzierer? Ich bereite diese Fragen vor und begleite fachlich. Finanzierungen vermittle ich nicht. KI und Automatisierung entwickle ich als zusätzlichen unternehmerischen Hebel für die eigene Gruppe weiter: bessere Daten, schnellere Abläufe, prüfbare Berichte. Ich beschreibe diese Anwendungen in ihrem tatsächlichen Entwicklungsstand.</p>
+      {hatPortrait(3) && (
+        <div class="g kapitel-bild">
+          <div class="gc-5-12">
+            <Portrait nr={3} ratio="3/2" nurMitBild sizes="(max-width: 860px) 100vw, (max-width: 1300px) 64vw, 800px" widths={[640, 960, 1200, 1600]} />
+          </div>
+        </div>
+      )}
 
-      <h2>Zusammenarbeit</h2>
-      <p>Ich arbeite persönlich am Mandat und binde bei Bedarf geeignete Spezialisten ein. Verbundene Unternehmen und mögliche wirtschaftliche Interessen lege ich offen, bevor ich eine Empfehlung ausspreche. Ich behaupte keine vollständige Anbieterunabhängigkeit, sondern Transparenz.</p>
+      <section class="kapitel" id="finanzierung-netzwerk-ki">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">04</span>
+          <h2>Finanzierung, Netzwerk und KI</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Die Finanzierungsperspektive gehört zu jeder Portfolioentscheidung: Welche Investition trägt sich, welche Struktur passt zur Bestandsentwicklung, welche Unterlagen erwarten Finanzierer? Ich bereite diese Fragen vor und begleite fachlich. Finanzierungen vermittle ich nicht.</p>
+          <p>Das operative Netzwerk dient der Einschätzung von Machbarkeit und Kosten. Eine Kapazität, die ich zusage, ist es nicht.</p>
+          <p>Künstliche Intelligenz (KI) und Automatisierung entwickle ich als zusätzlichen unternehmerischen Hebel, mit dem Ziel besserer Daten, schnellerer Abläufe und prüfbarer Berichte. Diese Anwendungen sind kein Bestandteil dieses Beratungsangebots und kein ausgerolltes Kundenprojekt.</p>
+          <p><a class="textlink" href="/ki-immobilienmanagement/">Wo KI in der Portfoliosteuerung hilft</a></p>
+        </div>
+      </section>
+
+      <section class="kapitel" id="arbeitsprinzipien">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">05</span>
+          <h2>Arbeitsprinzipien</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Sechs Grundsätze, nach denen ich in jedem Mandat arbeite. Sie gelten für den Portfolio-Check ebenso wie für die laufende Begleitung.</p>
+          <ul class="checklist prinzipien" role="list">
+            {prinzipien.map((p) => (
+              <li><strong>{p.t}</strong> {p.d}</li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section class="kapitel" id="zusammenarbeit">
+        <div class="kapitel__kopf sticky-rand">
+          <h2>Zusammenarbeit</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Ich arbeite persönlich am Mandat und binde bei Bedarf geeignete Spezialisten ein.</p>
+          <p><a class="textlink" href="/zusammenarbeit/#interessen">Ablauf, Vertraulichkeit und Offenlegung meiner Interessen</a></p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <section class="section kurzprofil" id="kurzprofil">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Kurzprofil</span>
+          <h2>Kurzprofil zum Weitergeben</h2>
+          <p>Für die Abstimmung im eigenen Haus, mit Gesellschaftern oder im Beirat. Der Text enthält nur Angaben, die auf dieser Website veröffentlicht sind.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <div class="note kurzprofil__text">
+            {kurzprofil.map((s) => <p>{s}</p>)}
+            <p>Kontakt: {SITE.email}</p>
+          </div>
+          <p class="bildunterschrift kurzprofil__hinweis">Zum Markieren und Kopieren. Kürzungen sind möglich, Ergänzungen um Zahlen oder Referenzen nicht vorgesehen.</p>
+        </div>
+      </div>
     </div>
   </section>
+
+  <Faq id="fragen-an-mich" title="Fragen an mich" items={faq} />
 
   <Timeline stationen={stationen} title="Stationen" />
 
@@ -81,14 +244,31 @@ const ld = [
 </Base>
 
 <style>
-  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
-  .profil-hero { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
-  .funktionen { margin-block: var(--s-5); grid-template-columns: 8rem 1fr; }
+  /* Hero 5/6: Bild vor Text im DOM (Profilseite, Person zuerst), mobil Bild mit 20 rem vor der H1 */
+  .hero { padding-block: clamp(2.5rem, 6vw, 6rem) clamp(2.5rem, 5vw, 5rem); border-bottom: 0; }
+  .hero__grid { align-items: start; }
+  .hero__text { min-width: 0; }
+  .hero .lead a { color: inherit; }
+  .funktionen { margin: var(--s-6) 0 0; grid-template-columns: 8rem minmax(0, 1fr); }
   .funktionen ul { list-style: none; padding: 0; margin: 0; }
   .funktionen li + li { margin-top: var(--s-1); }
-  .portrait { aspect-ratio: 4 / 5; max-width: 22rem; width: 100%; background: var(--c-dunkel); color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: var(--s-5); border-radius: var(--radius); justify-self: end; }
-  .portrait__initialen { font-size: clamp(4rem, 8vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
-  .portrait__linie { display: block; width: 3rem; height: 4px; background: var(--c-orange); margin-block: var(--s-4); }
-  .portrait__claim { font-size: var(--fs-xs); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,.8); }
-  @media (max-width: 800px) { .profil-hero { grid-template-columns: 1fr; } .portrait { justify-self: start; max-width: 16rem; } .funktionen { grid-template-columns: 1fr; } }
+  .funktionen a { overflow-wrap: anywhere; }
+  .hero__pdf { margin: var(--s-5) 0 0; }
+  @media (max-width: 860px) { .hero__media { max-width: 20rem; } }
+  @media (max-width: 520px) { .funktionen { grid-template-columns: minmax(0, 1fr); } }
+
+  /* Kapitelfolge: Haarlinien kommen aus .kapitel, das Bild traegt eine eigene Linie und rendert nur mit Datei */
+  .kapitel-bild { padding-block: var(--s-6); border-top: var(--rule); }
+  /* Textlinks in den Kapiteln: Zielhoehe 44 px und Umbruchverhalten kommen aus der globalen .textlink-Regel (inline-block, padding-block 0.65rem mit gleich grossem negativem Aussenabstand), keine Seitenregel noetig */
+  /* Die Schlusslinie des letzten Kapitels traegt den Abschluss; der Abstand zum Kurzprofil kommt nur aus dessen padding-top (kein doppelter Abschnittsabstand). */
+  .kapitel-folge { padding-bottom: 0; }
+  .prinzipien { margin: 0; }
+  .prinzipien li + li { margin-top: var(--s-3); }
+
+  /* Kurzprofil: kopierbarer Textblock (div.note, kein blockquote, weil kein fremdes Zitat) in Fliesstextgroesse, Kontaktzeile abgesetzt */
+  .kurzprofil__text { margin: 0; padding: var(--s-5); font-size: var(--fs-body); color: var(--c-text); }
+  .kurzprofil__text p { margin: 0; }
+  .kurzprofil__text p + p { margin-top: var(--s-3); }
+  .kurzprofil__text p:last-child { margin-top: var(--s-4); color: var(--c-text-2); }
+  .kurzprofil__hinweis { margin-top: var(--s-4); }
 </style>

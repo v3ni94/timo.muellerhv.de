@@ -32,11 +32,11 @@ Ausdrücklich nicht übernommen: warme Off-White-Palette, Radien 10 und 16 px, V
 ## 1. Gestaltungsprinzipien
 
 1. Struktur durch Linien und Raster, nicht durch Flächenwechsel oder Rahmen. Je Seite höchstens zwei Abschnitte auf `--c-flaeche`, höchstens ein dunkler Abschnitt (Cta). Abschnitte auf Weiß werden durch eine 1 px Haarlinie am Container getrennt.
-2. Orange ist Akzent, nie Text und nie Fläche: eine Geste je Abschnitt (Eyebrow-Marker, erster Schritt, Cta-Linie, Platzhalter-Linie, Checklisten-Marker). Wo ein Abschnitt bereits eine Register-Nummerierung trägt, entfällt der Eyebrow-Marker (`.eyebrow--still`).
+2. Orange ist Akzent, nie Text und nie Fläche: eine Geste je Abschnitt (Eyebrow-Marker, erster Schritt, Cta-Linie, Platzhalter-Linie, Checklisten-Marker). Wo ein Abschnitt bereits eine Register-Nummerierung trägt, entfällt der Eyebrow-Marker (`.eyebrow--still`). Entscheidung der Umsetzung: Das orangene Quadrat im Primärbutton ist Teil des Buttons und von der Regel ausgenommen; die Platzhalter-Linie entfällt mit echten Porträts. Der Start-Hero trägt bis dahin Eyebrow-Marker, Button-Quadrat und Platzhalter-Linie.
 3. Hierarchie durch Größe, Maß und Abstand, nicht durch neue Schriften. Systemschrift bleibt CI-Vorgabe für Web. Nur die Gewichte 400, 600 und 700.
 4. DOM-Reihenfolge ist Lesereihenfolge. Visuelle Vertauschungen nur per `grid-column`, nie per `order`. Unter 861 px fällt jedes Raster auf eine Spalte.
 5. Zustände über Farbe von Linie und Text, keine Bewegung, keine Schatten, keine Skalierung. Einzige Bewegung: das FAQ-Kreuz dreht 45 Grad.
-6. Kein zusätzliches JavaScript. Bestehende Skripte (Navigation, Formular) bleiben unverändert.
+6. Kein zusätzliches JavaScript. Bestehende Skripte (Navigation, Formular) bleiben unverändert. Ausnahme der Umsetzung: Das bestehende Header-Skript wurde um einen focusout-Handler ergänzt, der das absolut positionierte Desktop-Untermenü schließt, wenn der Fokus es per Tab oder Shift+Tab verlässt (im mobilen Kopf ohne Wirkung, 6.1).
 7. Faktenliste ist Grenze. Nummern, Kennungen, Platzhalter, Bildunterschriften und Alt-Texte führen keine neuen Aussagen ein. Platzhalter zeigen kein Gesicht und keine Silhouette.
 
 ## 2. Farben und Kontraste
@@ -72,7 +72,8 @@ Alle neuen Werte sind Grau- und Weißabstufungen innerhalb der HVM-Farbwelt und 
 | `--c-text-2` auf Weiß / `--c-flaeche` / `--c-flaeche-2` | 7,33 / 6,79 / 6,38:1 | Fließtext |
 | `--c-text-3` auf Weiß / `--c-flaeche` / `--c-flaeche-2` | 5,24 / 4,86 / 4,56:1 | Meta ab 13 px; auf `--c-flaeche-2` nur ab 15 px |
 | `--c-fokus` auf Weiß / `--c-flaeche` / `--c-flaeche-2` | 3,47 / 3,22 / 3,02:1 | Fokusring (Bedienelement, 3:1 erfüllt), nicht für Text |
-| `--c-mittelgrau` auf Weiß | 2,71:1 | nur dekorativ (Link-Unterstreichung im Ruhezustand, Rahmen) |
+| `--c-mittelgrau` auf Weiß | 2,71:1 | nur dekorativ (Link-Unterstreichung im Ruhezustand, Kennlinie); Formular-, Button- und Toggle-Rahmen sind davon ausgenommen und stehen in `--c-text-3` |
+| `--c-text-3` als Rahmen von Eingabefeldern, Sekundärbutton und Menü-Toggle auf Weiß (Formularrahmen) | 5,24:1 | Nicht-Text-Kontrast (WCAG 1.4.11 verlangt 3:1); Umsetzung in global.css und Header.astro, Runde 2 und 3 |
 | `--c-weiss-16` auf `--c-dunkel` | 1,66:1 | nur dekorativ |
 
 Regel daraus: Große Ziffern und Kennbuchstaben stehen in `--c-anthrazit` nur auf Weiß oder `--c-flaeche` und nur ab 1,5 rem (24 px). Der Token `--fs-zahl` hat deshalb den harten Mindestwert 1,5 rem. Auf `--c-flaeche-2` und in der hellen Platzhalter-Variante wird `--c-text-2` verwendet. Diese Tabelle ist in `docs/DESIGN-SYSTEM.md` zu übernehmen und nach dem axe-Lauf um das Prüfergebnis zu ergänzen.
@@ -199,7 +200,7 @@ Im bestehenden Block werden ersetzt:
 
 | Stufe | Token | Größe | Zeilenhöhe | Laufweite | Gewicht | Farbe | Maß | Einsatz |
 |---|---|---|---|---|---|---|---|---|
-| Display | `--fs-display` | 32 bis 68 px | `--lh-display` 1,04 | `--ls-display` | 700 | `--c-text` | max. 18ch | H1 Startseite, H1 Profil (Klasse `.display`) |
+| Display | `--fs-display` | 32 bis 68 px | `--lh-display` 1,04 | `--ls-display` | 700 | `--c-text` | max. 18ch; Startseite ab 861 px `max-width: none`, die Spalte gc-1-7 begrenzt (6.2) | H1 Startseite, H1 Profil (Klasse `.display`) |
 | H1 | `--fs-h1` | 30 bis 56 px | `--lh-heading` | `--ls-heading` | 600 | `--c-text` | max. 24ch | Fachseiten, Kontakt, Einblicke, Rechtstexte, 404, Danke |
 | H2 | `--fs-h2` | 28 bis 44 px | `--lh-heading` | `--ls-heading` | 600 | `--c-text` | max. 24ch in Section-Köpfen, 14ch in Randspalten | Abschnittsüberschriften |
 | H3 | `--fs-h3` | 20 bis 24 px | `--lh-heading` | `-0.01em` | 600 | `--c-text` | | Register, Spalten, Steps, Kapitel-H2 im Profil |
@@ -284,8 +285,10 @@ p { text-wrap: pretty; }
 .section-head p { font-size: var(--fs-lead); color: var(--c-text-2); max-width: var(--w-measure); }
 .bildunterschrift { font-size: var(--fs-xs); color: var(--c-text-3); border-top: var(--rule); padding-top: var(--s-2); margin-top: var(--s-3); }
 a { text-decoration-thickness: 1px; text-underline-offset: 0.2em; transition: text-decoration-color var(--dur) var(--ease); }
-.textlink { text-decoration-thickness: 1px; }
+.textlink { display: inline-block; padding-block: 0.65rem; margin-block: -0.65rem; text-decoration-thickness: 1px; }   /* Zielhoehe 44 px (5.6), auch fuer .textlink.small; der negative Aussenabstand haelt den Zeilenrhythmus; inline-block haelt den Pfeil am letzten Wort */
 ```
+Umsetzung (Runde 2 und 3): Seitenregeln setzen an `.textlink` keinen eigenen Innenabstand mehr; sichtbare Abstände werden mit `calc(var(--s-n) - 0.65rem)` gesetzt, Textlinks am Absatzende als eigene Zeile (`display: block; width: fit-content`), Listen aus Textlinks mit Zeilenabstand mindestens `calc(var(--s-2) + 1.3rem)`, damit sich Zielflächen nicht überlappen.
+
 Entfallen: `.hero__fakten` (index.astro), Rahmen und Hintergrund von `.card` (siehe 6.15), grauer `th`-Hintergrund (siehe 6.14). Bestehende Überlaufschutzregeln (`overflow-wrap`, `hyphens`, `min-width: 0`) bleiben und werden um `.register li, .kapitel, .spalte, .portrait` ergänzt.
 
 ### 5.5 Hover- und Sticky-Guards (verbindlich für alle Komponenten)
@@ -329,14 +332,14 @@ CSS-Änderungen (Komponentenstyle ersetzen):
 .brand__name { font-size: 1.25rem; font-weight: 700; letter-spacing: var(--ls-heading); }
 .brand__claim { font-size: var(--fs-xs); color: var(--c-text-2); letter-spacing: var(--ls-caps); text-transform: uppercase; }
 .site-nav__link { border-radius: 0; padding: 0.6rem 0.25rem; margin-inline: 0.5rem; text-decoration: underline; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 0.45em; transition: text-decoration-color var(--dur) var(--ease); background: none; }
-.site-nav__link[aria-current="page"] { box-shadow: none; text-decoration-color: var(--c-text); }
+.site-nav__link[aria-current] { box-shadow: none; text-decoration-color: var(--c-text); }   /* "page" an Links, "true" am Ausloeser "Beratung" des aktiven Zweigs (Umsetzung Header.astro) */
 @media (hover: hover) { .site-nav__link:hover { background: none; text-decoration-color: var(--c-mittelgrau); } .submenu a:hover { background: var(--c-flaeche); } }
 .submenu { min-width: 24rem; padding: var(--s-3); border-radius: 0 0 var(--radius) var(--radius); border-top: var(--rule-strong); box-shadow: var(--shadow-soft); }
 .submenu a { border-radius: 0; }
 .submenu a[aria-current="page"] { box-shadow: inset 2px 0 0 var(--c-text); }
 .site-nav__item--cta .btn { padding: 0.6em 1.1em; }
 ```
-Regeln: Aktiver Zustand in `--c-text`, nicht Orange (Zustandsanzeige braucht 3:1, Orange auf Weiß hat 2,09:1). HVM-Erkennung im Kopf trägt die Kennlinie (3 px, unverändert). Mobil (bis 1080 px) unverändert: Toggle, vertikale Liste, Untermenü mit 2 px Hellgrau-Linie links; im Untermenü `border-left` unverändert.
+Regeln: Aktiver Zustand in `--c-text`, nicht Orange (Zustandsanzeige braucht 3:1, Orange auf Weiß hat 2,09:1). HVM-Erkennung im Kopf trägt die Kennlinie (3 px, unverändert). Mobil (bis 1120 px; die Umsetzung hat den Bruchpunkt von 1080 px angehoben, weil zwischen 1081 und 1089 px die Desktop-Navigation in der Testumgebung unter die Marke brach) unverändert: Toggle, vertikale Liste, Untermenü mit 2 px Hellgrau-Linie links; im Untermenü `border-left` unverändert. Der Rahmen des Toggles steht in `--c-text-3` (2.3). Skript: Das bestehende Skript ist um einen focusout-Handler ergänzt, der ein geöffnetes Untermenü schließt, wenn der Fokus es verlässt; er wirkt nur, solange `.submenu` absolut positioniert ist (Desktop), im mobilen Kopf bleibt die Gruppe beim Weitertabben offen. Ohne JavaScript ist der Kopf unterhalb des Bruchpunkts nicht sticky (`html.no-js .site-header { position: static }`), geöffnet begrenzt `max-height: 100dvh` mit `overflow-y: auto` die Kopfhöhe.
 
 ### 6.2 Hero Startseite (index.astro) und Hero.astro
 Zweck: erster Bildschirm als Titelseite, große Typografie links, Portraet rechts, E-Mail sofort sichtbar.
@@ -370,6 +373,7 @@ CSS:
 .hero__mail a { font-weight: 600; color: var(--c-text); }
 @media (max-width: 860px) { .hero__media { max-width: 20rem; } }
 ```
+Umsetzung (Runde 2): ab 861 px `.hero .display { max-width: none; }` (die Spalte gc-1-7 begrenzt die Zeile, die weiche Trennstelle greift nur bei Bedarf); unter 640 px `.hero { padding-block: var(--s-6) }`, Lead in `--fs-body`, `.hero__actions` mit `margin-top: var(--s-5)`, `.hero__mail` mit `margin-top: var(--s-4)`; unter 480 px Eyebrow mit `letter-spacing: 0.04em`. Grund: Fünf-Sekunden-Test bei 360 und 390 px (11.1 Nr. 8). Messwerte in docs/TESTBERICHT.md, Stand v2, Runde 3.
 
 Hero.astro (Kontakt, Einblicke, Rechtstexte, Danke, 404): `.hero-frage` erhält zusätzlich die Klasse `standfirst` (Farbe `--c-text` statt Grau), H1 in `--fs-h1` mit `max-width: 24ch`, Padding `clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem)`, `border-bottom: var(--rule)`. Neuer optionaler Prop `mail?: boolean`, der unter dem Lead die E-Mail als `.hero__mail` ausgibt (Kontaktseite).
 
@@ -416,7 +420,7 @@ Register, Zweck: Ersatz für Kartenraster bei Aufzählungen mit Titel und Text (
 }
 @media (max-width: 640px) { .register > li { grid-template-columns: 2.25rem minmax(0, 1fr); } }
 ```
-Die Ziffern sind Gliederung, keine Rangfolge. Reihenfolge der Inhalte entspricht dem Masterprompt.
+Die Ziffern sind Gliederung, keine Rangfolge. Reihenfolge der Inhalte entspricht dem Masterprompt. Umsetzung (Runde 2): `.register--2 h3` steht ab 861 px in 1,2 rem (Stufe der Steps und FAQ-Summaries), weil Titel in `--fs-h3` in Spalten um 260 px über vier bis fünf Zeilen liefen; Abweichung von der Tabelle 4.1, in docs/DESIGN-SYSTEM.md vermerkt.
 
 ### 6.4 Abschnitt mit Randspalte (neues Muster, global.css)
 Zweck: Magazin-Gliederung, Eyebrow, H2 und Einleitung links am Rand, Inhalt rechts. Ersetzt `.section-head` in den Abschnitten Ausgangslagen und KI (Startseite), Passende Situationen (Fachseiten) und Einblicke-Übersicht.
@@ -534,13 +538,14 @@ Der bisherige `rgba(255,255,255,.85)`-Wert wird durch die Tokens ersetzt.
 
 ### 6.9 Footer.astro
 Zweck: Absender klar, HVM als dezenter Betreiber, Aufbau im Zwölfspaltenraster, Kennlinie unten bleibt.
-Markup: die vier Blöcke erhalten `class="footer-brand"`, `class="footer-nav-1"`, `class="footer-nav-2"`, `class="footer-operator"`; `.footer-grid` wird `.g`. Inhalte, Pflichtangaben, Logo-Einsatz unverändert.
+Gebauter Stand (Runde 1, ersetzt die ursprüngliche Aufteilung 1 bis 4, 5 bis 7, 8 bis 9, 10 bis 12 mit zwei Linkspalten): Absenderzeile `.footer-brand` (Name, Claim, E-Mail) über die volle Breite mit Haarlinie unten; darunter drei Linkspalten aus `FOOTER_SPALTEN` (`.footer-nav-1` Beratung in den Spalten 1 bis 3, `.footer-nav-2` Vertiefung 4 bis 6, `.footer-nav-3` Wissen und Weiteres 7 bis 9) und der Betreiberblock `.footer-operator` in den Spalten 10 bis 12; `.footer-grid` ist `.g`. Zwischen 600 und 860 px stehen zwei Spalten je Reihe, darunter eine. Inhalte, Pflichtangaben, Logo-Einsatz unverändert; Linkziele mindestens 44 px hoch (`padding-block: 0.6rem`).
 ```css
 .site-footer { background: #fff; border-top: var(--rule-strong); margin-top: 0; font-size: var(--fs-small); }
 .footer-grid { padding-block: var(--s-8) var(--s-7); row-gap: var(--s-6); }
-.footer-brand { grid-column: 1 / span 4; }
-.footer-nav-1 { grid-column: 5 / span 3; }
-.footer-nav-2 { grid-column: 8 / span 2; }
+.footer-brand { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; border-bottom: var(--rule); padding-bottom: var(--s-5); }
+.footer-nav-1 { grid-column: 1 / span 3; }
+.footer-nav-2 { grid-column: 4 / span 3; }
+.footer-nav-3 { grid-column: 7 / span 3; }
 .footer-operator { grid-column: 10 / -1; }
 .footer-name { font-size: 1.5rem; font-weight: 700; letter-spacing: var(--ls-heading); margin-bottom: var(--s-1); }
 .footer-claim { letter-spacing: var(--ls-caps); }
@@ -548,7 +553,7 @@ Markup: die vier Blöcke erhalten `class="footer-brand"`, `class="footer-nav-1"`
 .footer-logo img { width: 96px; height: auto; }
 .footer-bottom { border-top: var(--rule); padding-block: var(--s-5); color: var(--c-text-2); }
 @media (max-width: 860px) { .footer-grid > * { grid-column: 1 / -1; } }
-@media (min-width: 600px) and (max-width: 860px) { .footer-nav-1, .footer-nav-2 { grid-column: span 6; } }
+@media (min-width: 600px) and (max-width: 860px) { .footer-grid > .footer-nav, .footer-grid > .footer-operator { grid-column: span 6; } }
 @media (hover: hover) { .site-footer a:hover { text-decoration: underline; } }
 ```
 
@@ -614,10 +619,11 @@ Aufruf in Fachseite.astro mit den fünf Einträgen: Passende Situationen `#situa
 .seitennav { border-top: var(--rule); border-bottom: var(--rule); }
 .seitennav ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s-6); font-size: var(--fs-small); font-weight: 600; }
 .seitennav li { margin: 0; }
+@media (max-width: 640px) { .seitennav ol { column-gap: var(--s-5); } }   /* Runde 3: sechs Anker bei 390 px in hoechstens drei Zeilen */
 .seitennav a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
 @media (hover: hover) { .seitennav a:hover { text-decoration: underline; text-decoration-color: var(--c-text); } }
 ```
-Reiner Text zwischen zwei Haarlinien, keine Pillen, kein Hintergrund.
+Reiner Text zwischen zwei Haarlinien, keine Pillen, kein Hintergrund. Umsetzung: höchstens sechs Anker je Seite auf der AM-Seite, den drei Vertiefungen und Zusammenarbeit (Runde 2); sieben auf der KI- und PM-Seite (Slot-Abschnitte) und im Glossar (Themenblöcke); bei 1440 px eine Zeile, bei 390 px höchstens drei.
 
 Passende Situationen: `.abschnitt` (6.4) mit `<ol class="register register--2" role="list">` statt drei Karten.
 
@@ -884,6 +890,7 @@ Alle Werte der Platzhalter kommen aus Tokens; in der hellen Variante steht Text 
 | Startseite Persönlicher Ansatz, `.gc-1-6` | 2 | 3/2 | dunkel | nein | `(max-width: 860px) 100vw, (max-width: 1300px) 48vw, 600px` | 640, 960, 1200 | ca. 600 x 400 px |
 | Kontakt Aside | 2 | 1/1 | hell | nein | `12rem` | 400, 800 | 192 x 192 px |
 | Personenanker Fachseiten | 2 | 1/1 | hell | nein | `8rem` | 400, 800 | 128 x 128 px |
+| Zusammenarbeit Hero, `.gc-9-12` (Umsetzung: Slot 1 mit den Parametern des Startseiten-Heros; Wechsel auf Slot 3 nach Freigabe von portrait-3 als eigener Arbeitsschritt) | 1 | 4/5 | dunkel | ja | `(max-width: 860px) 20rem, (max-width: 1300px) 30vw, 380px` | 480, 800, 1200 | ca. 380 x 475 px |
 | Profil zwischen Kapitel 03 und 04, `.gc-5-12` | 3 | 3/2 | nurMitBild | nein | `(max-width: 860px) 100vw, (max-width: 1300px) 64vw, 800px` | 640, 960, 1200, 1600 | ca. 800 x 533 px |
 
 Mobil (unter 861 px): Hero-Portraets stehen unter dem Text, `max-width: 20rem`; Querformate volle Containerbreite; 1:1-Plätze behalten ihre rem-Breite.
@@ -934,12 +941,14 @@ Sektionsrhythmus je Seite: Weiß, Linie, Weiß, Fläche, Weiß, Dunkel. Höchste
 | 1 | Hero | Weiß | 7/5 (`gc-1-7`, `gc-9-12`) | Eyebrow, Display-H1, Standfirst, Lead, Buttonzeile, E-Mail mit Haarlinie; Portrait 1 (4:5) oben ausgerichtet |
 | 2 | Fakten-Band | Weiß, `section--tight`, Linie oben | 4/4/4 | drei Aussagen mit 2 px Linie oben, Link "Zum Profil" rechts |
 | 3 | Ausgangslagen `#ausgangslagen` | Weiß, `section--linie` | `.abschnitt` 4/8 | Kopf sticky links, Register 01 bis 05 rechts |
-| 4 | Beratung `#beratung` | `--c-flaeche` | `.spalten` 3 Spalten | Kennung A, B, C, Titel, Nutzen, dl Arbeitsergebnis, Textlink; Fußzeile |
-| 5 | Arbeitsweise `#arbeitsweise` | Weiß | Section-Head `gc-1-7`, Steps 4 Spalten | erster Schritt orange |
-| 6 | Persönlicher Ansatz `#ansatz` | Weiß, `section--linie` | 6/6 (`gc-1-6` Bild, `gc-7-12` Text) | Portrait 2 (3:2) links, Eyebrow, H2, drei Absätze, Link; DOM: Bild vor Text |
-| 7 | KI `#ki` | Weiß, `section--linie` | `.abschnitt` 4/8 | Register `register--2` mit vier Feldern, Textlink |
-| 8 | So würde ich vorgehen `#vorgehen` | `--c-flaeche` | Dossier 6/5 | Kopfzeile, Ausgangslage und Vorgehen links, Arbeitsergebnis weiß rechts, Hinweis |
-| 9 | Cta | `--c-dunkel` | 7/4, unten ausgerichtet | Frage, Lead, Button, E-Mail |
+| 4 | Für wen `#fuer-wen` (Inhaltsplan 4.1) | Weiß, `section--linie` | `.abschnitt` 4/8 | Kopf links, Register ohne Ziffern (`.rollen`, `register--2`) mit vier Rollen und Glossar-Links, Textlink "Fünf Fragen an Ihr Portfolio"; auf Weiß, weil die zwei Flächen der Seite mit Beratung und Szenario belegt sind |
+| 5 | Beratung `#beratung` | `--c-flaeche` | `.spalten` 3 Spalten | Kennung A, B, C, Titel, Nutzen, dl Arbeitsergebnis, Textlink; Fußzeile; Verweisblock Vertiefungen (vier Zeilen) |
+| 6 | Arbeitsweise `#arbeitsweise` | Weiß | Section-Head `gc-1-7`, Steps 4 Spalten | erster Schritt orange, Eyebrow `eyebrow--still` |
+| 7 | Persönlicher Ansatz `#ansatz` | Weiß, `section--linie` | 6/6 (`gc-1-6` Bild, `gc-7-12` Text) | Portrait 2 (3:2) links, Eyebrow, H2, drei Absätze, Link; DOM: Bild vor Text |
+| 8 | KI `#ki` | Weiß, `section--linie` | `.abschnitt` 4/8 | Register `register--2` mit vier Feldern, Textlink |
+| 9 | So würde ich vorgehen `#vorgehen` | `--c-flaeche` | Dossier 6/5 (Szenario.astro) | Kopfzeile, Ausgangslage und Vorgehen links, Arbeitsergebnis weiß rechts, Hinweis |
+| 10 | Einblicke `#einblicke` (bedingt, nur mit freigegebenem Beitrag) | Weiß, `section--linie` | `.abschnitt` 4/8 | Register mit Datum statt Ziffer, höchstens drei Beiträge |
+| 11 | Cta | `--c-dunkel` | 7/4, unten ausgerichtet | Frage, Lead, Button, E-Mail, Zeile "Was nach Ihrer Anfrage passiert" |
 
 Der Ansatz-Abschnitt wechselt von `--c-flaeche` auf Weiß, damit die Grenze von zwei Flächen je Seite eingehalten wird.
 
@@ -998,7 +1007,7 @@ Hero kompakt (H1 `--fs-h1`, Lead 60ch, E-Mail-Zeile). Grid 7/4: Formular mit zwe
 
 Reduzierte Bewegung: `@media (prefers-reduced-motion: reduce)` setzt `--dur` und `--dur-slow` auf 0 ms (tokens.css) und `scroll-behavior: auto` (global.css, Bestand). Damit erfolgen Farbwechsel sofort und das Kreuz springt. Layout und Inhalte sind identisch.
 
-Tastatur und Zielgrößen: alle Bedienelemente mindestens 44 px hoch, Abstand zwischen Zielen mindestens 8 px (Seitennavigation `gap` 32 px, Linkregister durch Zeilenhöhe). `scroll-padding-top` verhindert, dass Anker und fokussierte Elemente unter dem Sticky-Header liegen (WCAG 2.2, 2.4.11). Sticky-Randspalten nur ab 861 px Breite und 641 px Höhe.
+Tastatur und Zielgrößen: alle Bedienelemente mindestens 44 px hoch, Abstand zwischen Zielen mindestens 8 px (Seitennavigation `gap` 32 px, unter 641 px 24 px; Linkregister durch Zeilenhöhe; Textlink-Listen durch Zeilenabstand mindestens `calc(var(--s-2) + 1.3rem)`). `scroll-padding-top` verhindert, dass Anker und fokussierte Elemente unter dem Sticky-Header liegen (WCAG 2.2, 2.4.11). Sticky-Randspalten nur ab 861 px Breite und 641 px Höhe.
 
 Ohne JavaScript: Navigation sichtbar (`html.no-js`), Untermenü per details/summary, FAQ nativ, Formular als POST, Platzhalter und Bilder sind zur Buildzeit entschieden. Nichts ist ohne JavaScript verborgen.
 
@@ -1006,7 +1015,7 @@ Ohne JavaScript: Navigation sichtbar (`html.no-js`), Untermenü per details/summ
 
 ### 11.1 Pflichtprüfungen nach Umsetzung
 1. `npm run build`, `npm run check`, `npm test` fehlerfrei.
-2. `node scripts/screenshots.mjs` bei 360, 390, 768, 1024 und 1440 px für alle Seiten der Liste plus `/property-management-optimierung/`, `/ki-immobilienmanagement/`, `/danke/`, `/impressum/`, `/datenschutz/` (Liste im Skript ergänzen). Kein horizontaler Scrollbalken, keine abgeschnittene H1, keine überlagerten Buttons.
+2. `node scripts/screenshots.mjs` bei 360, 390, 768, 1024 und 1440 px (zusätzlich 1081, 1100 und 1120 px für den Kopf, Breiten als drittes Argument) für alle Seiten der Liste plus `/property-management-optimierung/`, `/ki-immobilienmanagement/`, `/danke/`, `/impressum/`, `/datenschutz/` (Liste im Skript ergänzen). Kein horizontaler Scrollbalken, keine abgeschnittene H1, keine überlagerten Buttons.
 3. `node scripts/a11y-check.mjs` (axe bei 390 und 1440 px) ohne Verstöße; zusätzlich manuell: Tab-Reihenfolge entspricht der Leserichtung auf Start (Hero, Fakten, Register), Profil (Bild vor Text), Kontakt (Hero-Mail, Formular, Aside); Sticky-Randspalten verdecken bei 200 Prozent Zoom keinen Fokus (bei 720 px Breite sind sie statisch).
 4. Screenreader-Stichprobe mit NVDA oder VoiceOver: Register werden als Liste mit Positionsangabe gelesen, die CSS-Ziffer wird nicht zusätzlich angesagt; Kennungen A, B, C und Kapitelnummern werden nicht gelesen; Dossier-Kopfzeile wird nicht gelesen, der Hinweistext schon.
 5. H1-Umbruch bei 360 px und 200 Prozent Zoom auf Windows (Segoe UI) und macOS: Startseite (weiches Trennzeichen greift), Fachseiten (U+00AD in den Props).

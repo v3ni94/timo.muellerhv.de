@@ -1,51 +1,64 @@
 ---
 import { SITE } from '../data/site';
 /**
- * Formular postet ohne JavaScript direkt an /api/contact.php (303 auf /danke/ bei Erfolg,
- * HTML-Fehlerseite bei Fehlern). Mit JavaScript wird per fetch gesendet und die Antwort inline angezeigt.
+ * Kontaktformular (docs/DESIGN-SPEC-V2.md 6.13, Masterprompt Abschnitt 12).
+ * Postet ohne JavaScript direkt an /api/contact.php (303 auf /danke/ bei Erfolg, HTML-Fehlerseite bei Fehlern).
+ * Mit JavaScript wird per fetch gesendet und die Antwort inline angezeigt.
+ * Die Felder sind in zwei fieldset gruppiert (Ihre Kontaktdaten, Ihr Anliegen). Honeypot, Zeitstempel,
+ * Datenschutzhinweis, Button, Status und Fallback stehen ausserhalb der Fieldsets.
+ * Feldkatalog, Namen, ids, Validierung und fetch-Logik sind unveraendert; der Endpunkt liest dieselben Felder.
+ * Das Feld Rolle traegt seine Beispiele als Hinweiszeile (h-rolle) statt als Platzhalter, der auf schmalen Feldern abgeschnitten wurde.
  */
 ---
 <form id="formular" class="contact-form" method="post" action="/api/contact.php" novalidate data-contact-form>
-  <div class="form-grid">
-    <div class="form-field">
-      <label for="f-name">Name <span aria-hidden="true">*</span></label>
-      <input id="f-name" name="name" type="text" required autocomplete="name" maxlength="120" />
-      <span class="form-error" id="e-name" hidden></span>
+  <fieldset class="form-fieldset">
+    <legend>Ihre Kontaktdaten</legend>
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="f-name">Name <span aria-hidden="true">*</span></label>
+        <input id="f-name" name="name" type="text" required autocomplete="name" maxlength="120" />
+        <span class="form-error" id="e-name" hidden></span>
+      </div>
+      <div class="form-field">
+        <label for="f-email">E-Mail-Adresse <span aria-hidden="true">*</span></label>
+        <input id="f-email" name="email" type="email" required autocomplete="email" maxlength="200" inputmode="email" />
+        <span class="form-error" id="e-email" hidden></span>
+      </div>
+      <div class="form-field">
+        <label for="f-unternehmen">Unternehmen <span class="hint">(optional)</span></label>
+        <input id="f-unternehmen" name="unternehmen" type="text" autocomplete="organization" maxlength="160" />
+      </div>
+      <div class="form-field">
+        <label for="f-rolle">Rolle <span class="hint">(optional)</span></label>
+        <input id="f-rolle" name="rolle" type="text" autocomplete="organization-title" maxlength="120" aria-describedby="h-rolle" />
+        <span class="hint" id="h-rolle">z. B. Geschäftsführung oder Asset Management</span>
+      </div>
+      <div class="form-field">
+        <label for="f-telefon">Telefonnummer <span class="hint">(optional)</span></label>
+        <input id="f-telefon" name="telefon" type="tel" autocomplete="tel" maxlength="40" inputmode="tel" />
+      </div>
+      <div class="form-field">
+        <label for="f-bestand">Ungefähre Bestandsgröße <span class="hint">(optional)</span></label>
+        <select id="f-bestand" name="bestand" aria-describedby="h-bestand">
+          <option value="">Keine Angabe</option>
+          <option value="unter 500 Einheiten">unter 500 Einheiten</option>
+          <option value="500 bis unter 2.000 Einheiten">500 bis unter 2.000 Einheiten</option>
+          <option value="2.000 bis unter 10.000 Einheiten">2.000 bis unter 10.000 Einheiten</option>
+          <option value="10.000 Einheiten und mehr">10.000 Einheiten und mehr</option>
+        </select>
+        <span class="hint" id="h-bestand">Eine grobe Einordnung reicht. Vertrauliche Portfolio- oder Mieterdaten bitte nicht übermitteln.</span>
+      </div>
     </div>
-    <div class="form-field">
-      <label for="f-email">E-Mail-Adresse <span aria-hidden="true">*</span></label>
-      <input id="f-email" name="email" type="email" required autocomplete="email" maxlength="200" inputmode="email" />
-      <span class="form-error" id="e-email" hidden></span>
-    </div>
-    <div class="form-field">
-      <label for="f-unternehmen">Unternehmen <span class="hint">(optional)</span></label>
-      <input id="f-unternehmen" name="unternehmen" type="text" autocomplete="organization" maxlength="160" />
-    </div>
-    <div class="form-field">
-      <label for="f-rolle">Rolle <span class="hint">(optional)</span></label>
-      <input id="f-rolle" name="rolle" type="text" autocomplete="organization-title" maxlength="120" placeholder="z. B. Geschäftsführung, Asset Management" />
-    </div>
-    <div class="form-field">
-      <label for="f-telefon">Telefonnummer <span class="hint">(optional)</span></label>
-      <input id="f-telefon" name="telefon" type="tel" autocomplete="tel" maxlength="40" inputmode="tel" />
-    </div>
-    <div class="form-field">
-      <label for="f-bestand">Ungefähre Bestandsgröße <span class="hint">(optional)</span></label>
-      <select id="f-bestand" name="bestand">
-        <option value="">Keine Angabe</option>
-        <option value="bis 500 Einheiten">bis 500 Einheiten</option>
-        <option value="500 bis 2.000 Einheiten">500 bis 2.000 Einheiten</option>
-        <option value="2.000 bis 10.000 Einheiten">2.000 bis 10.000 Einheiten</option>
-        <option value="über 10.000 Einheiten">über 10.000 Einheiten</option>
-      </select>
-      <span class="hint">Eine grobe Einordnung reicht. Vertrauliche Portfolio- oder Mieterdaten bitte nicht übermitteln.</span>
-    </div>
+  </fieldset>
+
+  <fieldset class="form-fieldset">
+    <legend>Ihr Anliegen</legend>
     <div class="form-field form-field--full">
-      <label for="f-anliegen">Ihr Anliegen <span aria-hidden="true">*</span></label>
+      <label for="f-anliegen">Beschreibung Ihres Anliegens <span aria-hidden="true">*</span></label>
       <textarea id="f-anliegen" name="anliegen" required minlength="20" maxlength="4000" rows="7" placeholder="Ausgangslage, Ziel und was Sie besprechen möchten."></textarea>
       <span class="form-error" id="e-anliegen" hidden></span>
     </div>
-  </div>
+  </fieldset>
 
   <!-- Spamabwehr: Honeypot (fuer Menschen unsichtbar) und Zeitstempel -->
   <div class="hp-field" aria-hidden="true">
@@ -66,6 +79,7 @@ import { SITE } from '../data/site';
 
 <style>
   .contact-form { max-width: 52rem; }
+  .form-fieldset:last-of-type { margin-bottom: var(--s-4); }
   .form-privacy { margin-block: var(--s-5); color: var(--c-text-2); }
   .form-fallback { margin-top: var(--s-4); color: var(--c-text-2); }
   .contact-form[aria-busy="true"] .btn { opacity: .7; pointer-events: none; }
@@ -85,6 +99,7 @@ import { SITE } from '../data/site';
       if (el) { el.textContent = msg; el.hidden = !msg; }
       input?.setAttribute('aria-invalid', msg ? 'true' : 'false');
       if (msg && el) input?.setAttribute('aria-describedby', el.id);
+      else input?.removeAttribute('aria-describedby');
     };
 
     const validate = () => {

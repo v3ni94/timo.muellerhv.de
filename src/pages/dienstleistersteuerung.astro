@@ -1,0 +1,415 @@
+---
+/**
+ * Dienstleistersteuerung im Immobilienbestand (docs/CONTENT-PLAN-V2.md 3.3, Masterprompt Abschnitte 4 und 9).
+ * Vertiefung zu Property-Management-Optimierung auf Fachseite.astro. Heimatort fuer Vergabe, Nachtraege, Abnahme
+ * und Dienstleisterbewertung; der PM-Leistungsblock Dienstleisterkoordination und die PM-FAQ zum handwerklichen
+ * Kostenverstaendnis liegen hier. Die Seite bleibt Steuerungsebene: Sie beschreibt, wie die Eigentuemerseite die Verwaltung
+ * und ihre Dienstleister fuehrt, nicht wie eine Verwaltung arbeitet.
+ * Slot methodik: Steuerungskette (neun Steps, drei Reihen), Pruefpunkte, Standards, Zustaendigkeiten und
+ * Kennzahlarten, Netzwerk und Interessen (Offenlegung nur als ein Satz plus Link auf /zusammenarbeit/#interessen).
+ * Slot szenario: Szenario "Nachtraege und Abnahmen ohne Regel" im Konjunktiv.
+ * Faktenbasis: docs/FAKTENLISTE.md Nr. 8 (praktische Erfahrung) und Nr. 9 (Netzwerk mit Bezuegen zu Schreinerei,
+ * Fenster- und Elementebau, Heizung und Sanitaer, ohne Kapazitaetsbehauptung). Handwerkliche Praxis erscheint nur als
+ * Kostenverstaendnis und Einschaetzungsquelle (Verwaltungspraxis und Netzwerk), nie als eigene Ausfuehrung. Keine Betriebsnamen, keine Preise,
+ * keine Fristen, keine Zielwerte, keine vertragsrechtlichen Aussagen; Rechtsfragen mit Verweis auf den Rechtsanwalt.
+ * Hero-Formulierung und Abschnitt Netzwerk und Interessen sind vor Launch ausdruecklich freizugeben (Textfreigabe).
+ */
+import Fachseite, { type Block, type Absatz, type Link } from '../layouts/Fachseite.astro';
+import Szenario from '../components/Szenario.astro';
+import type { FaqItem } from '../components/Faq.astro';
+import type { SeitennavEintrag } from '../components/Seitennav.astro';
+import type { Crumb } from '../lib/seo';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
+
+const path = '/dienstleistersteuerung/';
+const crumbs: Crumb[] = [
+  { name: 'Beratung', href: '/asset-management-beratung/' },
+  { name: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  { name: 'Dienstleistersteuerung', href: path },
+];
+
+/* Flag: Belegte Referenzfaelle (docs/FAKTENLISTE.md Nr. 16, Status offen). Erst mit Freigabe schaltet die
+   Szenario-Komponente die Fallstudienfelder frei; dann sind zeitraum, ergebnis und messmethode zu ergaenzen. */
+const referenzfallFreigabe = false;
+
+/* Bedingter Beitragslink: nur ein freigegebener Beitrag, kein Hinweis auf kommende Beitraege. */
+const beitraege = await veroeffentlichteBeitraege();
+const beitragZukauf = beitraege.find((b) => b.id === 'nach-dem-zukauf-reihenfolge');
+
+/* Seitennavigation: eine Textzeile mit sechs Ankern in DOM-Reihenfolge (Spezifikation 6.11 und 9.2). Die
+   Abschnitte pruefung, standards, netzwerk, vorgehen und abgrenzung behalten ihre ids fuer interne Links. */
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Passende Situationen', href: '#situationen' },
+  { label: 'Leistungsumfang', href: '#leistung' },
+  { label: 'Methode', href: '#kette' },
+  { label: 'Zuständigkeiten', href: '#zustaendigkeiten' },
+  { label: 'Szenario', href: '#szenario' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+const situationen: Block[] = [
+  { t: 'Aufträge ohne Leistungs­beschreibung', d: 'Eine Leistungs­beschreibung legt schriftlich fest, was in welcher Qualität bis wann geliefert wird. Fehlt sie, sind Angebote nicht vergleichbar, und jede Abweichung wird später zum Streitpunkt.' },
+  { t: 'Nachträge ohne Prüfung', d: 'Ein Nachtrag ändert einen laufenden Auftrag in Umfang oder Preis. Wird er erst mit der Rechnung sichtbar, fehlt jede Grundlage, ihn zu prüfen oder zurückzuweisen.' },
+  { t: 'Abnahmen ohne Protokoll', d: 'Die Abnahme stellt fest, ob die Leistung wie beauftragt erbracht wurde. Ohne Protokoll, Mängelliste und Fotos lassen sich Mängel später nicht zuordnen und Schlussrechnungen nicht sauber freigeben.' },
+  {
+    t: 'Abhängigkeit oder uneinheitliche Dienstleister­landschaft',
+    d: 'Entweder kennt ein einzelner Betrieb alle Objekte und ist nicht mehr vergleichbar, oder nach einem Zukauf arbeiten je Teilbestand andere Betriebe nach anderen Standards.',
+    ...(beitragZukauf ? { mehr: { label: 'Beitrag: Nach dem Zukauf', href: `/einblicke/${beitragZukauf.id}/` } } : {}),
+  },
+];
+
+const leistungen: Block[] = [
+  { t: 'Steuerungskette aufnehmen und Lücken benennen', d: 'Vom Bedarf bis zur Rechnungsprüfung wird jeder Schritt erfasst: Wer tut was, mit welcher Unterlage, mit welcher Freigabe. Lücken und Doppelarbeit werden sichtbar.' },
+  { t: 'Standards für Leistungsbeschreibung, Nachtrag und Abnahme festlegen', d: 'Drei Steuerungspunkte, die Kosten und Termine im Griff halten. Sie werden als Muster ausgearbeitet und mit Verwaltung und Technik abgestimmt.' },
+  { t: 'Angebots- und Nachtragsprüfung mit Kostenverständnis', d: 'Angebote, Nachträge und Rechnungen werden auf Vollständigkeit, Mengen, Einheitspreise, Nebenleistungen und Plausibilität geprüft. Das Kostenverständnis dafür stammt aus Verwaltungspraxis und meinem operativen Netzwerk.' },
+  { t: 'Zuständigkeiten entlang der Kette klären', d: 'Wer beauftragt, wer kontrolliert, wer nimmt ab, wer gibt die Zahlung frei. Festgehalten in der Zuständigkeitsmatrix der Schnittstelle zwischen Eigentümerseite und Verwaltung.' },
+  { t: 'Kennzahlarten zur Dienstleisterleistung definieren', d: 'Termintreue, Nachtragsanteil, Mängel bei Abnahme und Reaktionszeit werden definiert, damit die nächste Vergabe auf Erfahrung beruht. Zielwerte legt Ihr Haus fest.' },
+];
+
+const ergebnisse = [
+  'Standardset für Vergabe, Nachträge und Abnahmen',
+  'Muster einer Leistungsbeschreibung als Gliederung',
+  'Nachtragsregel mit Freigabestufen, ohne Beträge',
+  'Abnahmeprotokoll und Mängelliste als Struktur',
+  'Kennzahlarten zur Dienstleisterleistung, ohne Zielwerte',
+];
+
+const vorgehen: Block[] = [
+  { t: 'Kette aufnehmen', d: 'Auftragsakten, Abläufe und Zuständigkeiten mit Verwaltung und Technik sichten. Wo fehlen Leistungsbeschreibung, Nachtragsfreigabe oder Abnahmeprotokoll?' },
+  { t: 'Standards festlegen', d: 'Muster für Leistungsbeschreibung, Nachtragsregel und Abnahme ausarbeiten, Freigabestufen in der Zuständigkeitsmatrix verankern.' },
+  { t: 'Einführen und Beteiligte schulen', d: 'Erste Vergaben nach dem neuen Standard begleiten, Verwaltung und Technik im Umgang mit Prüfung und Dokumentation unterstützen.' },
+  { t: 'Nachhalten', d: 'Kennzahlarten in festem Rhythmus auswerten, Dienstleisterbewertung führen, Standards anpassen, wo sie sich im Alltag nicht bewähren.' },
+];
+
+/* Steuerungskette: neun Schritte, davon drei hervorgehobene Steuerungspunkte */
+const kette: Block[] = [
+  { t: 'Bedarf', d: 'Was genau soll erreicht werden, und ist die Maßnahme im Investitionsplan vorgesehen? Ohne klaren Bedarf entsteht keine klare Leistungsbeschreibung.' },
+  { t: 'Leistungs­beschreibung', d: 'Umfang, Qualitäten, Termine, Schnittstellen und Dokumentation schriftlich festlegen. Sie macht Angebote vergleichbar.' },
+  { t: 'Angebotseinholung und Vergleich', d: 'Angebote auf derselben Grundlage einholen und auf Vollständigkeit, Mengen und Ausschlüsse prüfen, nicht nur auf die Endsumme.' },
+  { t: 'Vergabe', d: 'Beauftragung mit Leistungsbeschreibung, Terminen und Nachtragsregel als Bestandteil des Auftrags. Wer beauftragt, steht in der Zuständigkeitsmatrix.' },
+  { t: 'Ausführungs­kontrolle', d: 'Ortstermine nach Plan. Abweichungen werden gemeldet, bevor sie Kosten auslösen, nicht danach.' },
+  { t: 'Nachtragsprüfung', d: 'Jeder Nachtrag wird angezeigt, begründet und vor Ausführung freigegeben. Geprüft wird dem Grunde und der Höhe nach.' },
+  { t: 'Abnahme und Dokumentation', d: 'Protokoll, Mängelliste, Fotodokumentation und Übergabe der Unterlagen an die Verwaltung.' },
+  { t: 'Rechnungsprüfung', d: 'Rechnung gegen Auftrag, freigegebene Nachträge und Abnahmeprotokoll prüfen. Die Schlussrechnung wird erst nach Abnahme freigegeben.' },
+  { t: 'Dienstleister­bewertung', d: 'Termintreue, Nachtragsanteil und Mängel bei Abnahme je Dienstleister festhalten. Grundlage für die nächste Vergabe.' },
+];
+
+interface Punkt { t: string; glossar: string; items: string[]; hinweis: string }
+const punkte: Punkt[] = [
+  {
+    t: 'Leistungsbeschreibung',
+    glossar: '/glossar/#leistungsbeschreibung',
+    items: [
+      'Leistungsumfang: Was gehört dazu, was ausdrücklich nicht.',
+      'Schnittstellen zu anderen Gewerken: Wer übergibt was an wen.',
+      'Qualitäten und Materialien, so konkret wie nötig.',
+      'Termine für Beginn, Zwischenstände und Fertigstellung.',
+      'Dokumentationspflichten: Fotos, Aufmaß (Mengenermittlung der ausgeführten Leistung), Nachweise.',
+      'Regelung für Unvorhergesehenes: Was passiert, wenn etwas anders ist als angenommen.',
+    ],
+    hinweis: 'Ziel: Angebote werden auf derselben Grundlage vergleichbar, und Unvorhergesehenes hat eine Regel, bevor es eintritt.',
+  },
+  {
+    t: 'Nachtrag',
+    glossar: '/glossar/#nachtrag',
+    items: [
+      'Regel vor Beginn: Anzeige, Begründung, Freigabe vor Ausführung, Freigabestufen nach Zuständigkeitsmatrix.',
+      'Prüfung dem Grunde nach: War die Leistung bereits Teil des Auftrags?',
+      'Prüfung der Höhe nach: Mengen, Einheitspreise, Nebenleistungen gegen das Angebot.',
+      'Dokumentation: Jeder Nachtrag mit Anlass, Freigabe und Betrag in der Auftragsakte.',
+    ],
+    hinweis: 'Nicht der Nachtrag ist das Problem, sondern der Nachtrag, der erst mit der Rechnung erscheint.',
+  },
+  {
+    t: 'Abnahme',
+    glossar: '/glossar/#abnahme',
+    items: [
+      'Protokoll mit Datum, Beteiligten und Ergebnis.',
+      'Mängelliste mit Verantwortlichem und Termin für die Nachbesserung.',
+      'Fotodokumentation als Pflichtbestandteil.',
+      'Freigabe der Schlussrechnung erst nach Abnahme.',
+      'Übergabe aller Unterlagen an die Verwaltung.',
+    ],
+    hinweis: 'Welche rechtlichen Folgen eine Abnahme hat, klärt Ihr Rechtsanwalt. Hier geht es um die Struktur, die diese Folgen nachvollziehbar macht.',
+  },
+];
+
+const pruefpunkte: Block[] = [
+  { t: 'Vollständigkeit', d: 'Sind alle Positionen der Leistungsbeschreibung enthalten, oder fehlt eine, die später als Nachtrag kommt?' },
+  { t: 'Mengenansätze', d: 'Passen die Mengen zu Plan und Objekt? Zu hohe Ansätze verteuern, zu niedrige kündigen Nachträge an.' },
+  { t: 'Einheitspreise gegen Pauschalen', d: 'Pauschalen sind bequem, verdecken aber, was enthalten ist. Einheitspreise machen Nachträge prüfbar.' },
+  { t: 'Nebenleistungen', d: 'Gerüst, Entsorgung, Anfahrt, Schutzmaßnahmen: enthalten, gesondert ausgewiesen oder gar nicht genannt?' },
+  { t: 'Ausschlüsse', d: 'Was ein Angebot ausdrücklich nicht enthält, gehört genauso gelesen wie das, was es enthält.' },
+  { t: 'Plausibilität von Dauer und Aufwand', d: 'Passen Stunden, Tage und Personal zum Umfang? Auffällige Abweichungen nach oben wie nach unten werden hinterfragt.' },
+  { t: 'Abgrenzung zum Auftrag', d: 'Bei Nachträgen und Rechnungen: War die Leistung bereits beauftragt, oder ist sie neu?' },
+  { t: 'Nachweise', d: 'Stundenzettel, Lieferscheine, Fotos, Aufmaß. Ohne Nachweis keine Freigabe.' },
+];
+
+const standards: Block[] = [
+  { t: 'Leistungsverzeichnis für wiederkehrende Leistungen', d: 'Für Leistungen, die im Bestand immer wieder anfallen, etwa Wohnungsherrichtung, Wartung oder kleinere Instandsetzungen, wird der Leistungsumfang einmal beschrieben und dann wiederverwendet. Positionen, Qualitäten, Nebenleistungen und Dokumentation stehen fest. Mengen und Preise werden je Auftrag oder je Vereinbarung ergänzt.' },
+  { t: 'Rahmenvereinbarung als Struktur', d: 'Eine Rahmenvereinbarung legt Konditionen, Reaktionswege, Dokumentation und Nachtragsregel für einen vereinbarten Zeitraum fest, ohne jeden Einzelauftrag neu zu verhandeln. Preise gehören hinein, aber nicht in diese Darstellung. Die vertragliche Gestaltung prüft Ihr Rechtsanwalt.' },
+  { t: 'Herrichtungsstandard für Wohnungen', d: 'Der Herrichtungsstandard legt fest, in welchem Zustand eine Wohnung neu vermietet wird: Oberflächen, Ausstattung, Technik, je nach Objektstrategie abgestuft. Er ist ein Steuerungsinstrument der Eigentümerseite, weil er Kosten, Leerstandsdauer und Vermietbarkeit gleichzeitig beeinflusst und der Verwaltung eine Entscheidung ohne Rückfrage erlaubt.' },
+];
+
+const kennzahlarten = [
+  { t: 'Termintreue', d: 'Anteil der Aufträge, die zum vereinbarten Termin fertiggestellt wurden. Ob Fertigstellung oder Abnahme zählt, legt jedes Haus in der Definition fest.' },
+  { t: 'Nachtragsanteil', d: 'Summe der freigegebenen Nachträge im Verhältnis zur ursprünglichen Auftragssumme, je Dienstleister und je Gewerk.' },
+  { t: 'Mängel bei Abnahme', d: 'Anzahl und Schwere der im Protokoll festgehaltenen Mängel je Abnahme, mit Termin der Nachbesserung.' },
+  { t: 'Reaktionszeit', d: 'Zeit zwischen Meldung und erster Reaktion des Dienstleisters, getrennt nach Dringlichkeit.' },
+];
+
+const abgrenzung: Absatz[] = [
+  'Keine Bauleitung und keine Fachplanung. Ich steuere die Kette, die Fachleistung erbringen Planer und Ausführende.',
+  'Keine Rechtsberatung zu Werkverträgen, Gewährleistung und Haftung. Diese Fragen klären Sie mit Ihrem Rechtsanwalt. Ich bereite die Sachlage dafür auf.',
+  'Keine Empfehlung einzelner Betriebe ohne Begründung und Alternativen.',
+  'Keine eigene Handwerkerkapazität. Mein Netzwerk liefert Einschätzungen, nicht die Ausführung.',
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'handwerk',
+    q: 'Was bringt handwerkliches Kostenverständnis in der Dienstleistersteuerung?',
+    a: 'Ein realistisches Verständnis dafür, was Maßnahmen kosten, welche Nebenleistungen anfallen und woran unvollständige Angebote zu erkennen sind. Das hilft bei Angebotsprüfung, Nachträgen und Abnahmen. Es stammt aus Verwaltungspraxis und einem operativen Netzwerk mit Bezügen zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär, nicht aus eigener Ausführung. Es ersetzt keine Fachplanung, keine Bauleitung und kein Gutachten.',
+  },
+  {
+    id: 'nachtraege',
+    q: 'Sollen Nachträge grundsätzlich abgelehnt werden?',
+    a: 'Nein. Ein Nachtrag kann berechtigt sein, wenn sich Umstände zeigen, die bei der Beauftragung nicht erkennbar waren. Entscheidend ist die Regel: angezeigt vor Ausführung, begründet, geprüft dem Grunde und der Höhe nach, freigegeben von der zuständigen Stufe.',
+  },
+  {
+    id: 'angebote',
+    q: 'Wie viele Angebote sind sinnvoll?',
+    a: 'So viele, dass ein echter Vergleich möglich ist, und so wenige, dass jedes Angebot auf derselben Leistungsbeschreibung beruht und ernsthaft geprüft wird. Bei wiederkehrenden Leistungen ersetzt eine Rahmenvereinbarung mit regelmäßigem Preisvergleich die Einzelanfrage. Die Anzahl legt jedes Haus in seiner Vergaberegel fest.',
+  },
+  {
+    id: 'langjaehrig',
+    q: 'Wie gehen Sie mit langjährigen Dienstleistern um?',
+    a: 'Mit Respekt vor dem, was funktioniert, und mit denselben Regeln wie für alle. Langjährige Betriebe kennen die Objekte, das ist ein Wert. Leistungsbeschreibung, Nachtragsregel und Abnahme gelten trotzdem. Zeigt die Dienstleisterbewertung Auffälligkeiten, wird zuerst das Gespräch gesucht, bevor ein Wechsel erwogen wird.',
+  },
+];
+
+const verwandt: Link[] = [
+  { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  { label: 'Investitionspriorisierung', href: '/investitionspriorisierung/' },
+  { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+];
+---
+<Fachseite
+  path={path}
+  title="Dienstleistersteuerung im Immobilienbestand | Timo Müller"
+  description="Leistungsbeschreibung, Nachtrag, Abnahme: Wie Dienstleister im Wohnungsbestand nachvollziehbar gesteuert werden. Mit handwerklichem Kostenverständnis."
+  h1={'Dienstleister­steuerung im Immobilien­bestand'}
+  eyebrow="Vertiefung"
+  frage="Woran erkennen Sie, ob Ihre Dienstleister das liefern, was Sie bezahlen?"
+  intro="Ob Kosten und Termine im Griff bleiben, entscheidet sich an drei Punkten: vor der Beauftragung in der Leistungsbeschreibung, während der Ausführung in der Nachtragsregel, am Ende in einer dokumentierten Abnahme. Wer diese drei Punkte verbindlich regelt, braucht weniger Kontrolle im Alltag."
+  serviceName="Dienstleistersteuerung im Immobilienbestand"
+  serviceType="Beratung Dienstleistersteuerung Immobilien"
+  crumbs={crumbs}
+  seitennav={seitennav}
+  situationen={situationen}
+  situationenIntro="Situationen, in denen die Steuerungskette Lücken hat."
+  leistungen={leistungen}
+  ergebnisse={ergebnisse}
+  vorgehen={vorgehen}
+  vorgehenIntro="Vier Schritte. Umfang und Reihenfolge richten sich nach den Lücken, die die Aufnahme der Kette zeigt."
+  abgrenzung={abgrenzung}
+  faq={faq}
+  verwandt={verwandt}
+>
+  <section class="section section--linie kette" id="kette" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Methode</span>
+        <h2>Die Steuerungskette in neun Schritten</h2>
+        <p>Jede Vergabe im Bestand durchläuft dieselbe Kette, ob es um eine Wohnungsherrichtung oder um eine Dachsanierung geht. Wo ein Schritt fehlt oder niemandem zugeordnet ist, entstehen Nachträge, Verzögerungen und Rechnungen, die niemand prüfen kann.</p>
+      </div>
+      <ol class="steps" role="list">
+        {kette.map((k) => (<li><h3>{k.t}</h3><p>{k.d}</p></li>))}
+      </ol>
+
+      <div class="punkte g">
+        <div class="punkte__kopf gc-full">
+          <h3 class="caps">Drei Steuerungspunkte, vertieft</h3>
+          <p class="punkte__intro">An drei Stellen der Kette entscheidet sich, ob die Eigentümerseite steuert oder nur bezahlt. Die drei Punkte werden als Muster ausgearbeitet und mit Verwaltung und Technik abgestimmt.</p>
+        </div>
+        {punkte.map((p, i) => (
+          <article class={['punkt', ['gc-1-4', 'gc-5-8', 'gc-9-12'][i]].join(' ')}>
+            <h4>{p.t}</h4>
+            <ul class="punkt__liste" role="list">{p.items.map((x) => <li>{x}</li>)}</ul>
+            <p class="punkt__hinweis">{p.hinweis} <a href={p.glossar}>{p.t} im Glossar</a></p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="pruefung" slot="methodik">
+    <div class="container g">
+      <div class="gc-1-7">
+        <div class="section-head">
+          <span class="eyebrow eyebrow--still">Prüfung</span>
+          <h2>Angebote, Nachträge und Rechnungen prüfen</h2>
+          <p>Acht Prüfpunkte, die vor jeder Freigabe durchlaufen werden. Sie gelten für das Angebot vor der Vergabe ebenso wie für den Nachtrag während der Ausführung und die Rechnung am Ende.</p>
+        </div>
+        <ul class="checklist pruefpunkte" role="list">
+          {pruefpunkte.map((p) => (<li><strong>{p.t}.</strong> {p.d}</li>))}
+        </ul>
+      </div>
+      <aside class="quelle gc-9-12" aria-labelledby="quelle-h">
+        <h3 id="quelle-h">Woher die Einschätzung kommt</h3>
+        <p>Mein operatives Netzwerk hat Bezüge zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär. Daraus stammt ein Verständnis dafür, wie Leistungen kalkuliert werden, welche Nebenleistungen anfallen und woran unvollständige Angebote zu erkennen sind.</p>
+        <p>Es ist eine Quelle für Einschätzungen, keine Prüfinstanz und keine eigene Ausführung. Fachliche Bewertungen einzelner Gewerke bleiben bei Fachplanern und Sachverständigen.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="standards" slot="methodik">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Standards</span>
+          <h2>Standards für wieder&shy;kehrende Leistungen</h2>
+          <p>Was im Bestand immer wieder anfällt, wird einmal sauber beschrieben und dann wiederverwendet. Drei Instrumente, jeweils als Struktur und ohne Preise.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register" role="list">
+            {standards.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}
+          </ol>
+          <div class="buendelung">
+            <h3>Bündeln oder verteilen?</h3>
+            <p>Bündelung erleichtert die Steuerung, wenn sie Standards durchsetzt: ein Leistungsverzeichnis, eine Dokumentation, ein Ansprechpartner je Gewerk, vergleichbare Kennzahlen über alle Objekte. Sie schafft Abhängigkeit, wenn ein Betrieb alle Objekte kennt, Preise sich nicht mehr vergleichen lassen und ein Ausfall den ganzen Bestand trifft.</p>
+            <p>Die Regel, die ich vorschlage: bündeln, wo Standards die Steuerung erleichtern, und einen zweiten Anbieter halten, wo Ausfall oder Preisentwicklung den Bestand treffen würden. Wo die Grenze liegt, hängt von Bestandsgröße, Regionen und Gewerken ab und wird je Haus festgelegt.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="zustaendigkeiten" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Steuerung</span>
+        <h2>Zuständigkeiten und Kennzahlen</h2>
+      </div>
+      <div class="g">
+        <div class="rollen gc-1-6">
+          <h3>Wer beauftragt, prüft, abnimmt und freigibt</h3>
+          <p>Entlang der Kette braucht jeder Schritt einen Verantwortlichen: Wer beauftragt innerhalb welcher Wertgrenze, wer kontrolliert die Ausführung, wer nimmt ab, wer gibt die Zahlung frei. Diese Rollen stehen in der Zuständigkeitsmatrix der Schnittstelle zwischen Eigentümerseite und Verwaltung, damit Vergabe und Freigabe nicht in derselben Hand liegen, ohne dass es jemand entschieden hat.</p>
+          <a class="textlink" href="/property-management-optimierung/#zustaendigkeitsmatrix">Zuständigkeitsmatrix als Muster</a>
+        </div>
+        <div class="kennzahlarten gc-7-12">
+          <h3>Kennzahlarten ohne Zielwert</h3>
+          <dl class="dl-grid">
+            {kennzahlarten.map((k) => (<><dt>{k.t}</dt><dd>{k.d}</dd></>))}
+          </dl>
+          <p class="small kennzahlarten__hinweis">Ich definiere die Kennzahl, nicht den Sollwert. Zielwerte legt jedes Haus fest, und sie gehören in das Eigentümerreporting, nicht in eine Beratungsseite.</p>
+          <a class="textlink" href="/reporting-und-kennzahlen/">Reporting und Kennzahlen</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="netzwerk" slot="methodik">
+    <div class="container g">
+      <div class="gc-1-8">
+        <div class="section-head">
+          <span class="eyebrow">Netzwerk und Interessen</span>
+          <h2>Was mein Netzwerk in der Dienstleister&shy;steuerung leistet, und was nicht</h2>
+        </div>
+        <div class="prose">
+          <p>Mein operatives Netzwerk ist eine Quelle für Einschätzungen zu Machbarkeit, Aufwand und Kosten. Es ist keine eigene Handwerkerorganisation und keine bundesweit verfügbare Kapazität. Die Ausführung bleibt bei den Dienstleistern, die Ihr Haus beauftragt.</p>
+          <p>Kommt ein verbundenes Unternehmen oder ein Betrieb aus meinem Netzwerk als Dienstleister in Frage, lege ich das vor einer Empfehlung offen.</p>
+          <p class="netzwerk__mehr"><a class="textlink" href="/zusammenarbeit/#interessen">Zu den Interessen</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Szenario
+    slot="szenario"
+    titel="Nachträge und Abnahmen ohne Regel"
+    intro="Wie ich vorgehen würde, wenn Rechnungen die Angebote regelmäßig übersteigen und Abnahmen fehlen. Ein schematischer Fall, kein Mandat."
+    ausgangslage={[
+      'Die Schlussrechnungen der Dienstleister lägen regelmäßig über den Angeboten. Nachträge würden mündlich vor Ort vereinbart und erst mit der Rechnung sichtbar. Abnahmen fänden statt, aber ohne Protokoll, sodass Mängel später niemandem mehr zuzuordnen wären.',
+      'Die Verwaltung würde die Rechnungen prüfen, hätte aber keine Grundlage, einen Nachtrag zurückzuweisen. Die Eigentümerseite sähe nur die Summe.',
+    ]}
+    rolle="Ich würde die Steuerungskette vom Bedarf bis zur Rechnungsprüfung aufnehmen und die Lücken benennen. Mit Verwaltung und Technik würde ich Nachtragsregel und Abnahmestruktur festlegen und die ersten Vergaben nach dem neuen Standard begleiten. Entscheidungen über Wertgrenzen und Freigabestufen blieben bei der Eigentümerseite."
+    vorgehen={[
+      'Auftragsakten zurückliegender Vergaben durchsehen: Angebot, Nachträge, Rechnung, Abnahme. Wo fehlt was, und an welcher Stelle der Kette?',
+      'Nachtragsregel festlegen: Anzeige, Begründung, Freigabe vor Ausführung, Freigabestufen nach der Zuständigkeitsmatrix.',
+      'Abnahmeprotokoll und Mängelliste als Struktur einführen, Fotodokumentation als Pflichtbestandteil, Schlussrechnung erst nach Abnahme.',
+      'Leistungsbeschreibung für wiederkehrende Vergaben als Muster aufsetzen, damit Angebote vergleichbar werden.',
+      'Erste Vergaben nach dem Standard begleiten, Rechnungsprüfung gegen Auftrag und Abnahme einüben, Kennzahlarten festlegen.',
+    ]}
+    beteiligte={['Geschäftsführung oder Eigentümerseite', 'Leitung der Verwaltung', 'Technik oder Bauabteilung', 'Rechnungswesen']}
+    ergebnisse={[
+      'Nachtragsregel mit Freigabestufen, in der Zuständigkeitsmatrix verankert.',
+      'Abnahmeprotokoll und Mängelliste als Struktur, in der Verwaltung eingeführt.',
+      'Muster einer Leistungsbeschreibung für wiederkehrende Vergaben.',
+      'Kennzahlarten Nachtragsanteil und Anteil dokumentierter Abnahmen, ohne Zielwert.',
+    ]}
+    messung="Gemessen würde die Qualität der Steuerung, nicht ein vorab zugesagter Wert: der Nachtragsanteil je Dienstleister und Gewerk vor und nach Einführung der Regel sowie der Anteil der Aufträge mit dokumentierter Abnahme vor Freigabe der Schlussrechnung."
+    grenzen={['Keine Bauleitung, keine Fachplanung.', 'Keine Rechtsberatung zu Werkverträgen, Gewährleistung und Haftung.', 'Keine eigene Ausführung, keine Handwerkerkapazität.', 'Keine Ergebniszusage vor der Aufnahme der Kette.']}
+    mehr={{ label: 'Was ein echter Fall zusätzlich braucht', href: '/einblicke/#redaktionsgrundsaetze' }}
+    freigabe={referenzfallFreigabe}
+  />
+</Fachseite>
+
+<style>
+  /* Steuerungskette: neun Schritte in drei Reihen ab 861 px, darunter greift das auto-fit-Raster der Steps */
+  @media (min-width: 861px) {
+    .kette .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  /* Drei Steuerungspunkte als Bloecke mit 2 px Linie, Listen mit Haarlinien */
+  .punkte { margin-top: var(--s-8); }
+  .punkte__kopf .caps { display: block; margin: 0 0 var(--s-2); }
+  .punkte__intro { color: var(--c-text-2); max-width: var(--w-measure); margin: 0; }
+  .punkt { border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .punkt h4 { font-size: var(--fs-h3); margin-bottom: var(--s-3); }
+  .punkt__liste { list-style: none; margin: 0; padding: 0; }
+  .punkt__liste li { margin: 0; padding-block: var(--s-2); border-top: var(--rule); color: var(--c-text-2); }
+  .punkt__liste li:first-child { border-top: 0; padding-top: 0; }
+  .punkt__hinweis { color: var(--c-text-2); margin: var(--s-4) 0 0; padding-top: var(--s-3); border-top: var(--rule); }
+  .punkt__liste, .punkt__hinweis { max-width: var(--w-text); }
+
+  /* Zwischen 861 und 1080 px sind drei Spalten fuer Fliesstext zu eng: zwei Bloecke nebeneinander, der dritte ueber volle Breite */
+  @media (min-width: 861px) and (max-width: 1080px) {
+    .punkte > .punkt:nth-of-type(1) { grid-column: 1 / span 6; }
+    .punkte > .punkt:nth-of-type(2) { grid-column: 7 / -1; }
+    .punkte > .punkt:nth-of-type(3) { grid-column: 1 / -1; }
+  }
+
+  /* Pruefpunkte: Checkliste mit fettem Stichwort, Randnotiz mit 2 px Linie */
+  .pruefpunkte { max-width: var(--w-text); margin: 0; }
+  .pruefpunkte li { color: var(--c-text-2); }
+  .pruefpunkte li + li { margin-top: var(--s-3); }
+  .pruefpunkte strong { color: var(--c-text); }
+  .quelle { border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .quelle h3 { margin-bottom: var(--s-3); }
+  .quelle p { color: var(--c-text-2); }
+  .quelle p:last-child { margin-bottom: 0; }
+
+  /* Standards: Absatzblock Buendelung unter dem Register */
+  .buendelung { margin-top: var(--s-7); }
+  .buendelung h3 { margin-bottom: var(--s-3); }
+  .buendelung p { color: var(--c-text-2); max-width: var(--w-text); }
+  .buendelung p:last-child { margin-bottom: 0; }
+
+  /* Zustaendigkeiten und Kennzahlarten: zwei Spalten, dl-grid mit fester Begriffsspalte */
+  .rollen h3, .kennzahlarten h3 { margin-bottom: var(--s-3); }
+  .rollen p { color: var(--c-text-2); max-width: var(--w-text); }
+  .rollen .textlink, .kennzahlarten .textlink { margin-top: calc(var(--s-4) - 0.65rem); }   /* sichtbarer Abstand --s-4; 0.65rem ist der Innenabstand der Zielflaeche aus .textlink */
+  .kennzahlarten .dl-grid { grid-template-columns: 10rem 1fr; }
+  .kennzahlarten__hinweis { color: var(--c-text-2); margin: var(--s-4) 0 0; }
+  @media (max-width: 600px) {
+    .kennzahlarten .dl-grid { grid-template-columns: 1fr; }
+    .kennzahlarten .dl-grid dt { border-bottom: 0; padding-bottom: 0; }
+  }
+
+  /* Netzwerk und Interessen: Fliesstext in Textbreite, Textlink als eigene Zeile unter dem letzten Absatz */
+  #netzwerk .prose p { color: var(--c-text-2); }
+  #netzwerk .prose p:last-child { margin-bottom: 0; }
+  #netzwerk .netzwerk__mehr { margin-top: calc(var(--s-2) - var(--s-4)); }   /* Absatzabstand oben auf --s-2 verkuerzt (Randkollaps mit dem Absatz davor) */
+</style>

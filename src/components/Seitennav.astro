@@ -1,0 +1,33 @@
+---
+/**
+ * Seitennavigation direkt unter dem Hero der Fachseiten und Vertiefungen (docs/DESIGN-SPEC-V2.md 6.11).
+ * Reiner Text zwischen zwei Haarlinien, keine Pillen, kein Hintergrund. Jedes Ziel ist mindestens 44 px hoch.
+ * Die Ziele sind Anker auf derselben Seite; die Reihenfolge folgt der DOM-Reihenfolge der Abschnitte.
+ */
+export interface SeitennavEintrag {
+  label: string;
+  /** Anker auf derselben Seite, z. B. "#leistung" */
+  href: string;
+}
+interface Props {
+  items: SeitennavEintrag[];
+  /** Beschriftung der Navigation fuer Screenreader, Standard "Auf dieser Seite" */
+  label?: string;
+}
+const { items, label = 'Auf dieser Seite' } = Astro.props;
+---
+<nav class="seitennav" aria-label={label}>
+  <div class="container">
+    <ol role="list">
+      {items.map((i) => <li><a href={i.href}>{i.label}</a></li>)}
+    </ol>
+  </div>
+</nav>
+<style>
+  .seitennav { border-top: var(--rule); border-bottom: var(--rule); }
+  .seitennav ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s-6); font-size: var(--fs-small); font-weight: 600; }
+  .seitennav li { margin: 0; }
+  @media (max-width: 640px) { .seitennav ol { column-gap: var(--s-5); } }   /* 24 statt 32 px: sechs Anker stehen bei 390 px in hoechstens drei Zeilen (Pruefung Runde 3); Abstand zwischen Zielen bleibt ueber 8 px */
+  .seitennav a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; color: var(--c-text); }
+  @media (hover: hover) { .seitennav a:hover { text-decoration: underline; text-decoration-color: var(--c-text); } }
+</style>

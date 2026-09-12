@@ -35,13 +35,25 @@ ErrorDocument 404 /404.html
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
-  # Keine externen Skripte, Schriften oder Frames. Inline-Skripte stammen aus dem Astro-Build (Hash-CSP bei Bedarf ergaenzen).
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  # CSP: keine externen Skripte, Schriften oder Frames.
+  # 'unsafe-inline' in script-src ist bewusst gesetzt: Astro rendert die Skripte aus Header.astro und ContactForm.astro
+  # als Inline-Module, Base.astro traegt den synchronen no-js-Einzeiler im <head>. JSON-LD-Bloecke werden nicht ausgefuehrt.
+  # 'unsafe-inline' in style-src deckt die im Build inline ausgelieferten Stylesheets ab (build.inlineStylesheets).
+  # Eine Hash-CSP (sha256 je Inline-Skript, nach jedem Build neu zu erzeugen) bleibt optionaler Deploy-Schritt,
+  # siehe docs/LAUNCH-CHECKLISTE.md.
   Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
   # HSTS nur fuer diese Subdomain, ohne includeSubDomains (bestehende HVM-Anwendungen nicht beeinflussen)
   Header always set Strict-Transport-Security "max-age=31536000"
-  # Cache: gehashte Assets lange, HTML kurz
+  # Cache: gehashte Build-Assets ein Jahr und immutable, Dateien aus public/ einen Tag, HTML kurz.
+  # Dateien aus public/ (og-default.png, favicon.svg, favicon.png, logo-hvm.webp) tragen keinen Hash im Namen
+  # und koennen spaeter ausgetauscht werden, deshalb nur ein Tag.
   <FilesMatch "\.(css|js|woff2|webp|avif|png|jpe?g|svg|ico)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+  # Astro legt Build-Assets unter /_astro/ mit Hash im Dateinamen ab (Muster name.HASH.ext, HASH mindestens acht
+  # Zeichen aus A-Z, a-z, 0-9, _ und -, bei Bildvarianten mit Suffix). Die spaetere Regel ueberschreibt die Tagesregel.
+  <FilesMatch "\.[A-Za-z0-9_-]{8,}\.(css|js|woff2|webp|avif|png|jpe?g|svg)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
   <FilesMatch "\.(html|xml|txt)$">

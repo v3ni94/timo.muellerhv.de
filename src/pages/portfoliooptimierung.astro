@@ -1,57 +1,149 @@
 ---
-import Fachseite from '../layouts/Fachseite.astro';
+/**
+ * Portfoliooptimierung (docs/CONTENT-PLAN-V2.md 4.3, Masterprompt Abschnitt 8).
+ * Fachseite auf Fachseite.astro. Heimatort fuer Einordnung des Bestands, Leerstand, Forderungen, OPEX,
+ * Begriffserlaeuterung CAPEX und Liquiditaet. Die Priorisierungslogik fuer Investitionen liegt auf
+ * /investitionspriorisierung/ und wird hier nur mit einem Satz plus Link angerissen (Heimatort-Prinzip 1.2).
+ * Beitragslinks (Leerstand je Einheit, Objektstrategie) rendern nur, wenn der Beitrag status freigegeben traegt;
+ * ohne Freigabe fuehrt der Link auf den passenden Glossareintrag. Keine Zahlen, keine Rhythmus- oder Fristangaben.
+ */
+import Fachseite, { type Block } from '../layouts/Fachseite.astro';
+import type { FaqItem } from '../components/Faq.astro';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
+import type { Crumb } from '../lib/seo';
+
+const path = '/portfoliooptimierung/';
+
+/* Breadcrumb Beratung / Portfoliooptimierung (Inhaltsplan 2 und 6.2), gleiche Benennung wie auf /investitionspriorisierung/. */
+const crumbs: Crumb[] = [
+  { name: 'Beratung', href: '/asset-management-beratung/' },
+  { name: 'Portfoliooptimierung', href: path },
+];
+
+/* Bedingte Beitragslinks: nur freigegebene Beitraege, kein Hinweis auf kommende Beitraege. */
+const beitraege = await veroeffentlichteBeitraege();
+const beitrag = (slug: string) => beitraege.find((b) => b.id === slug);
+const beitragLeerstand = beitrag('leerstand-je-einheit');
+const beitragObjektstrategie = beitrag('objektstrategie-halten-entwickeln-verkaufen');
+
+const situationen: Block[] = [
+  { t: 'Ergebnis unter Erwartung', d: 'Der Bestand ist grundsätzlich gesund, aber Leerstand, Forderungsausfälle und Kosten drücken das Ergebnis stärker, als es sein müsste.' },
+  { t: 'Instandhaltungs­stau ohne Zahlenbasis', d: 'Der Rückstand ist bekannt, aber nicht beziffert. Investitionen werden reaktiv statt nach Priorität entschieden.' },
+  { t: 'Heterogener Bestand nach Zukauf', d: 'Mehrere Teilportfolios mit unterschiedlichen Verwaltungen, Datenständen und Standards sollen einheitlich gesteuert werden.' },
+  { t: 'Anstehende Finanzierungs­entscheidung', d: 'Eine Prolongation, also die Verlängerung einer auslaufenden Finanzierung, eine Umschuldung oder zusätzlicher Kapitalbedarf verlangen eine belastbare Darstellung von Ertragskraft und Investitionsbedarf.' },
+  {
+    t: 'Bestand halten bei knapper Liquidität',
+    d: 'Der Bestand soll gehalten werden, aber die Mittel reichen nicht für alle Maßnahmen gleichzeitig. Entscheidend sind die Reihenfolge der Maßnahmen und ihre Wirkung auf die Liquidität. Finanzierungen vermittle ich nicht.',
+    mehr: { label: 'Liquiditätsplanung im Glossar', href: '/glossar/#liquiditaet' },
+  },
+];
+
+const leistungen: Block[] = [
+  { t: 'Einordnung des Bestands', d: 'Jedes Objekt wird nach Ausgangslage und Handlungsbedarf eingeordnet: Ertragslage, Zustand, Vermietbarkeit, Kapitalbindung. Daraus entsteht eine Landkarte, die zeigt, wo Aufmerksamkeit und Budget wirken.' },
+  {
+    t: 'Leerstand und Vermietung',
+    d: 'Ursachen des Leerstands je Einheit klären: Zustand, Preis, Prozess oder Nachfrage. Maßnahmen mit Verwaltung und Technik so abstimmen, dass Freigabe, Herrichtung und Vermarktung ineinandergreifen.',
+    mehr: beitragLeerstand
+      ? { label: 'Beitrag: Leerstand je Einheit', href: `/einblicke/${beitragLeerstand.id}/` }
+      : { label: 'Leerstand im Glossar', href: '/glossar/#leerstand' },
+  },
+  { t: 'Forderungen', d: 'Offene Posten strukturieren, Mahnprozesse und Zuständigkeiten prüfen. Realistisch einschätzen, welche Forderungen noch eingehen und welchen Aufwand ihre Durchsetzung kostet.' },
+  {
+    t: 'Laufende Kosten (OPEX)',
+    d: 'OPEX sind die laufenden Betriebs- und Verwaltungskosten eines Objekts. Sie werden danach geordnet, ob sie im zulässigen Rahmen auf Mieter umgelegt werden können, wie lange Verträge sie binden und wo Einfluss möglich ist. Dienstleisterverträge und Verbrauchsdaten werden auf Auffälligkeiten geprüft.',
+    mehr: { label: 'OPEX im Glossar', href: '/glossar/#opex' },
+  },
+  {
+    t: 'Instandhaltung und Investitionen (CAPEX)',
+    d: 'CAPEX sind Investitionen in die Substanz eines Objekts: Dach, Fassade, Technik, Wohnungen. Ich unterstütze dabei, jede Maßnahme als zwingend, sinnvoll oder verzichtbar einzustufen und auf eine Zeitachse zu legen. Wie Maßnahmen in eine begründete Reihenfolge kommen, beschreibe ich auf einer eigenen Seite.',
+    mehr: { label: 'Investitionspriorisierung', href: '/investitionspriorisierung/' },
+  },
+  {
+    t: 'Liquidität und Finanzierungs­schnittstelle',
+    d: 'Maßnahmenplan und Liquiditätsplanung werden zusammengeführt. Für Gespräche mit Finanzierern entstehen nachvollziehbare Unterlagen zu Ertragskraft, Investitionsbedarf und Zeitplan. Grundlage ist der Investitionsplan mit Zeitachse aus der Investitionspriorisierung. Die Finanzierung selbst vermittle ich nicht.',
+    mehr: { label: 'Investitionsplan mit Zeitachse', href: '/investitionspriorisierung/#investitionsplan' },
+  },
+];
+
+const ergebnisse = [
+  'Portfolio-Einordnung mit Handlungsbedarf je Objekt',
+  'Maßnahmenliste nach Wirkung, Aufwand und Risiko priorisiert',
+  'Instandhaltungs- und Investitionsmaßnahmen in begründeter Reihenfolge',
+  'Maßnahmenpaket Leerstand und Forderungen mit Verantwortlichen',
+  'Abgestimmte Kennzahlen für die laufende Nachverfolgung',
+];
+
+const vorgehen: Block[] = [
+  { t: 'Daten zusammenführen', d: 'Mieterlisten, Leerstand, offene Forderungen, Kosten, Instandhaltungshistorie und Verträge in einen konsistenten Stand bringen.' },
+  { t: 'Objekte einordnen', d: 'Ertragslage, Zustand und Handlungsbedarf je Objekt bewerten, Cluster bilden, also Gruppen vergleichbarer Objekte.' },
+  { t: 'Maßnahmen priorisieren', d: 'Mit Eigentümerseite, Verwaltung und Technik die Reihenfolge festlegen und Verantwortliche benennen.' },
+  { t: 'Umsetzen und nachhalten', d: 'Fortschritt und Wirkung in festem Rhythmus prüfen, Abweichungen erklären, nachsteuern.' },
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'wirkung',
+    q: 'Wie schnell zeigen sich Verbesserungen?',
+    a: 'Das hängt von Ausgangslage, Datenqualität und Entscheidungsgeschwindigkeit ab. Maßnahmen bei Forderungen und Prozessen wirken meist früher als Investitionen in die Substanz. Ich nenne keine pauschalen Fristen oder Einsparquoten.',
+  },
+  {
+    id: 'daten',
+    q: 'Brauchen Sie Zugang zu allen Daten?',
+    a: 'Für eine Ersteinschätzung genügen aggregierte Angaben. Im Mandat arbeite ich mit den Daten, die für die vereinbarten Handlungsfelder erforderlich sind. Vertraulichkeit wird vorab vereinbart.',
+    mehr: { label: 'Datenbedarf und Vertraulichkeit unter Zusammenarbeit', href: '/zusammenarbeit/' },
+  },
+  {
+    id: 'verwaltung',
+    q: 'Was passiert mit der bestehenden Verwaltung?',
+    a: 'Sie bleibt eingebunden. Portfoliooptimierung funktioniert nur, wenn die Verwaltung die Maßnahmen im Tagesgeschäft trägt. Ein Verwalterwechsel ist kein Ziel der Beratung, kann aber ein Ergebnis der Analyse sein.',
+  },
+  {
+    id: 'verkauf',
+    q: 'Ist der Verkauf einzelner Objekte Teil der Portfoliooptimierung?',
+    a: 'Er kann ein Ergebnis sein, aber kein Ausgangspunkt. Die Objektstrategie, also die begründete Zielrichtung je Objekt, endet mit Halten, Entwickeln oder Verkaufen. Fällt die Entscheidung für einen Verkauf, bereite ich sie vor: Zahlenbasis, Unterlagen und Reihenfolge der Schritte auf Eigentümerseite. Steuerliche und rechtliche Folgen bewerten Steuerberater und Rechtsanwalt. Vermarktung und Vermittlung übernehme ich nicht.',
+    mehr: beitragObjektstrategie
+      ? { label: 'Beitrag: Halten, Entwickeln oder Verkaufen', href: `/einblicke/${beitragObjektstrategie.id}/` }
+      : { label: 'Objektstrategie im Glossar', href: '/glossar/#objektstrategie' },
+  },
+  {
+    id: 'capex-opex',
+    q: 'Wie unterscheiden sich CAPEX und OPEX in der Steuerung?',
+    a: 'OPEX beeinflussen das laufende Ergebnis und sind teilweise umlagefähig. CAPEX binden Kapital, erhöhen aber Substanz, Vermietbarkeit und Wert. Beide werden getrennt geplant und gemeinsam in der Liquidität betrachtet.',
+    mehr: { label: 'CAPEX und OPEX im Glossar', href: '/glossar/#capex' },
+  },
+];
+
+const verwandt = [
+  { label: 'Investitionspriorisierung', href: '/investitionspriorisierung/' },
+  { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
+  { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  { label: 'KI im Immobilienmanagement', href: '/ki-immobilienmanagement/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+];
 ---
 <Fachseite
-  path="/portfoliooptimierung/"
+  path={path}
   title="Immobilienportfolio optimieren | Timo Müller"
-  description="Bestandsoptimierung für Wohnimmobilien: Leerstand, Forderungen, laufende Kosten, Instandhaltungs- und Investitionsprioritäten, Liquidität. Beratung von Timo Müller."
-  h1="Portfoliooptimierung für Immobilienbestände"
+  description="Bestandsoptimierung für Wohnimmobilien: Leerstand, Forderungen, laufende Kosten, Investitionsprioritäten und Liquidität. Beratung von Timo Müller."
+  h1={'Portfolio­optimierung für Immobilien­bestände'}
   eyebrow="Beratung"
   frage="Welche Maßnahmen verbessern Ihr Ergebnis tatsächlich, und in welcher Reihenfolge?"
   intro="Portfoliooptimierung bedeutet hier die konkrete wirtschaftliche und operative Verbesserung eines Bestands: Erträge sichern, Kosten und Ausfälle senken, Investitionen priorisieren und die Liquidität im Blick behalten."
   serviceName="Portfoliooptimierung für Immobilienbestände"
   serviceType="Bestandsoptimierung Immobilien"
-  situationen={[
-    { t: 'Ergebnis unter Erwartung', d: 'Der Bestand ist grundsätzlich gesund, aber Leerstand, Forderungsausfälle und Kosten drücken das Ergebnis stärker, als es sein müsste.' },
-    { t: 'Instandhaltungsstau ohne Zahlenbasis', d: 'Der Umfang des Rückstands ist bekannt, aber nicht beziffert. Investitionen werden reaktiv statt nach Priorität entschieden.' },
-    { t: 'Heterogener Bestand nach Zukauf', d: 'Mehrere Teilportfolios mit unterschiedlichen Verwaltungen, Datenständen und Standards sollen einheitlich gesteuert werden.' },
-    { t: 'Anstehende Finanzierungsentscheidung', d: 'Prolongation, Umschuldung oder Kapitalbedarf verlangen eine belastbare Darstellung von Ertragskraft und Investitionsbedarf.' },
-  ]}
-  leistungen={[
-    { t: 'Einordnung des Bestands', d: 'Jedes Objekt wird nach Ausgangslage und Handlungsbedarf eingeordnet: Ertragslage, Zustand, Vermietbarkeit, Kapitalbindung. Daraus entsteht eine Landkarte, wo Aufmerksamkeit und Budget wirken.' },
-    { t: 'Leerstand und Vermietung', d: 'Ursachen des Leerstands je Einheit klären: Zustand, Preis, Prozess oder Nachfrage. Maßnahmen mit Verwaltung und Technik so abstimmen, dass Freigabe, Herrichtung und Vermarktung ineinandergreifen.' },
-    { t: 'Forderungen', d: 'Offene Posten strukturieren, Mahnprozesse und Zuständigkeiten prüfen, realistische Einschätzung von Einbringlichkeit und Aufwand.' },
-    { t: 'Laufende Kosten (OPEX)', d: 'OPEX sind die laufenden Betriebs- und Verwaltungskosten. Sie werden nach Umlagefähigkeit, Vertragsbindung und Einflussmöglichkeit geordnet. Dienstleisterverträge und Verbrauchsdaten werden auf Auffälligkeiten geprüft.' },
-    { t: 'Instandhaltung und Investitionen (CAPEX)', d: 'CAPEX sind Investitionen in die Substanz: Dach, Fassade, Technik, Wohnungen. Ich unterstütze bei der Priorisierung nach Dringlichkeit, Wirkung auf Ertrag und Wert sowie technischer Abhängigkeit, und bei der Umsetzungsplanung.' },
-    { t: 'Liquidität und Finanzierungsschnittstelle', d: 'Maßnahmenplan und Liquiditätsplanung werden zusammengeführt. Für Gespräche mit Finanzierern entstehen nachvollziehbare Unterlagen zu Ertragskraft, Investitionsbedarf und Zeitplan. Die Finanzierung selbst vermittle ich nicht.' },
-  ]}
-  ergebnisse={[
-    'Portfolio-Einordnung mit Handlungsbedarf je Objekt',
-    'Maßnahmenliste nach Wirkung, Aufwand und Risiko priorisiert',
-    'CAPEX-Plan mit Zeitachse und Budgetrahmen',
-    'Maßnahmenpaket Leerstand und Forderungen mit Verantwortlichen',
-    'Abgestimmte Kennzahlen für die laufende Nachverfolgung',
-  ]}
-  vorgehen={[
-    { t: 'Daten zusammenführen', d: 'Mieterlisten, Leerstand, offene Forderungen, Kosten, Instandhaltungshistorie und Verträge in einen konsistenten Stand bringen.' },
-    { t: 'Objekte einordnen', d: 'Ertragslage, Zustand und Handlungsbedarf je Objekt bewerten, Cluster bilden.' },
-    { t: 'Maßnahmen priorisieren', d: 'Mit Eigentümerseite, Verwaltung und Technik die Reihenfolge festlegen und Verantwortliche benennen.' },
-    { t: 'Umsetzen und nachhalten', d: 'Fortschritt und Wirkung monatlich prüfen, Abweichungen erklären, nachsteuern.' },
-  ]}
+  crumbs={crumbs}
+  situationen={situationen}
+  situationenIntro="Fünf Ausgangslagen, in denen Portfoliooptimierung ansetzt."
+  leistungen={leistungen}
+  ergebnisse={ergebnisse}
+  vorgehen={vorgehen}
   abgrenzung={[
-    'Zahlenbeispiele in Vorlagen basieren auf offen gelegten Modellannahmen. Sie sind keine Projektergebnisse und keine Zusage.',
+    'Zahlen in Entscheidungsvorlagen beruhen auf offengelegten Annahmen. Sie sind keine Projektergebnisse und keine Zusage.',
     'Ich vermittle keine Finanzierungen und erbringe keine Anlageberatung. Ich bereite die Unterlagen vor und begleite fachlich.',
     'Die operative Umsetzung erfolgt durch Ihre Verwaltung und Dienstleister. Ich steuere und halte nach, ersetze diese aber nicht.',
+    'Keine Rechts- oder Steuerberatung. Steuerliche und rechtliche Folgen von Maßnahmen und Objektstrategien bewerten Steuerberater und Rechtsanwalt.',
   ]}
-  faq={[
-    { q: 'Wie schnell zeigen sich Verbesserungen?', a: 'Das hängt von Ausgangslage, Datenqualität und Entscheidungsgeschwindigkeit ab. Maßnahmen bei Forderungen und Prozessen wirken meist früher als Investitionen in die Substanz. Ich nenne keine pauschalen Fristen oder Einsparquoten.' },
-    { q: 'Brauchen Sie Zugang zu allen Daten?', a: 'Für eine Ersteinschätzung genügen aggregierte Angaben. Im Mandat arbeite ich mit den Daten, die für die vereinbarten Handlungsfelder erforderlich sind. Vertraulichkeit wird vorab vereinbart.' },
-    { q: 'Was passiert mit der bestehenden Verwaltung?', a: 'Sie bleibt eingebunden. Portfoliooptimierung funktioniert nur, wenn die Verwaltung die Maßnahmen im Tagesgeschäft trägt. Ein Verwalterwechsel ist kein Ziel der Beratung, kann aber ein Ergebnis der Analyse sein.' },
-    { q: 'Wie unterscheiden sich CAPEX und OPEX in der Steuerung?', a: 'OPEX beeinflussen das laufende Ergebnis und sind teilweise umlagefähig. CAPEX binden Kapital, erhöhen aber Substanz, Vermietbarkeit und Wert. Beide werden getrennt geplant und gemeinsam in der Liquidität betrachtet.' },
-  ]}
-  verwandt={[
-    { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
-    { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
-    { label: 'KI im Immobilienmanagement', href: '/ki-immobilienmanagement/' },
-  ]}
+  faq={faq}
+  verwandt={verwandt}
 />

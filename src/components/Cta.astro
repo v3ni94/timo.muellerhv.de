@@ -1,28 +1,52 @@
 ---
+/**
+ * Dunkler Schlussakkord (docs/DESIGN-SPEC-V2.md 6.8, docs/CONTENT-PLAN-V2.md 1.6).
+ * Grosse Frage links, Aktionen rechts, eine orange Linie als einziger Akzent.
+ * Zusatzzeile "Was nach Ihrer Anfrage passiert" verlinkt auf /zusammenarbeit/, abschaltbar per ohneAblauf.
+ */
 import { SITE } from '../data/site';
-interface Props { title?: string; text?: string; button?: string; }
+interface Props {
+  title?: string;
+  text?: string;
+  button?: string;
+  /** Zusatzzeile mit Link auf /zusammenarbeit/ unterdruecken (fuer /zusammenarbeit/ selbst). */
+  ohneAblauf?: boolean;
+}
 const {
   title = 'Wo steht Ihr Portfolio, und was soll sich verändern?',
   text = 'Schildern Sie mir kurz Ihre Ausgangslage und Ihr Ziel. Wir klären, ob und in welchem Umfang eine Zusammenarbeit sinnvoll ist.',
   button = 'Anliegen schildern',
+  ohneAblauf = false,
 } = Astro.props;
 ---
 <section class="section section--dunkel cta">
-  <div class="container cta__inner">
-    <div>
+  <div class="container g cta__inner">
+    <div class="cta__text gc-1-7">
       <h2>{title}</h2>
       <p class="lead">{text}</p>
     </div>
-    <div class="cta__actions">
+    <div class="cta__actions gc-9-12">
       <a class="btn btn--primary" href="/kontakt/">{button}</a>
-      <p class="cta__mail">Direkt per E-Mail: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      <p class="cta__mail"><span class="cta__mail-prefix">Direkt per E-Mail:</span> <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      {!ohneAblauf && (
+        <p class="cta__ablauf"><a class="textlink" href="/zusammenarbeit/">Was nach Ihrer Anfrage passiert</a></p>
+      )}
     </div>
   </div>
 </section>
 <style>
-  .cta__inner { display: grid; gap: var(--s-6); grid-template-columns: 1.4fr 1fr; align-items: center; }
-  .cta__actions { display: flex; flex-direction: column; gap: var(--s-4); align-items: flex-start; }
-  .cta__mail { color: rgba(255,255,255,.85); margin: 0; }
-  .cta__mail a { color: #fff; }
-  @media (max-width: 800px) { .cta__inner { grid-template-columns: 1fr; } }
+  .cta { padding-block: clamp(4rem, 9vw, 8rem); }
+  .cta__inner { align-items: end; }
+  .cta__text::before { content: ""; display: block; width: 3rem; height: 3px; background: var(--c-orange); margin-bottom: var(--s-5); }
+  .cta h2 { font-size: var(--fs-h2); letter-spacing: var(--ls-heading); max-width: 18ch; }
+  .cta .lead { color: var(--c-weiss-75); }
+  /* Zielhoehe 44 px fuer E-Mail- und Ablauflink (Spezifikation 5.6, Muster .kontakt-direkt__link): Innenabstand am Link,
+     der kleinere gap gleicht den Zuwachs aus. margin: 0 hebt den negativen Aussenabstand der globalen .textlink-Regel auf,
+     damit sich die beiden Zielflaechen nicht ueberlappen. */
+  .cta__actions { display: flex; flex-direction: column; gap: var(--s-2); align-items: flex-start; border-top: var(--rule-dark); padding-top: var(--s-5); }
+  .cta__mail { margin: var(--s-2) 0 0; color: var(--c-weiss-60); }
+  .cta__mail-prefix { display: block; font-size: var(--fs-small); }
+  .cta__mail a { display: inline-block; padding-block: 0.65rem; margin: 0; color: #fff; font-size: var(--fs-lead); font-weight: 600; overflow-wrap: anywhere; }
+  .cta__ablauf { margin: 0; color: var(--c-weiss-75); }
+  .cta__ablauf a { display: inline-block; padding-block: 0.65rem; margin: 0; color: #fff; }
 </style>

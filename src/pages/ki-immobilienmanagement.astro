@@ -1,58 +1,273 @@
 ---
-import Fachseite from '../layouts/Fachseite.astro';
+/**
+ * KI im Immobilienmanagement (docs/CONTENT-PLAN-V2.md 4.5, Masterprompt Abschnitt 8).
+ * Fachseite auf Fachseite.astro. Heimatort fuer den kontrollierten Einstieg: Prozessauswahl, Datenpruefung,
+ * Freigabekonzept, Testphase, Auswertung. Reporting liegt auf /reporting-und-kennzahlen/, Vorgangsbearbeitung auf
+ * /property-management-optimierung/, Massnahmenverfolgung auf /dienstleistersteuerung/; diese Stellen werden hier
+ * mit einem Satz plus Link angerissen (Heimatort-Prinzip 1.2).
+ * Slot methodik: Abschnitt "Was ein Pilot enthaelt" (Register mit fuenf Phasen, Checkliste des Pilotplans),
+ * Abschnitt "Mandantendaten und KI", Flag-Abschnitt "Entwicklungsstand eigener Anwendungen".
+ * Flag entwicklungsstand (Freigabepunkt 32, docs/FAKTENLISTE.md Nr. 10): rendert ausschliesslich mit Freigabe und
+ * freigegebenem Text. Ohne Freigabe erscheint nichts, auch kein Eintrag in der Seitennavigation und kein Verweis
+ * aus der Abgrenzung auf den Abschnitt.
+ * Beitragslink (KI, kontrollierter Einstieg) rendert nur mit status freigegeben.
+ * Keine Werkzeug- oder Anbieternamen, keine Zahlen, keine Zusagen zu Einsparungen oder Zeitgewinn.
+ */
+import Fachseite, { type Block, type Absatz, type Link } from '../layouts/Fachseite.astro';
+import type { FaqItem } from '../components/Faq.astro';
+import type { SeitennavEintrag } from '../components/Seitennav.astro';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
+
+const path = '/ki-immobilienmanagement/';
+
+/* Freigabepunkt 32: Entwicklungsstand eigener KI-Anwendungen. Veroeffentlicht wird ausschliesslich eine von
+   Timo Mueller freigegebene, nuechterne Beschreibung des tatsaechlichen Stands. Bis dahin bleibt der Abschnitt
+   vollstaendig ausgeblendet. Nach Freigabe: entwicklungsstand auf true setzen und die freigegebenen Absaetze in
+   entwicklungsstandText eintragen. Ohne Text rendert der Abschnitt auch mit Flag nichts (kein Torso). */
+const entwicklungsstand = false;
+const entwicklungsstandText: string[] = [];
+const zeigeEntwicklungsstand = entwicklungsstand && entwicklungsstandText.length > 0;
+
+/* Bedingter Beitragslink: nur ein freigegebener Beitrag, kein Hinweis auf kommende Beitraege. */
+const beitraege = await veroeffentlichteBeitraege();
+const beitragEinstieg = beitraege.find((b) => b.id === 'ki-immobilienmanagement-kontrollierter-einstieg');
+
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Passende Situationen', href: '#situationen' },
+  { label: 'Leistungsumfang', href: '#leistung' },
+  { label: 'Pilot', href: '#pilot' },
+  { label: 'Mandantendaten', href: '#mandantendaten' },
+  ...(zeigeEntwicklungsstand ? [{ label: 'Entwicklungsstand', href: '#entwicklungsstand' }] : []),
+  { label: 'Vorgehen', href: '#vorgehen' },
+  { label: 'Abgrenzung', href: '#abgrenzung' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+const situationen: Block[] = [
+  { t: 'Dokumente ohne Struktur', d: 'Verträge, Protokolle, Rechnungen und Schriftverkehr liegen verteilt in Postfächern, Ordnern und Systemen. Die Informationen sind vorhanden, aber im Moment der Entscheidung nicht verfügbar.' },
+  { t: 'Manuelle Datenprüfung', d: 'Plan und Ist, Stammdaten (die dauerhaften Grunddaten des Bestands: Objekte, Einheiten, Flächen, Verträge) und Abrechnungen werden von Hand abgeglichen. Fehler fallen spät oder gar nicht auf, und die Prüfung bindet Zeit, die für die Bewertung fehlt.' },
+  { t: 'Aufwendiges Reporting', d: 'Berichte für Eigentümer und Gremien binden in jeder Periode viel Arbeitszeit, obwohl die Daten vorliegen. Am Ende wird zusammengetragen statt eingeordnet.' },
+  { t: 'Unklare Erwartungen an KI', d: 'Die Geschäftsleitung soll KI einführen, weiß aber nicht, welcher Prozess sich eignet, welche Daten dafür reichen und welche Risiken bestehen.' },
+];
+
+const leistungen: Block[] = [
+  { t: 'Dokumentensichtung und Zuordnung', d: 'Eingehende Dokumente erkennen, klassifizieren, Objekt und Vorgang zuordnen und die wesentlichen Inhalte auslesen. Die Ergebnisse werden stichprobenartig von Menschen geprüft.' },
+  {
+    t: 'Strukturierte Vorgangsbearbeitung',
+    d: 'Vorgänge wie Schadensmeldungen, Rechnungen oder Anfragen mit Bearbeitungsstand, Fristen und Zuständigen nachvollziehbar führen. KI schlägt vor, Menschen entscheiden. Zuständigkeiten und Eskalation regelt die Umsetzungsebene.',
+    mehr: { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  },
+  { t: 'Datenprüfungen', d: 'Automatisierte Prüfung auf Abweichungen: Plan gegen Ist, Vertrag gegen Abrechnung, Stammdaten gegen den tatsächlichen Bestand. Auffälligkeiten werden zur Prüfung vorgelegt, nicht selbst korrigiert.' },
+  {
+    t: 'Berichtsentwürfe',
+    d: 'Entwürfe für Eigentümer- und Gremienberichte aus geprüften Daten, mit nachvollziehbarer Herkunft jeder Zahl. Die Freigabe liegt beim Verantwortlichen. Welche Kennzahlen ein Bericht braucht und wie er aufgebaut ist, beschreibe ich auf einer eigenen Seite.',
+    mehr: { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  },
+  {
+    t: 'Maßnahmenverfolgung',
+    d: 'Beschlossene Maßnahmen mit Verantwortlichen, Terminen und Status verfolgen, Erinnerungen und Abweichungsberichte erzeugen. Bei Aufträgen an Dienstleister schließt das Nachtrag und Abnahme ein.',
+    mehr: { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/' },
+  },
+  {
+    t: 'Einstiegsprüfung vor jeder Automatisierung',
+    d: 'Datenqualität, Zugriffsrechte, Nutzen, Risiken, Datenschutz und menschliche Freigaben werden vor der Einführung geprüft. Ohne belastbare Daten wird nichts automatisiert.',
+    mehr: { label: 'Was ein Pilot enthält', href: '#pilot' },
+  },
+];
+
+const ergebnisse = [
+  'Bewertete Liste geeigneter Prozesse mit Nutzen, Aufwand und Risiko',
+  'Anforderungen an Datenqualität und Zugriffsrechte je Prozess',
+  'Freigabe- und Kontrollkonzept je Anwendungsfall',
+  'Pilotplan mit Erfolgs- und Abbruchkriterien',
+  'Auswertung des Piloten als Entscheidungsgrundlage für den nächsten Schritt',
+];
+
+const vorgehen: Block[] = [
+  { t: 'Prozesse bewerten', d: 'Welche Abläufe sind häufig, regelbasiert und datenreich genug für einen sinnvollen Einsatz? Bewertung nach Nutzen, Aufwand und Risiko.' },
+  { t: 'Voraussetzungen prüfen', d: 'Datenqualität, Zugriffsrechte, Rechtsgrundlage, Auftragsverarbeitung und Verantwortlichkeiten klären. Fehlt eine Voraussetzung, endet der Prozess hier.' },
+  { t: 'Pilot umsetzen', d: 'Einen begrenzten Anwendungsfall mit klaren Freigaben, Kontrollen und Rückfallweg einführen. Der bisherige Ablauf läuft parallel weiter.' },
+  { t: 'Auswerten und entscheiden', d: 'Ergebnis gegen die vorab festgelegten Kriterien halten, Fehlerquellen beseitigen, dann entscheiden: erweitern, anpassen oder beenden.' },
+];
+
+/* Abgrenzung zu eigenen Anwendungen (docs/FAKTENLISTE.md Nr. 10). Der Verweis auf den Abschnitt Entwicklungsstand
+   erscheint nur, wenn dieser Abschnitt tatsaechlich rendert (Freigabepunkt 32). Ohne Freigabe bleibt es bei der Abgrenzung. */
+const eigeneAnwendungen =
+  'Eigene Anwendungen entwickle ich als unternehmerischen Hebel. Sie sind kein ausgerolltes Kundenprojekt und kein Nachweis institutioneller Mandatserfahrung.';
+const abgrenzungEigeneAnwendungen: Absatz = zeigeEntwicklungsstand
+  ? {
+      text: `${eigeneAnwendungen} Ihren Stand beschreibe ich unter Entwicklungsstand.`,
+      mehr: { label: 'Zum Entwicklungsstand', href: '#entwicklungsstand' },
+    }
+  : eigeneAnwendungen;
+
+const abgrenzung: Absatz[] = [
+  'Keine automatischen Zahlungs- oder Investitionsentscheidungen. KI bereitet vor, Menschen entscheiden und geben frei.',
+  abgrenzungEigeneAnwendungen,
+  'Keine Partner- oder Anbieterempfehlung ohne konkrete Grundlage. Die Werkzeugauswahl folgt dem Anwendungsfall, nicht umgekehrt.',
+  {
+    text: 'Mandantendaten kommen nur nach ausdrücklicher Vereinbarung und Prüfung in KI-Werkzeuge.',
+    mehr: { label: 'Mandantendaten und KI', href: '#mandantendaten' },
+  },
+  'Keine Rechtsberatung zu Datenschutz oder Auftragsverarbeitung. Die rechtliche Prüfung übernehmen Ihr Datenschutzbeauftragter und Ihr Rechtsanwalt; ich sorge dafür, dass sie vor der Einführung stattfindet.',
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'einstieg',
+    q: 'Welche Prozesse eignen sich für den Einstieg?',
+    a: 'Häufige, regelbasierte Abläufe mit vorhandenen Daten: Dokumentenzuordnung, Rechnungsprüfung, Plan-Ist-Abgleiche, Berichtsentwürfe. Ungeeignet sind Einzelfallentscheidungen mit hoher wirtschaftlicher Tragweite und Prozesse, deren Daten unvollständig oder widersprüchlich sind.',
+    mehr: { label: 'Was ein Pilot enthält', href: '#pilot' },
+  },
+  {
+    id: 'ersatz',
+    q: 'Ersetzt KI die Verwaltung oder das Asset Management?',
+    a: 'Nein. Sie entlastet von Routinearbeit und verbessert die Informationsbasis. Verantwortung, Bewertung und Entscheidung bleiben bei den Menschen, die dafür zuständig sind.',
+  },
+  {
+    id: 'datenschutz',
+    q: 'Wie wird der Datenschutz berücksichtigt?',
+    a: 'Vor jedem Einsatz werden Rechtsgrundlage, Auftragsverarbeitung, Speicherort und Zugriffsrechte geprüft. Wo die Grundlage fehlt, wird der Prozess nicht automatisiert oder mit anonymisierten Daten umgesetzt. Die rechtliche Einordnung übernehmen Datenschutzbeauftragter und Rechtsanwalt.',
+    mehr: { label: 'Mandantendaten und KI', href: '#mandantendaten' },
+  },
+  {
+    id: 'einsparung',
+    q: 'Finanziert KI Projekte oder garantiert sie Einsparungen?',
+    a: 'Nein. KI verbessert Daten, Abläufe und Entscheidungsvorbereitung. Wirtschaftliche Wirkung entsteht erst durch die Entscheidungen, die daraus folgen. Ich nenne keine Einsparquoten und keine Zeitgewinne.',
+  },
+];
+
+const verwandt: Link[] = [
+  { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  { label: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
+  { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+  ...(beitragEinstieg ? [{ label: 'Beitrag: KI, kontrollierter Einstieg', href: `/einblicke/${beitragEinstieg.id}/` }] : []),
+];
+
+/* Fuenf Phasen eines Piloten; Texte enthalten Glossar-Links und stehen deshalb direkt im Markup. */
+const pilotplan = [
+  'Umfang und Anwendungsfall: ein Prozess, ein Teilbestand, ein fester Endpunkt',
+  'Datenquelle und Datenqualität: woher die Daten kommen und wer für sie einsteht',
+  'Rechtsgrundlage und Auftragsverarbeitung: geprüft, bevor Daten fließen',
+  'Zugriffsrechte: wer was sehen und ändern darf, im System und im Werkzeug',
+  'Menschliche Freigabe: an welcher Stelle ein Verantwortlicher prüft und freigibt',
+  'Erfolgs- und Abbruchkriterien: vorab festgelegt, nicht im Nachhinein',
+  'Verantwortliche auf Ihrer Seite: für Daten, Fachlichkeit und Freigabe',
+  'Rückfallweg ohne KI: der bisherige Ablauf bleibt bestehen, bis der Pilot ausgewertet ist',
+];
 ---
 <Fachseite
-  path="/ki-immobilienmanagement/"
+  path={path}
   title="KI im Immobilienmanagement | Timo Müller"
   description="KI in der Portfoliosteuerung: Dokumentensichtung, Vorgangsbearbeitung, Datenprüfung, Berichtsentwürfe. Kontrollierter Einstieg mit klaren Freigaben."
-  h1="KI im Immobilienmanagement"
+  h1={'KI im Immobilien­management'}
   eyebrow="Beratung"
-  frage="Wo verbessert KI Ihre Portfoliosteuerung messbar, und wo bleibt sie ein Versprechen?"
+  frage="Wo verbessert KI Ihre Portfoliosteuerung nachweisbar, und wo bleibt sie ein Versprechen?"
   intro="KI ist ein Werkzeug innerhalb der Portfoliosteuerung. Richtig eingesetzt liefert sie bessere Daten, schnellere Abläufe und vorbereitete Entscheidungen. Wirtschaftliche Verantwortung und Freigaben bleiben beim Menschen."
   serviceName="Beratung zu KI im Immobilienmanagement"
   serviceType="KI-Beratung Immobilienwirtschaft"
-  situationen={[
-    { t: 'Dokumente ohne Struktur', d: 'Verträge, Protokolle, Rechnungen und Schriftverkehr liegen verteilt in Postfächern, Ordnern und Systemen. Informationen sind vorhanden, aber nicht verfügbar.' },
-    { t: 'Manuelle Datenprüfung', d: 'Plan und Ist, Stammdaten und Abrechnungen werden von Hand abgeglichen. Fehler fallen spät oder gar nicht auf.' },
-    { t: 'Aufwendiges Reporting', d: 'Berichte für Eigentümer und Gremien kosten jeden Monat Tage, obwohl die Daten vorliegen.' },
-    { t: 'Unklare Erwartungen an KI', d: 'Die Geschäftsleitung soll KI einführen, weiß aber nicht, welcher Prozess sich eignet und welche Risiken bestehen.' },
-  ]}
-  leistungen={[
-    { t: 'Dokumentensichtung und Zuordnung', d: 'Eingehende Dokumente erkennen, klassifizieren, Objekt und Vorgang zuordnen und die wesentlichen Inhalte extrahieren. Ergebnisse werden stichprobenartig geprüft.' },
-    { t: 'Strukturierte Vorgangsbearbeitung', d: 'Vorgänge wie Schadensmeldungen, Rechnungen oder Anfragen mit Bearbeitungsstand, Fristen und Zuständigen nachvollziehbar führen. KI schlägt vor, Menschen entscheiden.' },
-    { t: 'Datenprüfungen', d: 'Automatisierte Prüfung auf Abweichungen: Plan gegen Ist, Vertrag gegen Abrechnung, Stammdaten gegen Realität. Auffälligkeiten werden zur Prüfung vorgelegt.' },
-    { t: 'Berichtsentwürfe', d: 'Entwürfe für Eigentümer- und Gremienberichte aus geprüften Daten, mit nachvollziehbarer Herkunft jeder Zahl. Freigabe durch den Verantwortlichen.' },
-    { t: 'Maßnahmenverfolgung', d: 'Beschlossene Maßnahmen mit Verantwortlichen, Terminen und Status verfolgen, Erinnerungen und Abweichungsberichte erzeugen.' },
-    { t: 'Einstiegsprüfung vor jeder Automatisierung', d: 'Datenqualität, Zugriffsrechte, Nutzen, Risiken, Datenschutz und menschliche Freigaben werden vor der Einführung geprüft. Ohne belastbare Daten wird nichts automatisiert.' },
-  ]}
-  ergebnisse={[
-    'Bewertete Liste geeigneter Prozesse mit Nutzen, Aufwand und Risiko',
-    'Anforderungen an Datenqualität und Zugriffsrechte',
-    'Freigabe- und Kontrollkonzept je Anwendungsfall',
-    'Pilotplan für einen kontrollierten Einstieg',
-    'Kriterien für die Erfolgsmessung',
-  ]}
-  vorgehen={[
-    { t: 'Prozesse bewerten', d: 'Welche Abläufe sind häufig, regelbasiert und datenreich genug für einen sinnvollen Einsatz?' },
-    { t: 'Voraussetzungen prüfen', d: 'Datenqualität, Zugriffsrechte, Datenschutz und Verantwortlichkeiten klären.' },
-    { t: 'Pilot umsetzen', d: 'Einen begrenzten Anwendungsfall mit klaren Freigaben und Kontrollen einführen.' },
-    { t: 'Auswerten und erweitern', d: 'Nutzen messen, Fehlerquellen beseitigen, erst dann den nächsten Prozess angehen.' },
-  ]}
-  abgrenzung={[
-    'Keine automatischen Zahlungs- oder Investitionsentscheidungen. KI bereitet vor, Menschen entscheiden und geben frei.',
-    'Eigene Anwendungen entwickle ich als unternehmerischen Hebel für die eigene Gruppe weiter. Ich beschreibe sie in ihrem tatsächlichen Entwicklungsstand und nicht als ausgerolltes Kundenprojekt.',
-    'Keine Partner- oder Anbieterempfehlung ohne konkrete Grundlage. Die Werkzeugauswahl folgt dem Anwendungsfall, nicht umgekehrt.',
-    'Personenbezogene Daten aus Kontaktformularen oder Mieterakten werden nicht ohne Rechtsgrundlage und Prüfung an KI-Dienste übergeben.',
-  ]}
-  faq={[
-    { q: 'Welche Prozesse eignen sich für den Einstieg?', a: 'Häufige, regelbasierte Abläufe mit vorhandenen Daten: Dokumentenzuordnung, Rechnungsprüfung, Plan-Ist-Abgleiche, Berichtsentwürfe. Ungeeignet sind Einzelfallentscheidungen mit hoher wirtschaftlicher Tragweite.' },
-    { q: 'Ersetzt KI die Verwaltung oder das Asset Management?', a: 'Nein. Sie entlastet von Routinearbeit und verbessert die Informationsbasis. Verantwortung, Bewertung und Entscheidung bleiben bei den Menschen.' },
-    { q: 'Wie wird der Datenschutz berücksichtigt?', a: 'Vor jedem Einsatz werden Rechtsgrundlage, Auftragsverarbeitung, Speicherort und Zugriffsrechte geprüft. Wo die Grundlage fehlt, wird der Prozess nicht automatisiert oder anonymisiert umgesetzt.' },
-    { q: 'Finanziert KI Projekte oder garantiert sie Einsparungen?', a: 'Nein. KI verbessert Daten, Abläufe und Entscheidungsvorbereitung. Wirtschaftliche Wirkung entsteht erst durch die Entscheidungen, die daraus folgen.' },
-  ]}
-  verwandt={[
-    { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
-    { label: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
-    { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
-  ]}
-/>
+  seitennav={seitennav}
+  situationen={situationen}
+  situationenIntro="Vier Ausgangslagen, in denen bessere Informationen die Steuerung verändern würden."
+  leistungen={leistungen}
+  ergebnisse={ergebnisse}
+  vorgehen={vorgehen}
+  vorgehenIntro="Vier Schritte. Der Aufwand hängt von Datenlage, Zahl der Systeme und Zahl der Beteiligten ab."
+  abgrenzung={abgrenzung}
+  faq={faq}
+  verwandt={verwandt}
+>
+  <Fragment slot="methodik">
+    <section class="section section--linie" id="pilot">
+      <div class="container">
+        <div class="abschnitt">
+          <div class="abschnitt__kopf sticky-rand">
+            <span class="eyebrow eyebrow--still">Pilot</span>
+            <h2>Was ein Pilot enthält</h2>
+            <p>Ein Pilot ist ein begrenzter Testlauf: ein Prozess, ein Teilbestand, ein fester Endpunkt. Er zeigt, ob <a href="/glossar/#datenqualitaet">Datenqualität</a>, also Vollständigkeit, Aktualität und Widerspruchsfreiheit der Stammdaten, und die Freigaben tragen, bevor etwas in den Regelbetrieb geht.</p>
+          </div>
+          <div class="abschnitt__inhalt">
+            <ol class="register" role="list">
+              <li>
+                <h3>Prozessauswahl</h3>
+                <p>Ein Prozess, der häufig vorkommt, nach Regeln läuft und genug Daten hat. Bewertet nach Nutzen, Aufwand und Risiko. Typische Kandidaten sind die Dokumentenzuordnung und der <a href="/glossar/#plan-ist-abgleich">Plan-Ist-Abgleich</a>, also der regelmäßige Vergleich geplanter und tatsächlicher Werte. Ungeeignet sind Einzelfallentscheidungen mit wirtschaftlicher Tragweite.</p>
+              </li>
+              <li>
+                <h3>Datenprüfung</h3>
+                <p>Welche Daten braucht der Prozess, wo liegen sie, wer pflegt sie, wie aktuell sind sie. Stammdaten und Belege werden auf Vollständigkeit und Widersprüche geprüft. Reichen die Daten nicht, endet der Pilot hier, und die Datenpflege wird zur ersten Maßnahme.</p>
+              </li>
+              <li>
+                <h3>Freigabekonzept</h3>
+                <p>Wer prüft, wer gibt frei, was darf das Werkzeug allein vorschlagen und was nie. <a href="/glossar/#freigabe">Freigabe durch Menschen</a> heißt: Kein Ergebnis wird wirksam, bevor ein Verantwortlicher es geprüft hat. Zugriffsrechte, Rechtsgrundlage und Auftragsverarbeitung sind vorher geklärt.</p>
+              </li>
+              <li>
+                <h3>Testphase</h3>
+                <p>Der Prozess läuft auf einem begrenzten Ausschnitt parallel zum bisherigen Ablauf. Jede Abweichung wird dokumentiert. Der bisherige Weg bleibt als Rückfallweg bestehen, damit kein Vorgang vom Pilot abhängt.</p>
+              </li>
+              <li>
+                <h3>Auswertung</h3>
+                <p>Trefferquote, Korrekturaufwand und Fehlerbilder werden gegen die vorab festgelegten Erfolgs- und Abbruchkriterien gehalten. Erst dann fällt die Entscheidung: erweitern, anpassen oder beenden. Die Entscheidung trifft Ihr Haus, nicht das Werkzeug.</p>
+              </li>
+            </ol>
+            <div class="pilotplan">
+              <h3>Was der Pilotplan festhält</h3>
+              <ul class="checklist" role="list">
+                {pilotplan.map((p) => <li>{p}</li>)}
+              </ul>
+              <p class="small pilotplan__hinweis">Der Plan nennt zuerst den Prozess und die Kriterien. Die Auswahl des Werkzeugs folgt daraus, nicht umgekehrt. Anbieternamen gehören nicht in den Plan, bevor der Anwendungsfall steht.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--linie" id="mandantendaten">
+      <div class="container g">
+        <div class="gc-1-8">
+          <div class="section-head">
+            <span class="eyebrow">Vertraulichkeit</span>
+            <h2>Mandantendaten und KI</h2>
+          </div>
+          <div class="prose mandantendaten">
+            <p>Daten aus einem Mandat kommen nur dann in ein KI-Werkzeug, wenn wir das ausdrücklich vereinbart haben und Rechtsgrundlage, Auftragsverarbeitung, Speicherort und Zugriffsrechte vorher geprüft sind. Auftragsverarbeitung bedeutet, dass ein Dienstleister personenbezogene Daten im Auftrag und nach Weisung des Verantwortlichen verarbeitet. Die rechtliche Prüfung übernehmen Ihr Datenschutzbeauftragter oder Ihr Rechtsanwalt.</p>
+            <p>Personenbezogene Daten aus Mieterakten oder Schriftverkehr werden nicht ohne diese Grundlage an KI-Dienste übergeben. Fehlt sie, wird der Prozess nicht automatisiert oder mit anonymisierten Daten aufgesetzt. Eingaben aus dem Kontaktformular dieser Website gehen in kein KI-System.</p>
+            <p>Wie Vertraulichkeit im Mandat geregelt ist, beschreibe ich unter <a href="/zusammenarbeit/">Zusammenarbeit</a>. Welche Daten diese Website verarbeitet, steht in der <a href="/datenschutz/">Datenschutzerklärung</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {zeigeEntwicklungsstand && (
+      <section class="section section--linie" id="entwicklungsstand">
+        <div class="container g">
+          <div class="gc-1-8">
+            <div class="section-head">
+              <span class="eyebrow">Entwicklungsstand</span>
+              <h2>Eigene Anwendungen: der tatsächliche Stand</h2>
+              <p>KI und Automatisierung entwickle ich als unternehmerischen Hebel. Was hier steht, beschreibt den Stand der Entwicklung, kein ausgerolltes Kundenprojekt.</p>
+            </div>
+            <div class="prose">
+              {entwicklungsstandText.map((t) => <p>{t}</p>)}
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+  </Fragment>
+</Fachseite>
+
+<style>
+  /* Pilotplan: Checkliste unter dem Register, 2 px Linie, Hinweiszeile in Sekundaerfarbe */
+  .pilotplan { border-top: var(--rule-strong); margin-top: var(--s-6); padding-top: var(--s-5); }
+  .pilotplan h3 { font-size: var(--fs-h3); margin-bottom: var(--s-3); }
+  .pilotplan .checklist { margin: 0; max-width: var(--w-text); }
+  .pilotplan .checklist li { color: var(--c-text-2); }
+  .pilotplan .checklist li + li { margin-top: var(--s-2); }
+  .pilotplan__hinweis { color: var(--c-text-2); margin: var(--s-4) 0 0; max-width: 62ch; }
+
+  /* Mandantendaten: Fliesstext in Sekundaerfarbe, Links behalten Textfarbe */
+  .mandantendaten p { color: var(--c-text-2); }
+  .mandantendaten p:last-child { margin-bottom: 0; }
+</style>

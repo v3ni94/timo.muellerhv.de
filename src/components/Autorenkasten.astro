@@ -1,0 +1,45 @@
+---
+/**
+ * Autorenkasten am Beitragsende (docs/CONTENT-PLAN-V2.md 1.6 und 4.8).
+ * Portrait 2 als 1:1 hell, zwei Saetze ausschliesslich aus PERSON.funktionen (src/data/site.ts), Link zum Profil.
+ * Keine weiteren Aussagen, keine Zahlen, keine Jahre. Haarlinien oben (2 px) und unten (1 px).
+ */
+import Portrait from './Portrait.astro';
+import { PERSON } from '../data/site';
+
+interface Props {
+  /** Ueberschrift des Kastens (H2 in Caps), Standard "Über den Autor" */
+  titel?: string;
+  /** id des Kastens, Standard "autor"; die Ueberschrift erhaelt "{id}-h" */
+  id?: string;
+}
+const { titel = 'Über den Autor', id = 'autor' } = Astro.props;
+
+/* "a, b und c" aus einer Liste. */
+const verbinde = (teile: readonly string[]): string =>
+  teile.length <= 1 ? (teile[0] ?? '') : `${teile.slice(0, -1).join(', ')} und ${teile[teile.length - 1]}`;
+const f = PERSON.funktionen;
+const satz1 = `${PERSON.name} ist ${verbinde(f.slice(0, 2))}.`;
+const satz2 = f.length > 2 ? `Er ist ${verbinde(f.slice(2))}.` : '';
+---
+<aside class="autorenkasten" id={id} aria-labelledby={`${id}-h`}>
+  <h2 id={`${id}-h`} class="caps autorenkasten__titel">{titel}</h2>
+  <div class="autorenkasten__grid">
+    <Portrait nr={2} ratio="1/1" variant="hell" sizes="8rem" widths={[400, 800]} />
+    <div class="autorenkasten__text">
+      <p class="autorenkasten__name">{PERSON.name}</p>
+      <p>{satz1}{satz2 && ` ${satz2}`}</p>
+      <a class="textlink" href="/profil/">Zum Profil</a>
+    </div>
+  </div>
+</aside>
+<style>
+  .autorenkasten { border-top: var(--rule-strong); border-bottom: var(--rule); padding-block: var(--s-5) var(--s-6); margin-top: var(--s-8); }
+  .autorenkasten__titel { margin: 0 0 var(--s-5); }
+  .autorenkasten__grid { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: var(--col-gap); align-items: start; }
+  .autorenkasten__text { min-width: 0; }
+  .autorenkasten__name { font-size: var(--fs-h3); font-weight: 600; line-height: var(--lh-heading); letter-spacing: -0.01em; margin: 0 0 var(--s-2); color: var(--c-text); }
+  .autorenkasten__text p { color: var(--c-text-2); max-width: 62ch; }
+  .autorenkasten__text p + p { margin-bottom: var(--s-3); }
+  @media (max-width: 520px) { .autorenkasten__grid { grid-template-columns: 6rem minmax(0, 1fr); } }
+</style>

@@ -1,10 +1,24 @@
 ---
+/**
+ * Beitragsseite der Einblicke (docs/CONTENT-PLAN-V2.md 4.8, docs/DESIGN-SPEC-V2.md 6.16, 9.5).
+ * Aufbau: Breadcrumb, Kopf im Fachseiten-Hero-Muster 8/4 (Eyebrow, H1, Kernaussage als Standfirst links; Autor und
+ * Daten als Definitionsliste rechts), Artikel in gc-3-10, Block "Begriffe in diesem Beitrag" (Frontmatter glossar),
+ * Quellen, Hinweis "Passende Beratung" (einziger Beratungslink), Autorenkasten, Block "Verwandte Beitraege"
+ * (Frontmatter verwandt, rendert erst ab drei freigegebenen Beitraegen und nur mit veroeffentlichten Zielen), Cta.
+ * Es werden nur Beitraege mit status "freigegeben" und datum gebaut (src/lib/einblicke.ts).
+ * Title: hoechstens 65 Zeichen, eindeutig, mit Namenszusatz. Reihenfolge: Frontmatter seoTitle (vollstaendiger Title),
+ * sonst voller Titel mit Namenszusatz, sonst "Einblicke: <Teil vor dem Doppelpunkt>" mit Namenszusatz (eindeutig, keine
+ * Kollision mit den Fachseiten). Passt keine Stufe, bricht der Build mit einer klaren Fehlermeldung ab.
+ */
 import Base from '../../layouts/Base.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
+import Autorenkasten from '../../components/Autorenkasten.astro';
 import Cta from '../../components/Cta.astro';
 import { render } from 'astro:content';
-import { breadcrumbLd, ID, absolute } from '../../lib/seo';
-import { veroeffentlichteBeitraege, formatDatum } from '../../lib/einblicke';
+import { breadcrumbLd, ID, absolute, type Crumb } from '../../lib/seo';
+import { veroeffentlichteBeitraege, verwandteBeitraege, formatDatum } from '../../lib/einblicke';
+import { glossarEintrag, glossarHref, type GlossarEintrag } from '../../data/glossar';
+import { PERSON } from '../../data/site';
 
 export async function getStaticPaths() {
   const beitraege = await veroeffentlichteBeitraege();
@@ -12,9 +26,48 @@ export async function getStaticPaths() {
 }
 const { beitrag } = Astro.props;
 const { Content } = await render(beitrag);
-const path = `/einblicke/${beitrag.id}/`;
-const crumbs = [{ name: 'Einblicke', href: '/einblicke/' }, { name: beitrag.data.title, href: path }];
 const d = beitrag.data;
+const path = `/einblicke/${beitrag.id}/`;
+const crumbs: Crumb[] = [{ name: 'Einblicke', href: '/einblicke/' }, { name: d.title, href: path }];
+
+/* Title hoechstens 65 Zeichen, eindeutig je Seite, immer mit Namenszusatz (scripts/test-build.mjs).
+   Ein seoTitle aus dem Frontmatter hat Vorrang (Laenge prueft das Schema). Ohne seoTitle: voller Titel mit Namenszusatz,
+   sonst Reihe "Einblicke: <Teil vor dem Doppelpunkt>". Passt keine Stufe, bricht der Build ab statt einen Title ohne
+   Namenszusatz auszugeben. */
+const SUFFIX = ` | ${PERSON.name}`;
+const TITLE_MAX = 65;
+function seitentitel(t: string, seo?: string): string {
+  if (seo) {
+    if (!seo.includes(PERSON.name)) {
+      throw new Error(`Beitrag ${beitrag.id}: seoTitle "${seo}" enthaelt nicht den Namenszusatz "${SUFFIX}".`);
+    }
+    return seo;
+  }
+  const voll = `${t}${SUFFIX}`;
+  if (voll.length <= TITLE_MAX) return voll;
+  const kurz = t.split(':')[0].trim();
+  const reihe = `Einblicke: ${kurz}${SUFFIX}`;
+  if (reihe.length <= TITLE_MAX) return reihe;
+  throw new Error(
+    `Beitrag ${beitrag.id}: kein Title bis ${TITLE_MAX} Zeichen ableitbar ("${voll}" hat ${voll.length}, "${reihe}" hat ${reihe.length} Zeichen). Bitte seoTitle im Frontmatter setzen.`,
+  );
+}
+const title = seitentitel(d.title, d.seoTitle);
+
+/* Begriffe in diesem Beitrag: ids aus dem Frontmatter, Aliasse aufgeloest, ohne Dubletten. Unbekannte ids brechen den Build. */
+const unbekannt = d.glossar.filter((id) => !glossarEintrag(id));
+if (unbekannt.length > 0) {
+  throw new Error(`Beitrag ${beitrag.id}: unbekannte Glossar-ids im Frontmatter: ${unbekannt.join(', ')}`);
+}
+const begriffe: GlossarEintrag[] = [
+  ...new Map(d.glossar.map((id) => glossarEintrag(id)!).map((e) => [e.id, e] as const)).values(),
+];
+
+/* Verwandte Beitraege: nur veroeffentlichte Ziele, leer unter drei freigegebenen Beitraegen. */
+const verwandte = await verwandteBeitraege(d.verwandt, beitrag.id);
+
+const iso = (x: Date) => x.toISOString().slice(0, 10);
+
 const ld = [
   breadcrumbLd(crumbs),
   {
@@ -28,34 +81,124 @@ const ld = [
     author: { '@id': ID.person },
     publisher: { '@id': ID.org },
     mainEntityOfPage: absolute(path),
+    isPartOf: { '@id': ID.website },
   },
 ];
 ---
-<Base title={`${d.title} | Timo Müller`} description={d.description} path={path} ld={ld} ogType="article">
+<Base title={title} description={d.description} path={path} ld={ld} ogType="article">
   <Breadcrumb crumbs={crumbs} />
-  <article class="section">
-    <div class="container prose">
-      <span class="eyebrow">Einblicke</span>
-      <h1>{d.title}</h1>
-      <p class="article-meta">
-        Von Timo Müller{d.datum && <>, veröffentlicht am <time datetime={d.datum.toISOString().slice(0, 10)}>{formatDatum(d.datum)}</time></>}
-        {d.aktualisiert && <>, aktualisiert am <time datetime={d.aktualisiert.toISOString().slice(0, 10)}>{formatDatum(d.aktualisiert)}</time></>}
-      </p>
-      <p class="lead"><strong>Kernaussage:</strong> {d.kernaussage}</p>
-      <div class="article-body"><Content /></div>
-      {d.quellen.length > 0 && (
-        <aside class="quellen">
-          <h2>Quellen</h2>
-          <ol>{d.quellen.map((q) => <li><a href={q.url} rel="noopener">{q.titel}</a>, abgerufen am {q.abgerufen}</li>)}</ol>
-        </aside>
-      )}
-      <p class="note">Passende Beratung: <a href={d.beratung}>{d.beratungLabel}</a></p>
+
+  <article class="beitrag">
+    <header class="hero">
+      <div class="container g hero__grid">
+        <div class="hero__text gc-1-8">
+          <span class="eyebrow">Einblicke</span>
+          <h1>{d.title}</h1>
+          <p class="standfirst hero__these"><span class="caps">Kernaussage</span>{d.kernaussage}</p>
+        </div>
+        <dl class="dl-grid hero__meta gc-9-12">
+          <dt>Autor</dt>
+          <dd>{PERSON.name}</dd>
+          {d.datum && (
+            <>
+              <dt>Veröffentlicht</dt>
+              <dd><time datetime={iso(d.datum)}>{formatDatum(d.datum)}</time></dd>
+            </>
+          )}
+          {d.aktualisiert && (
+            <>
+              <dt>Aktualisiert</dt>
+              <dd><time datetime={iso(d.aktualisiert)}>{formatDatum(d.aktualisiert)}</time></dd>
+            </>
+          )}
+        </dl>
+      </div>
+    </header>
+
+    <div class="section beitrag__inhalt">
+      <div class="container g">
+        <div class="gc-3-10">
+          <div class="article-body prose"><Content /></div>
+
+          {begriffe.length > 0 && (
+            <aside class="begriffe" aria-labelledby="begriffe-h">
+              <h2 id="begriffe-h" class="caps">Begriffe in diesem Beitrag</h2>
+              <ul class="begriffe__liste" role="list">
+                {begriffe.map((e) => <li><a href={glossarHref(e.id)}>{e.begriff}</a></li>)}
+              </ul>
+              <p class="small begriffe__hinweis">Das Glossar erklärt die Begriffe in der Bedeutung, in der ich sie verwende. Es ergänzt die Erläuterung im Text und ersetzt sie nicht.</p>
+            </aside>
+          )}
+
+          {d.quellen.length > 0 && (
+            <section class="quellen" aria-labelledby="quellen-h">
+              <h2 id="quellen-h" class="h3">Quellen</h2>
+              <ol class="quellen__liste">
+                {d.quellen.map((q) => <li><a href={q.url} rel="noopener">{q.titel}</a>, abgerufen am {q.abgerufen}</li>)}
+              </ol>
+            </section>
+          )}
+
+          <p class="note">Passende Beratung: <a href={d.beratung}>{d.beratungLabel}</a>. Dort beschreibe ich Leistungsumfang, Arbeitsergebnisse und Vorgehen zu diesem Thema.</p>
+
+          <Autorenkasten />
+
+          {verwandte.length > 0 && (
+            <aside class="verwandte" aria-labelledby="verwandte-h">
+              <h2 id="verwandte-h" class="caps">Verwandte Beiträge</h2>
+              <ul class="verwandte__liste" role="list">
+                {verwandte.map((b) => <li><a href={`/einblicke/${b.id}/`}>{b.data.title}</a></li>)}
+              </ul>
+            </aside>
+          )}
+        </div>
+      </div>
     </div>
   </article>
+
   <Cta />
 </Base>
+
 <style>
-  .quellen { margin-top: var(--s-7); font-size: var(--fs-small); color: var(--c-text-2); }
-  .quellen h2 { font-size: 1.1rem; }
+  /* Kopf 8/4 wie Fachseiten-Hero: Text links, Meta rechts unten ausgerichtet, Haarlinie unten */
+  .hero { padding-block: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: var(--rule); }
+  .hero__grid { align-items: end; row-gap: var(--s-6); }
+  .hero__text { min-width: 0; }
+  .hero h1 { max-width: 24ch; }
+  .hero__these { margin-bottom: 0; }
+  .hero__these .caps { display: block; margin-bottom: var(--s-2); }
+  .hero__meta { margin: 0; align-self: end; grid-template-columns: 8rem 1fr; }
+  .hero__meta dd { font-variant-numeric: tabular-nums; }
+  @media (max-width: 520px) { .hero__meta { grid-template-columns: 1fr; } }
+
+  /* Artikel: erster Absatz ohne oberen Abstand */
+  .article-body > :first-child { margin-top: 0; }
+
+  /* Begriffe in diesem Beitrag: Textlinks in einer Zeile, umbrechend, keine Pillen */
+  .begriffe { margin-top: var(--s-8); border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .begriffe .caps { margin: 0 0 var(--s-2); }
+  .begriffe__liste { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 var(--s-5); }
+  .begriffe__liste li { margin: 0; }
+  .begriffe__liste a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 600; }
+  .begriffe__hinweis { color: var(--c-text-2); margin: var(--s-2) 0 0; max-width: var(--w-text); }
+
+  /* Quellen: Liste mit Haarlinie oben */
+  .quellen { margin-top: var(--s-7); border-top: var(--rule); padding-top: var(--s-5); font-size: var(--fs-small); color: var(--c-text-2); }
+  .quellen .h3 { margin-bottom: var(--s-3); }
+  .quellen__liste { margin: 0; padding-left: 1.25rem; }
+  .quellen__liste li { margin-bottom: var(--s-2); overflow-wrap: anywhere; }
+
   .note { margin-top: var(--s-6); }
+
+  /* Verwandte Beitraege: Linkregister mit Haarlinien und Pfeil */
+  .verwandte { margin-top: var(--s-7); }
+  .verwandte .caps { margin: 0 0 var(--s-3); }
+  .verwandte__liste { list-style: none; margin: 0; padding: 0; border-top: var(--rule-strong); }
+  .verwandte__liste li { margin: 0; border-bottom: var(--rule); }
+  .verwandte__liste a { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); min-height: 44px; padding-block: var(--s-3); text-decoration: none; font-weight: 600; }
+  .verwandte__liste a::after { content: "\2192"; font-weight: 400; color: var(--c-text-3); flex: none; }
+
+  @media (hover: hover) {
+    .verwandte__liste a:hover { text-decoration: underline; }
+  }
 </style>

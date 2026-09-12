@@ -53,10 +53,15 @@ export function websiteLd() {
 
 export type Crumb = { name: string; href: string };
 
+/**
+ * BreadcrumbList entsprechend dem sichtbaren Breadcrumb (Masterprompt Abschnitt 10): Breadcrumb.astro setzt
+ * "Start" selbst voran, deshalb steht "Start" hier als Position 1 und die uebergebenen crumbs zaehlen ab Position 2.
+ */
 export function breadcrumbLd(crumbs: Crumb[]) {
+  const alle: Crumb[] = [{ name: 'Start', href: '/' }, ...crumbs];
   return {
     '@type': 'BreadcrumbList',
-    itemListElement: crumbs.map((c, i) => ({
+    itemListElement: alle.map((c, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       name: c.name,
@@ -73,7 +78,9 @@ export function serviceLd(opts: { name: string; description: string; path: strin
     description: opts.description,
     serviceType: opts.serviceType,
     url: absolute(opts.path),
-    provider: { '@id': ID.org },
+    // Anbieter ist die Person: der sichtbare Inhalt sagt durchgehend "Ich berate", die Person traegt worksFor auf die
+    // Organisation. Zuordnung nach Entscheidung zu Freigabepunkt 22 (Vertragspartner des Beratungsmandats) bewusst pruefen.
+    provider: { '@id': ID.person },
     areaServed: { '@type': 'Country', name: 'Deutschland' },
     audience: { '@type': 'BusinessAudience', name: 'Eigentümer und Bestandshalter von Wohnimmobilienportfolios' },
   };

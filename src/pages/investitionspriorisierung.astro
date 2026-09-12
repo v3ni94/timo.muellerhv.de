@@ -1,0 +1,347 @@
+---
+/**
+ * Investitionspriorisierung, Vertiefung zu Portfoliooptimierung (docs/CONTENT-PLAN-V2.md 3.2, 6.2, 6.4;
+ * docs/DESIGN-SPEC-V2.md 1.4, 6.11). Heimatort aller Inhalte zur CAPEX-Priorisierung.
+ * Fachseite.astro mit Slot methodik (Datengrundlage, Bewertungsachsen mit Matrix, Investitionsplan) und
+ * Slot szenario (Szenario im Konjunktiv). Die Bewertungsmatrix ist die einzige Grafik der Website: inline-SVG,
+ * Farben aus tokens.css, Text als SVG-Textelemente, figure mit figcaption "Schematische Darstellung, ohne Zahlen",
+ * dazu eine textliche Beschreibung im Fliesstext, die per aria-describedby mit der Grafik verknuepft ist.
+ * Faktenregeln: keine Zahlen, Richtwerte, Budgets, Nutzungsdauern, Normen oder Foerderaussagen. Pflichten nur
+ * allgemein benannt, Einordnung durch Fachplaner und Rechtsberatung. Handwerkliche Praxis nur als Kostenverstaendnis
+ * (docs/FAKTENLISTE.md Nr. 9). Kein Rechenbeispiel.
+ */
+import Fachseite, { type Block } from '../layouts/Fachseite.astro';
+import Szenario from '../components/Szenario.astro';
+import type { FaqItem } from '../components/Faq.astro';
+import type { SeitennavEintrag } from '../components/Seitennav.astro';
+import type { Crumb } from '../lib/seo';
+
+const path = '/investitionspriorisierung/';
+
+const crumbs: Crumb[] = [
+  { name: 'Beratung', href: '/asset-management-beratung/' },
+  { name: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
+  { name: 'Investitionspriorisierung', href: path },
+];
+
+// Sechs Anker, damit die Seitennavigation bei 1440 px einzeilig bleibt (Designspezifikation 6.11).
+// Datengrundlage, Vorgehen und Abgrenzung behalten ihre ids, stehen aber nicht in der Seitennavigation.
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Passende Situationen', href: '#situationen' },
+  { label: 'Leistungsumfang', href: '#leistung' },
+  { label: 'Methode', href: '#bewertungsachsen' },
+  { label: 'Investitionsplan', href: '#investitionsplan' },
+  { label: 'Szenario', href: '#szenario' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+const situationen: Block[] = [
+  { t: 'Rückstand bekannt, aber nicht beziffert', d: 'Alle Beteiligten wissen, dass Instandhaltung aufgelaufen ist. Niemand kann sagen, an welchen Objekten wie viel offen ist und in welcher Reihenfolge es abzuarbeiten wäre.' },
+  { t: 'Konkurrierende Budgets zwischen Objekten', d: 'Mehrere Objekte melden Bedarf, das Budget reicht nicht für alle. Entschieden wird nach Reihenfolge der Meldungen statt nach Wirkung und Dringlichkeit.' },
+  { t: 'Pflicht­maßnahmen gegen Ertrags­maßnahmen', d: 'Sicherheit und Auflagen binden Mittel, die für Leerstandsabbau oder Modernisierung fehlen. Beides zugleich lässt die Liquidität selten zu. Es braucht eine Reihenfolge, die begründet ist und vor der Eigentümerseite Bestand hat.' },
+  { t: 'Finanzierer verlangt einen Investitions­plan', d: 'Vor einer Prolongation, also der Verlängerung einer auslaufenden Finanzierung, oder einer Umschuldung will der Finanzierer wissen, was in den nächsten Perioden in den Bestand fließt und woher die Mittel kommen.' },
+];
+
+const leistungen: Block[] = [
+  { t: 'Bestandsaufnahme mit Technik und Verwaltung', d: 'Instandhaltungshistorie, Zustandsaufnahmen, vorhandene Gutachten und bekannte Auflagen je Objekt zusammenführen. Lücken werden benannt, nicht geschätzt.' },
+  {
+    t: 'Bewertung jeder Maßnahme nach drei Achsen',
+    d: 'Dringlichkeit und Risiko, Wirkung auf Ertrag und Wert, technische Abhängigkeit und Bündelung. Jede Maßnahme erhält eine Einstufung: zwingend, sinnvoll oder verzichtbar.',
+    mehr: { label: 'Zu den Bewertungsachsen', href: '#bewertungsachsen' },
+  },
+  { t: 'Reihenfolge und Zeitachse', d: 'Bewertete Maßnahmen auf Perioden verteilen, Bündelungen nutzen, Abhängigkeiten der Bausubstanz einhalten. Die Reihenfolge wird begründet, nicht behauptet.' },
+  { t: 'Zusammenführung mit der Liquiditätsplanung', d: 'Der Plan wird an der verfügbaren Liquidität und an den Finanzierungsterminen gespiegelt. Was nicht finanzierbar ist, wird sichtbar zurückgestellt oder gestrichen, nicht stillschweigend verdrängt.' },
+  { t: 'Unterlagen für Finanzierungsgespräche', d: 'Investitionsplan, Ertragslage und Zeitachse so aufbereiten, dass Finanzierer sie nachvollziehen können. Die Finanzierung selbst vermittle ich nicht, zu Konditionen äußere ich mich nicht.' },
+  {
+    t: 'Übergabe in Vergabe und Nachhalten',
+    d: 'Aus der Reihenfolge werden Aufträge mit Leistungsbeschreibung. Fortschritt und Wirkung werden je Periode gegen den Plan gehalten.',
+    mehr: { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/' },
+  },
+];
+
+const ergebnisse = [
+  'Bewertete Maßnahmenliste mit Einstufung zwingend, sinnvoll oder verzichtbar',
+  'Investitionsplan mit Zeitachse und Budgetrahmen je Periode',
+  'Entscheidungsvorlage für die Eigentümerseite',
+  'Unterlagenpaket für Finanzierungsgespräche',
+  'Kennzahlen für das Nachhalten von Fortschritt und Wirkung',
+];
+
+const vorgehen: Block[] = [
+  { t: 'Bestand aufnehmen', d: 'Historie, Befunde, Auflagen und offene Punkte je Objekt zusammentragen. Objekte ohne Befund kennzeichnen, nicht schätzen.' },
+  { t: 'Maßnahmen bewerten', d: 'Jede Maßnahme auf den drei Achsen einordnen, mit Technik und Verwaltung abstimmen, Einstufung und Begründung festhalten.' },
+  { t: 'Reihenfolge und Zeitachse festlegen', d: 'Maßnahmen auf Perioden verteilen, Bündelungen nutzen, Liquiditätsgrenze und Finanzierungstermine einhalten. Vorlage für die Eigentümerseite erstellen.' },
+  { t: 'Nachhalten und Reihenfolge überprüfen', d: 'Fortschritt und Wirkung je Periode gegen den Plan halten. Neue Befunde oder geänderte Liquidität führen zu einer neuen Reihenfolge, nicht zu einer längeren Liste.' },
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'gutachten',
+    q: 'Erst Gutachten oder erst Priorisierung?',
+    a: 'Erst die Bestandsaufnahme mit dem, was vorliegt. Sie zeigt, wo ein Gutachten die Entscheidung tatsächlich verändern würde und wo Historie und Begehung genügen. Gutachten für alle Objekte vorab kosten Zeit und Geld, bevor klar ist, welche Frage sie beantworten sollen. Wo Gutachterqualität nötig ist, wird sie gezielt beauftragt.',
+  },
+  {
+    id: 'pflichtmassnahmen',
+    q: 'Wie gehen Sie mit Pflichtmaßnahmen um?',
+    a: 'Maßnahmen, die aus Sicherheit, Verkehrssicherung oder behördlichen Auflagen folgen, werden als zwingend eingestuft und nicht gegen Ertragsmaßnahmen abgewogen. Bewertet wird nur, wie sie sich mit anderen Maßnahmen bündeln lassen. Ob eine Pflicht besteht und wie weit sie reicht, klären Fachplaner und Rechtsberatung, nicht die Priorisierung.',
+  },
+  {
+    id: 'knappe-liquiditaet',
+    q: 'Wie wird bei knapper Liquidität priorisiert?',
+    a: 'Die Liquiditätsgrenze wird offengelegt, bevor die Reihenfolge entsteht. Zwingende Maßnahmen kommen zuerst. Sinnvolle Maßnahmen werden auf spätere Perioden verteilt oder an Finanzierungstermine gekoppelt. Verzichtbare Maßnahmen werden gestrichen. Was nicht finanzierbar ist, steht mit Begründung als zurückgestellt im Plan, statt aus der Liste zu verschwinden.',
+  },
+  {
+    id: 'ueberpruefung',
+    q: 'Wie oft wird die Reihenfolge überprüft?',
+    a: 'Nicht nach Kalender, sondern an Entscheidungstermine gekoppelt: vor Budgetfreigaben, vor Finanzierungsgesprächen und wenn neue Befunde vorliegen. Dazwischen wird der Fortschritt gegen den Plan gehalten, ohne die Reihenfolge jedes Mal neu zu diskutieren.',
+    mehr: { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  },
+];
+
+const verwandt = [
+  { label: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
+  { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/' },
+  { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+];
+
+const datengrundlage: Block[] = [
+  { t: 'Instandhaltungshistorie', d: 'Was wurde an welchem Objekt bereits ausgeführt, was wurde beauftragt und nicht abgeschlossen, was wurde wiederholt verschoben. Die Historie zeigt Muster, die kein Einzelbefund zeigt.' },
+  { t: 'Zustandsaufnahme', d: 'Vorhandene Aufnahmen von Verwaltung und Technik je Bauteil: Dach, Fassade, Fenster, Technik, Leitungen, Außenanlagen. Mit Datum und Urheber, damit klar ist, wie belastbar der Stand ist.' },
+  { t: 'Vorhandene Gutachten', d: 'Bestehende Gutachten und Prüfberichte werden ausgewertet, nicht neu beauftragt. Ihre Aussagen fließen mit Datum in die Bewertung ein.' },
+  { t: 'Bekannte Auflagen', d: 'Behördliche Auflagen, Prüfpflichten und offene Mängelrügen je Objekt. Allgemein erfasst, die rechtliche Einordnung übernimmt Ihre Rechtsberatung.' },
+  { t: 'Begehungen nach Relevanz', d: 'Begangen wird dort, wo Befunde fehlen und der mögliche Schaden oder die mögliche Wirkung hoch ist. Nicht jedes Objekt, nicht jedes Bauteil, sondern gezielt.' },
+];
+
+const achsen: Block[] = [
+  { t: 'Dringlichkeit und Risiko', d: 'Sicherheit von Bewohnern und Dritten, Verkehrssicherung, also die Pflicht, erkennbare Gefahren abzuwenden, drohende Folgeschäden an der Substanz, Betriebsunterbrechung, rechtliche oder behördliche Pflichten. Diese Achse fragt: Was passiert, wenn die Maßnahme wartet?' },
+  { t: 'Wirkung auf Ertrag und Wert', d: 'Vermietbarkeit, Leerstandsabbau, Werterhalt, Mietentwicklung im rechtlich zulässigen Rahmen. Die mietrechtliche Einordnung einer Maßnahme übernimmt Ihre Rechtsberatung. Diese Achse fragt: Was gewinnt der Bestand, wenn die Maßnahme kommt?' },
+  { t: 'Technische Abhängigkeit und Bündelung', d: 'Reihenfolgen, die die Bausubstanz vorgibt: Was zuerst dicht sein muss, bevor innen gearbeitet wird. Gewerke bündeln, doppelte Baustelleneinrichtung und wiederholte Beeinträchtigung der Bewohner vermeiden. Das Kostenverständnis aus meinem operativen Netzwerk hilft mir einzuschätzen, wo Bündelung Kosten sparen kann und wo sie nur Aufwand verschiebt.' },
+];
+
+const einstufung = [
+  { t: 'Zwingend', d: 'Hohe Dringlichkeit, unabhängig von der Ertragswirkung. Wird terminiert, nicht abgewogen. Die Frage ist nur, wie sich die Maßnahme bündeln lässt.' },
+  { t: 'Sinnvoll', d: 'Hohe Wirkung auf Ertrag und Wert bei geringer Dringlichkeit. Der Zeitpunkt ist wählbar und richtet sich nach Bündelung, Liquidität und Finanzierungsterminen.' },
+  { t: 'Verzichtbar', d: 'Weder dringend noch wirksam. Wird zurückgestellt oder gestrichen und bleibt mit Begründung in der Liste, damit die Entscheidung nachvollziehbar bleibt.' },
+];
+
+const unterlagen = [
+  'Mieter- und Einheitenliste mit Vertragsstand',
+  'Leerstand je Einheit mit Ursache',
+  'Forderungen nach Alter',
+  'Instandhaltungs- und Investitionsplan mit Zeitachse',
+  'Liquiditätsplanung über die Planungsperioden',
+];
+---
+<Fachseite
+  path={path}
+  title="Investitionspriorisierung im Immobilienbestand | Timo Müller"
+  description="Instandhaltung und Investitionen nach Dringlichkeit, Wirkung, Abhängigkeit und Liquidität ordnen: Methode, Kriterien und Investitionsplan mit Zeitachse."
+  h1={'Investitions­priorisierung für Immobilien­bestände'}
+  eyebrow="Vertiefung"
+  frage="Welche Maßnahme kommt zuerst, wenn Budget, Zustand und Pflichten konkurrieren?"
+  intro="Eine Maßnahmenliste wird nicht dadurch beherrschbar, dass sie länger wird, sondern durch wenige Bewertungsachsen und eine offengelegte Liquiditätsgrenze. CAPEX, also Investitionen in die Substanz eines Objekts, ordne ich mit Ihnen nach Dringlichkeit, Wirkung und technischer Abhängigkeit."
+  serviceName="Investitionspriorisierung für Immobilienbestände"
+  serviceType="Beratung zur Investitionspriorisierung im Immobilienbestand"
+  crumbs={crumbs}
+  seitennav={seitennav}
+  situationen={situationen}
+  situationenIntro="Vier Ausgangslagen, in denen eine begründete Reihenfolge fehlt."
+  leistungen={leistungen}
+  ergebnisse={ergebnisse}
+  vorgehen={vorgehen}
+  vorgehenIntro="Vier Schritte, die sich wiederholen lassen, wenn sich Befunde, Budget oder Finanzierung ändern. Den Aufwand bestimmen Datenlage und Bestandsgröße."
+  abgrenzung={[
+    'Keine Fachplanung und keine Bauleitung. Ich ordne Maßnahmen und lege ihre Reihenfolge fest, plane sie aber nicht technisch.',
+    'Kein Sachverständigengutachten. Zustandsbewertungen, die Gutachterqualität brauchen, vergebe ich mit Ihnen an geeignete Spezialisten.',
+    'Keine Energieberatung und keine Aussagen zu Förderprogrammen. Beides gehört zu Fachberatern, deren Ergebnisse in die Priorisierung einfließen.',
+    'Standsicherheit, Brandschutz und Gewährleistungsfragen bewerten Fachplaner und Rechtsberatung. Ich sorge dafür, dass ihre Ergebnisse in der Reihenfolge berücksichtigt werden.',
+    { text: 'Verbundene Unternehmen und Interessen lege ich offen, bevor ich eine Empfehlung ausspreche.', mehr: { label: 'Zu den Interessen', href: '/zusammenarbeit/#interessen' } },
+  ]}
+  faq={faq}
+  verwandt={verwandt}
+>
+  <section class="section section--linie" id="datengrundlage" slot="methodik">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Datengrundlage</span>
+          <h2>Was vor der Bewertung auf dem Tisch liegen muss</h2>
+          <p>Ein <a href="/glossar/#instandhaltungsstau">Instandhaltungsstau</a>, also aufgelaufene und nicht ausgeführte Instandhaltung, lässt sich nur priorisieren, wenn der Bestand an Befunden zusammengeführt ist. <a href="/glossar/#capex">CAPEX</a> werden hier nicht geschätzt, sondern aus dem abgeleitet, was dokumentiert oder begangen wurde.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register register--anschluss" role="list">
+            {datengrundlage.map((d) => (<li><h3>{d.t}</h3><p>{d.d}</p></li>))}
+          </ol>
+          <div class="regel">
+            <h3>Objekte, die nie begutachtet wurden</h3>
+            <p>Sie werden als solche gekennzeichnet und nicht mit einem Schätzwert aufgefüllt. Eine erkennbare Lücke ist für die Entscheidung mehr wert als eine Zahl, die Sicherheit vortäuscht. Die Begehung dieser Objekte wird nach Relevanz eingeplant.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="bewertungsachsen" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Methode</span>
+        <h2>Drei Bewertungsachsen und ein Rahmen</h2>
+        <p>Jede Maßnahme wird auf denselben drei Achsen bewertet. Die Liquidität setzt den Rahmen, in dem die Reihenfolge umgesetzt werden kann. So wird aus einer Liste eine Entscheidung.</p>
+      </div>
+      <div class="g">
+        <div class="gc-1-6">
+          <ol class="register register--anschluss" role="list">
+            {achsen.map((a) => (<li><h3>{a.t}</h3><p>{a.d}</p></li>))}
+          </ol>
+          <div class="rahmen">
+            <h3>Der Rahmen: Liquidität</h3>
+            <p>Die <a href="/glossar/#liquiditaet">Liquiditätsplanung</a>, also die Übersicht, welche Mittel in welcher Periode tatsächlich verfügbar sind, und die Finanzierungstermine setzen die Grenze. Liquidität und Termine entscheiden nicht, welche Maßnahme wichtig ist, sondern wann sie kommen kann. Ergebnis je Maßnahme: zwingend, sinnvoll oder verzichtbar.</p>
+          </div>
+        </div>
+        <div class="gc-7-12">
+          <figure class="matrix">
+            <svg viewBox="0 0 480 408" width="480" height="408" role="img" aria-labelledby="matrix-title" aria-describedby="matrix-beschreibung" style="font-family: var(--ff-sans);">
+              <title id="matrix-title">Bewertungsmatrix Dringlichkeit gegen Wirkung, schematisch</title>
+              <rect x="60" y="16" width="202" height="160" style="fill: var(--c-flaeche-2);" />
+              <rect x="262" y="16" width="202" height="160" style="fill: var(--c-flaeche-2);" />
+              <rect x="60" y="176" width="202" height="160" style="fill: var(--c-weiss);" />
+              <rect x="262" y="176" width="202" height="160" style="fill: var(--c-flaeche);" />
+              <rect x="60" y="16" width="404" height="320" style="fill: none; stroke: var(--c-linie); stroke-width: 1;" />
+              <line x1="262" y1="16" x2="262" y2="336" style="stroke: var(--c-linie); stroke-width: 1;" />
+              <line x1="60" y1="176" x2="464" y2="176" style="stroke: var(--c-linie); stroke-width: 1;" />
+              <line x1="60" y1="336" x2="60" y2="16" style="stroke: var(--c-text); stroke-width: 2;" />
+              <line x1="60" y1="336" x2="464" y2="336" style="stroke: var(--c-text); stroke-width: 2;" />
+              <polygon points="54,22 60,10 66,22" style="fill: var(--c-text);" />
+              <polygon points="458,330 470,336 458,342" style="fill: var(--c-text);" />
+              <text x="161" y="90" text-anchor="middle" style="font-size: 26px; font-weight: 600; fill: var(--c-text);">Zwingend</text>
+              <text x="161" y="120" text-anchor="middle" style="font-size: 20px; fill: var(--c-text-2);">Pflicht zuerst</text>
+              <text x="363" y="90" text-anchor="middle" style="font-size: 26px; font-weight: 600; fill: var(--c-text);">Zwingend</text>
+              <text x="363" y="120" text-anchor="middle" style="font-size: 20px; fill: var(--c-text-2);">Pflicht mit Ertrag</text>
+              <text x="161" y="250" text-anchor="middle" style="font-size: 26px; font-weight: 600; fill: var(--c-text);">Verzichtbar</text>
+              <text x="161" y="280" text-anchor="middle" style="font-size: 20px; fill: var(--c-text-2);">Zurückstellen</text>
+              <text x="363" y="250" text-anchor="middle" style="font-size: 26px; font-weight: 600; fill: var(--c-text);">Sinnvoll</text>
+              <text x="363" y="280" text-anchor="middle" style="font-size: 20px; fill: var(--c-text-2);">Zeitpunkt wählbar</text>
+              <text x="46" y="18" text-anchor="end" transform="rotate(-90 46 18)" style="font-size: 20px; fill: var(--c-text-3);">hoch</text>
+              <text x="46" y="336" text-anchor="start" transform="rotate(-90 46 336)" style="font-size: 20px; fill: var(--c-text-3);">gering</text>
+              <text x="18" y="176" text-anchor="middle" transform="rotate(-90 18 176)" style="font-size: 22px; font-weight: 600; fill: var(--c-text-2);">Dringlichkeit und Risiko</text>
+              <text x="60" y="364" text-anchor="start" style="font-size: 20px; fill: var(--c-text-3);">gering</text>
+              <text x="464" y="364" text-anchor="end" style="font-size: 20px; fill: var(--c-text-3);">hoch</text>
+              <text x="262" y="396" text-anchor="middle" style="font-size: 22px; font-weight: 600; fill: var(--c-text-2);">Wirkung auf Ertrag und Wert</text>
+            </svg>
+            <figcaption class="bildunterschrift">Schematische Darstellung, ohne Zahlen. Zwei der drei Achsen; die dritte Achse, technische Abhängigkeit und Bündelung, verschiebt Maßnahmen entlang der Zeitachse und ist hier nicht abgebildet.</figcaption>
+          </figure>
+        </div>
+        <div class="gc-1-8 matrix-text">
+          <h3>So liest sich die Matrix</h3>
+          <p id="matrix-beschreibung">Nach oben steigt die Dringlichkeit, nach rechts die Wirkung auf Ertrag und Wert. Maßnahmen mit hoher Dringlichkeit sind zwingend, gleich ob sie Ertrag bringen oder nicht: Pflichten und Risiken warten nicht auf den Ertrag. Maßnahmen mit hoher Wirkung, aber geringer Dringlichkeit sind sinnvoll; ihr Zeitpunkt ist wählbar. Maßnahmen, die weder dringend sind noch wirken, sind verzichtbar. Die dritte Achse, technische Abhängigkeit und Bündelung, verschiebt einzelne Maßnahmen entlang der Zeitachse: Was die Bausubstanz vorgibt oder sich mit einer ohnehin laufenden Maßnahme verbinden lässt, rückt vor.</p>
+          <dl class="dl-grid einstufung">
+            {einstufung.map((e) => (<><dt>{e.t}</dt><dd>{e.d}</dd></>))}
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="investitionsplan" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Investitionsplan</span>
+        <h2>Investitionsplan mit Zeitachse und Liquidität</h2>
+        <p>Die bewertete Liste wird zum Plan, wenn jede Maßnahme eine Periode, einen Budgetrahmen und einen Verantwortlichen hat und der Plan die Liquiditätsgrenze einhält.</p>
+      </div>
+      <div class="g">
+        <div class="gc-1-7 plan-text">
+          <h3>Maßnahmen auf Perioden verteilen</h3>
+          <p>Zwingende Maßnahmen werden zuerst terminiert, dann werden sinnvolle Maßnahmen so auf die folgenden Perioden verteilt, dass Bündelungen erhalten bleiben und die Liquiditätsgrenze in keiner Periode überschritten wird. Finanzierungstermine, etwa eine anstehende <a href="/glossar/#prolongation">Prolongation</a>, werden als feste Punkte in die Zeitachse eingetragen. Was zurückgestellt wird, bleibt mit Begründung im Plan.</p>
+          <p>Aus dem Plan entsteht eine <a href="/glossar/#entscheidungsvorlage">Entscheidungsvorlage</a> für die Eigentümerseite: Fragestellung, Optionen, Annahmen, Risiken und Empfehlung auf wenigen Seiten. Sie beschließt die Reihenfolge, nicht ich.</p>
+          <h3>Unterlagen für das Finanzierungsgespräch</h3>
+          <p>Ein Finanzierungsgespräch verläuft anders, wenn die Unterlagen den Bestand vollständig und widerspruchsfrei zeigen. Diese fünf gehören dazu:</p>
+          <ul class="checklist unterlagen" role="list">
+            {unterlagen.map((u) => <li>{u}</li>)}
+          </ul>
+          <p class="small plan-hinweis">Ich treffe keine Aussage zu Konditionen und vermittle keine Finanzierung. Ich bereite die Unterlagen vor und begleite fachlich.</p>
+        </div>
+        <aside class="plan-aside gc-9-12" aria-labelledby="plan-aside-h">
+          <h3 id="plan-aside-h">Danach: Vergabe und Nachhalten</h3>
+          <p>Aus der Reihenfolge werden Aufträge. Leistungsbeschreibung, Bündelung der Gewerke, Nachtragsprüfung und Abnahme entscheiden darüber, ob der Plan zu den geplanten Kosten umgesetzt wird.</p>
+          <a class="textlink" href="/dienstleistersteuerung/">Dienstleistersteuerung</a>
+          <p>Fortschritt und Wirkung werden je Periode gegen den Plan gehalten: Welche Maßnahmen wurden begonnen und abgeschlossen, was hat sich an Leerstand und Kosten verändert, wo weicht der Plan ab.</p>
+          <a class="textlink" href="/reporting-und-kennzahlen/">Reporting und Kennzahlen</a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <Szenario
+    slot="szenario"
+    titel={'Instandhaltungsstau vor einer Finanzierungs­entscheidung'}
+    intro="Wie ich vorgehen würde, wenn ein Rückstand bekannt, aber nicht beziffert wäre und zugleich eine Prolongation anstünde."
+    ausgangslage={[
+      'Ein Wohnungsbestand hätte über längere Zeit weniger Instandhaltung erhalten als nötig. Der Rückstand wäre Verwaltung und Technik bekannt, aber weder je Objekt beziffert noch in eine Reihenfolge gebracht.',
+      'Zugleich stünde eine Prolongation an, also die Verlängerung einer auslaufenden Finanzierung. Der Finanzierer würde einen Investitionsplan mit Zeitachse erwarten, bevor er über die Fortführung spricht.',
+    ]}
+    rolle={[
+      'Ich würde die Bestandsaufnahme mit Technik und Verwaltung koordinieren und Datenlücken benennen, statt sie zu schätzen.',
+      'Ich würde die Bewertung der Maßnahmen moderieren, damit Pflicht, Ertrag und Abhängigkeit mit denselben Maßstäben beurteilt werden.',
+      'Ich würde die Entscheidungsvorlage für die Eigentümerseite erstellen. Die Entscheidung bliebe beim Eigentümer.',
+    ]}
+    vorgehen={[
+      'Aufnahme: Instandhaltungshistorie, vorhandene Befunde und bekannte Auflagen je Objekt zusammenführen. Begehungen dort, wo Befunde fehlen und die Relevanz hoch ist.',
+      'Bewertung: jede Maßnahme nach Dringlichkeit und Risiko, Wirkung auf Ertrag und Wert sowie technischer Abhängigkeit einstufen, Bündelungen bilden.',
+      'Plan: Maßnahmen auf Perioden verteilen, an der Liquiditätsplanung spiegeln, Unterlagen für das Finanzierungsgespräch zusammenstellen und die Vorlage mit der Eigentümerseite abstimmen.',
+    ]}
+    beteiligte={['Geschäftsführung', 'Technik', 'Verwaltung', 'Rechnungswesen']}
+    ergebnisse={[
+      'Investitionsplan mit Zeitachse und Budgetrahmen je Periode',
+      'Unterlagenpaket für das Finanzierungsgespräch',
+      'Entscheidungsvorlage mit bewerteter Maßnahmenliste',
+    ]}
+    messung="Gemessen würde die Qualität der Priorisierung, nicht ein vorab zugesagter Wert: der Anteil der Maßnahmen mit Bewertung, Termin und Verantwortlichem sowie der Plan-Ist-Abgleich je Periode, also ob die geplanten Maßnahmen in der geplanten Periode begonnen und abgeschlossen wurden."
+    grenzen={[
+      'Keine Fachplanung, keine Bauleitung.',
+      'Keine Finanzierungsvermittlung, keine Aussage zu Konditionen.',
+      'Keine Ergebniszusage vor der Bestandsaufnahme.',
+    ]}
+    mehr={{ label: 'Was ein echter Fall zusätzlich braucht', href: '/einblicke/#redaktionsgrundsaetze' }}
+  />
+</Fachseite>
+
+<style>
+  /* Register, auf das ein Block mit 2 px Linie folgt (.regel, .rahmen): Schlusslinie des Registers entfaellt, keine Doppellinie */
+  .register--anschluss > li:last-child { border-bottom: 0; }
+
+  /* Datengrundlage: Regel fuer Objekte ohne Befund unter dem Register, 2 px Linie */
+  .regel { border-top: var(--rule-strong); margin-top: var(--s-6); padding-top: var(--s-5); }
+  .regel h3 { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
+  .regel p { color: var(--c-text-2); max-width: 62ch; margin: 0; }
+
+  /* Bewertungsachsen: Rahmen Liquiditaet unter den drei Achsen */
+  .rahmen { border-top: var(--rule-strong); margin-top: var(--s-6); padding-top: var(--s-5); }
+  .rahmen h3 { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
+  .rahmen p { color: var(--c-text-2); max-width: 62ch; margin: 0; }
+
+  /* Bewertungsmatrix: einzige Grafik der Website, skaliert ueber viewBox, feste Attribute gegen Layoutsprung.
+     max-width 30rem = native Groesse der viewBox: ab Desktop keine Vergroesserung, mobil skaliert sie herunter
+     (Schriften im SVG sind dafuer auf 20 bis 26 px ausgelegt). */
+  .matrix svg { display: block; width: 100%; max-width: 30rem; height: auto; }
+  .matrix figcaption { max-width: 62ch; }
+  .matrix-text h3 { margin-bottom: var(--s-3); }
+  .matrix-text p { color: var(--c-text-2); max-width: var(--w-text); }
+  .einstufung { margin-top: var(--s-5); grid-template-columns: 9rem minmax(0, 1fr); }
+  .einstufung dd { max-width: 62ch; }
+  @media (max-width: 520px) { .einstufung { grid-template-columns: 1fr; } }
+
+  /* Investitionsplan: Text links, Aside mit 2 px Linie rechts */
+  .plan-text h3 { margin-bottom: var(--s-3); }
+  .plan-text h3 + p { margin-top: 0; }
+  .plan-text p { color: var(--c-text-2); max-width: var(--w-text); }
+  .plan-text h3:not(:first-child) { margin-top: var(--s-6); }
+  .unterlagen { margin: 0 0 var(--s-4); max-width: var(--w-text); }
+  .unterlagen li + li { margin-top: var(--s-2); }
+  .plan-hinweis { color: var(--c-text-2); }
+  .plan-aside { border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .plan-aside h3 { margin-bottom: var(--s-3); }
+  .plan-aside p { color: var(--c-text-2); }
+  .plan-aside .textlink:not(:last-child) { margin-bottom: calc(var(--s-5) - 0.65rem); }   /* sichtbarer Abstand zum Folgeabsatz --s-5; 0.65rem ist der Innenabstand der Zielflaeche aus .textlink */
+</style>

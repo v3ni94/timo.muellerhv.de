@@ -8,7 +8,12 @@ const axeSrc = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 const server = spawn('python3', ['-m', 'http.server', '4326', '--bind', '127.0.0.1'], { cwd: 'dist', stdio: 'ignore' });
 await new Promise((r) => setTimeout(r, 1500));
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-const pages = ['/', '/asset-management-beratung/', '/portfoliooptimierung/', '/property-management-optimierung/', '/ki-immobilienmanagement/', '/profil/', '/einblicke/', '/kontakt/', '/impressum/', '/datenschutz/', '/danke/', '/404.html'];
+// Alle Routen des Builds (docs/CONTENT-PLAN-V2.md 2), axe bei 390 und 1440 px.
+const pages = [
+  '/', '/asset-management-beratung/', '/portfoliooptimierung/', '/property-management-optimierung/', '/ki-immobilienmanagement/',
+  '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/', '/zusammenarbeit/', '/glossar/',
+  '/profil/', '/einblicke/', '/kontakt/', '/danke/', '/impressum/', '/datenschutz/', '/404.html',
+];
 let total = 0;
 try {
   for (const w of [390, 1440]) {

@@ -1,0 +1,151 @@
+---
+/**
+ * Schematisches Szenario "So wuerde ich vorgehen" (docs/CONTENT-PLAN-V2.md 1.6, docs/DESIGN-SPEC-V2.md 6.7).
+ * Sieben feste Felder in der Struktur kuenftiger Fallstudien, fester Fusssatz. Texte im Konjunktiv,
+ * keine Zahlen, Orte oder Zeitraeume. Die Felder zeitraum, ergebnis und messmethode sind fuer belegte
+ * Faelle vorbereitet und rendern ausschliesslich mit freigabe === true (docs/FAKTENLISTE.md Nr. 16).
+ * Gestaltung: Dossier auf --c-flaeche, Kopfzeile "Methode, schematisch", Raster 6/5, Ergebnisse weiss rechts.
+ * Der Abschnitt rendert eine vollstaendige section (Standard-id "szenario"), damit er als Slot szenario der
+ * Fachseite oder direkt auf der Startseite eingesetzt werden kann.
+ */
+export type SzenarioText = string | string[];
+export interface SzenarioLink { label: string; href: string }
+interface Props {
+  /** H2 des Abschnitts, z. B. "Instandhaltungsstau vor einer Finanzierungsentscheidung" */
+  titel: string;
+  /** Eyebrow ueber der H2, Standard "So würde ich vorgehen" (mit freigabe === true: "Fallstudie") */
+  eyebrow?: string;
+  /** Einleitungssatz unter der H2 */
+  intro?: string;
+  /** Feld 1: Ausgangslage. String = Absatz, Array = mehrere Absaetze */
+  ausgangslage: SzenarioText;
+  /** Feld 2: Meine Rolle. String = Absatz, Array = mehrere Absaetze */
+  rolle: SzenarioText;
+  /** Feld 3: Vorgehen. Array = nummerierte Phasen, String = Absatz */
+  vorgehen: SzenarioText;
+  /** Feld 4: Beteiligte auf Ihrer Seite. Array = Liste mit Haarlinien, String = Absatz */
+  beteiligte: SzenarioText;
+  /** Feld 5: Arbeitsergebnisse. Array = Checkliste, String = Absatz */
+  ergebnisse: SzenarioText;
+  /** Feld 6: Woran Erfolg gemessen wuerde (Art der Messung, kein Wert). String = Absatz, Array = mehrere Absaetze */
+  messung: SzenarioText;
+  /** Feld 7: Grenzen. Array = Liste mit Haarlinien, String = Absatz */
+  grenzen: SzenarioText;
+  /** Weiterfuehrender Link unter dem Fusssatz, z. B. auf /einblicke/#redaktionsgrundsaetze */
+  mehr?: SzenarioLink;
+  /** id der section, Standard "szenario" */
+  id?: string;
+  /** Abschnitt auf --c-flaeche (Standard true). false: Weiss mit Haarlinie, wenn die Seite bereits zwei Flaechen traegt */
+  flaeche?: boolean;
+  /** Spaetere Fallstudienfelder: rendern nur mit freigabe === true */
+  zeitraum?: string;
+  /** Belegtes Ergebnis, nur mit freigabe === true */
+  ergebnis?: string;
+  /** Messmethode des belegten Ergebnisses, nur mit freigabe === true */
+  messmethode?: string;
+  /** Freigabe des Auftraggebers liegt vor; schaltet die Fallstudienfelder frei */
+  freigabe?: boolean;
+  /** Fusssatz im Fallstudienmodus (nur mit freigabe === true) */
+  fussnoteFall?: string;
+}
+const {
+  titel, intro,
+  ausgangslage, rolle, vorgehen, beteiligte, ergebnisse, messung, grenzen,
+  mehr, id = 'szenario', flaeche = true,
+  zeitraum, ergebnis, messmethode, freigabe = false,
+  fussnoteFall = 'Belegter Fall mit Freigabe des Auftraggebers. Zeitraum, Ergebnis und Messmethode sind dokumentiert.',
+} = Astro.props;
+
+const fall = freigabe === true;
+const eyebrow = Astro.props.eyebrow ?? (fall ? 'Fallstudie' : 'So würde ich vorgehen');
+const FUSSSATZ = 'Schematische Darstellung des Vorgehens. Kein Kundenfall, keine Ergebniszusage.';
+
+type Art = 'text' | 'phasen' | 'liste' | 'check';
+interface Feld { t: string; v: SzenarioText; art: Art }
+const links: Feld[] = [
+  { t: 'Ausgangslage', v: ausgangslage, art: 'text' },
+  { t: 'Meine Rolle', v: rolle, art: 'text' },
+  { t: 'Vorgehen', v: vorgehen, art: 'phasen' },
+  { t: 'Beteiligte auf Ihrer Seite', v: beteiligte, art: 'liste' },
+];
+const rechts: Feld[] = [
+  { t: 'Arbeitsergebnisse', v: ergebnisse, art: 'check' },
+  { t: 'Woran Erfolg gemessen würde', v: messung, art: 'text' },
+  { t: 'Grenzen', v: grenzen, art: 'liste' },
+];
+const fallFelder = fall
+  ? [
+      { t: 'Zeitraum', v: zeitraum },
+      { t: 'Belegtes Ergebnis', v: ergebnis },
+      { t: 'Messmethode', v: messmethode },
+    ].filter((f): f is { t: string; v: string } => typeof f.v === 'string' && f.v.length > 0)
+  : [];
+---
+<section class:list={['section', flaeche ? 'section--flaeche' : 'section--linie', 'szenario', { 'szenario--weiss': !flaeche }]} id={id}>
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow eyebrow--still">{eyebrow}</span>
+      <h2>{titel}</h2>
+      {intro && <p>{intro}</p>}
+    </div>
+    <div class="dossier g">
+      <div class="dossier__kopf gc-full" aria-hidden="true">
+        <span class="caps">{fall ? 'Fallstudie' : 'Methode, schematisch'}</span>
+        <span class="caps">{fall ? 'Ergebnis belegt, Freigabe erteilt' : 'Keine Ergebniszusage, kein Kundenfall'}</span>
+      </div>
+      <div class="dossier__lage gc-1-6">
+        {links.map((f) => (
+          <div class="dossier__feld">
+            <h3>{f.t}</h3>
+            {typeof f.v === 'string' ? <p>{f.v}</p>
+              : f.art === 'text' ? f.v.map((x) => <p>{x}</p>)
+              : f.art === 'phasen' ? <ol class="dossier__phasen">{f.v.map((x) => <li>{x}</li>)}</ol>
+              : f.art === 'check' ? <ul class="checklist" role="list">{f.v.map((x) => <li>{x}</li>)}</ul>
+              : <ul class="dossier__liste" role="list">{f.v.map((x) => <li>{x}</li>)}</ul>}
+          </div>
+        ))}
+      </div>
+      <div class="dossier__ergebnis gc-8-12">
+        {rechts.map((f) => (
+          <div class="dossier__feld">
+            <h3>{f.t}</h3>
+            {typeof f.v === 'string' ? <p>{f.v}</p>
+              : f.art === 'text' ? f.v.map((x) => <p>{x}</p>)
+              : f.art === 'phasen' ? <ol class="dossier__phasen">{f.v.map((x) => <li>{x}</li>)}</ol>
+              : f.art === 'check' ? <ul class="checklist" role="list">{f.v.map((x) => <li>{x}</li>)}</ul>
+              : <ul class="dossier__liste" role="list">{f.v.map((x) => <li>{x}</li>)}</ul>}
+          </div>
+        ))}
+        {fallFelder.length > 0 && (
+          <dl class="dl-grid dossier__fall">
+            {fallFelder.map((f) => <><dt>{f.t}</dt><dd>{f.v}</dd></>)}
+          </dl>
+        )}
+      </div>
+      <p class="dossier__hinweis bildunterschrift gc-1-6">
+        {fall ? fussnoteFall : FUSSSATZ}
+        {mehr && <> <a href={mehr.href}>{mehr.label}</a></>}
+      </p>
+    </div>
+  </div>
+</section>
+<style>
+  .dossier__kopf { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--s-2) var(--s-5); border-top: var(--rule-strong); border-bottom: var(--rule); padding-block: var(--s-3); }
+  .dossier__feld + .dossier__feld { margin-top: var(--s-5); padding-top: var(--s-5); border-top: var(--rule); }
+  .dossier__feld h3 { font-size: 1.2rem; margin-bottom: var(--s-2); }   /* Stufe der Steps und FAQ-Summaries (Spezifikation 4.1) */
+  .dossier__feld p, .dossier__feld li { color: var(--c-text-2); }
+  .dossier__feld p { max-width: 62ch; }
+  .dossier__feld > :last-child { margin-bottom: 0; }
+  .dossier__phasen { padding-left: 1.5em; margin: 0; }
+  .dossier__phasen li::marker { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--c-text-2); }
+  .dossier__liste { list-style: none; padding: 0; margin: 0; }
+  .dossier__liste li { margin: 0; padding-block: var(--s-2); border-top: var(--rule); }
+  .dossier__liste li:first-child { border-top: 0; padding-top: 0; }
+  .dossier__ergebnis { background: #fff; border-top: var(--rule-strong); padding: var(--s-6); align-self: start; }
+  .szenario--weiss .dossier__ergebnis { background: var(--c-flaeche); }
+  .dossier__ergebnis .dossier__feld + .dossier__feld { border-top-color: var(--c-linie); }
+  .dossier__fall { margin-top: var(--s-5); }
+  .dossier__hinweis { margin: 0; }
+  .dossier__hinweis a { color: var(--c-text-2); }
+  @media (max-width: 640px) { .dossier__ergebnis { padding: var(--s-5); } }
+</style>

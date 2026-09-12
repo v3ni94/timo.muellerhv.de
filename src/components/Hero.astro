@@ -1,25 +1,50 @@
 ---
+/**
+ * Seitenkopf fuer Kontakt, Einblicke, Rechtstexte, Danke, 404 und neue Seiten (docs/DESIGN-SPEC-V2.md 6.2).
+ * H1 in --fs-h1 (oder .display), Ausgangsfrage als Standfirst, Lead, optional E-Mail-Zeile.
+ * Optionaler benannter Slot "media" (z. B. <Portrait>) stellt den Kopf auf das Raster 7/4 um; DOM: Text vor Bild.
+ */
 interface Props {
   eyebrow?: string;
   title: string;
-  lead?: string;
+  /** Ausgangsfrage, gerendert als .standfirst zwischen H1 und Lead */
   frage?: string;
+  lead?: string;
+  /** E-Mail-Zeile "Direkt: timo@muellerhv.de" unter Lead und Aktionen (Kontaktseite) */
+  mail?: boolean;
+  /** H1 in der Display-Stufe (nur Start und Profil) */
+  display?: boolean;
+  /** Keine Haarlinie unten, wenn eine Seitennavigation folgt */
+  ohneLinie?: boolean;
+  /** Kompaktere Abstaende (Rechtstexte, Danke, 404) */
   compact?: boolean;
 }
-const { eyebrow, title, lead, frage, compact = false } = Astro.props;
+import { SITE } from '../data/site';
+const { eyebrow, title, frage, lead, mail = false, display = false, ohneLinie = false, compact = false } = Astro.props;
+const hatMedia = Astro.slots.has('media');
 ---
-<section class:list={['hero', { 'hero--compact': compact }]}>
-  <div class="container">
-    {eyebrow && <span class="eyebrow">{eyebrow}</span>}
-    <h1>{title}</h1>
-    {frage && <p class="hero-frage">{frage}</p>}
-    {lead && <p class="lead">{lead}</p>}
-    <slot />
+<section class:list={['hero', { 'hero--compact': compact, 'hero--ohne-linie': ohneLinie }]}>
+  <div class:list={['container', { g: hatMedia, 'hero__grid': hatMedia }]}>
+    <div class:list={['hero__text', { 'gc-1-7': hatMedia }]}>
+      {eyebrow && <span class="eyebrow">{eyebrow}</span>}
+      <h1 class:list={{ display }}>{title}</h1>
+      {frage && <p class="standfirst hero-frage">{frage}</p>}
+      {lead && <p class="lead">{lead}</p>}
+      <slot />
+      {mail && <p class="hero__mail">Direkt: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>}
+    </div>
+    {hatMedia && <div class="hero__media gc-9-12"><slot name="media" /></div>}
   </div>
 </section>
 <style>
-  .hero { padding-block: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  .hero { padding-block: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: var(--rule); }
   .hero--compact { padding-block: clamp(2rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem); }
-  .hero h1 { max-width: 22ch; }
-  .hero-frage { font-size: 1.25rem; font-weight: 600; color: var(--c-text-2); max-width: 40ch; margin-bottom: var(--s-4); }
+  .hero--ohne-linie { border-bottom: 0; }
+  .hero h1 { max-width: 24ch; }
+  .hero h1.display { max-width: 18ch; }
+  .hero__grid { align-items: start; }
+  .hero__text { min-width: 0; }
+  .hero__mail { border-top: var(--rule); padding-top: var(--s-4); margin-top: var(--s-6); color: var(--c-text-2); font-size: var(--fs-small); }
+  .hero__mail a { font-weight: 600; color: var(--c-text); }
+  @media (max-width: 860px) { .hero__media { max-width: 20rem; } }
 </style>

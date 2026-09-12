@@ -1,56 +1,282 @@
 ---
-import Fachseite from '../layouts/Fachseite.astro';
+/**
+ * Property-Management-Optimierung (docs/CONTENT-PLAN-V2.md 4.4, Masterprompt Abschnitt 8).
+ * Fachseite auf Fachseite.astro. Heimatort fuer Zustaendigkeiten, Schnittstelle Eigentuemerseite und Verwaltung,
+ * Eskalation, Datenqualitaet und Bearbeitungsrueckstaende. Dienstleisterkoordination liegt auf
+ * /dienstleistersteuerung/, Kennzahlen und Reporting auf /reporting-und-kennzahlen/, die Offenlegung von
+ * Interessen auf /zusammenarbeit/#interessen; diese Stellen werden hier mit einem Satz plus Link angerissen
+ * (Heimatort-Prinzip 1.2).
+ * Slot methodik: Zustaendigkeitsmatrix als schematische Tabelle (Stufen statt Betraege, keine Fristen) und
+ * Abschnitt Eskalation. Keine WEG-Themen, damit die Seite nicht als Verwalterseite liest.
+ * Abgrenzung Punkt 1: Der Verwaltungsgegenstand der Hausverwaltung Mueller GmbH (Faktenliste Nr. 38) ist offen.
+ * Bis zur Freigabe ohne Nennung von WEG oder Mietobjekten; der Verweis auf muellerhv.de nutzt OPERATOR.website.
+ * Beitragslinks (Nach dem Zukauf, Asset und Property Management) rendern nur mit status freigegeben.
+ * Keine Zahlen zu Bestand, Mandaten, Zeitraeumen, Wertgrenzen oder Fristen.
+ */
+import Fachseite, { type Block, type Absatz, type Link } from '../layouts/Fachseite.astro';
+import type { FaqItem } from '../components/Faq.astro';
+import type { SeitennavEintrag } from '../components/Seitennav.astro';
+import { OPERATOR } from '../data/site';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
+
+const path = '/property-management-optimierung/';
+
+/* Bedingte Beitragslinks: nur freigegebene Beitraege, kein Hinweis auf kommende Beitraege. */
+const beitraege = await veroeffentlichteBeitraege();
+const beitrag = (slug: string) => beitraege.find((b) => b.id === slug);
+const beitragZukauf = beitrag('nach-dem-zukauf-reihenfolge');
+const beitragSchnittstelle = beitrag('asset-management-property-management-zusammenarbeit');
+
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Passende Situationen', href: '#situationen' },
+  { label: 'Leistungsumfang', href: '#leistung' },
+  { label: 'Zuständigkeitsmatrix', href: '#zustaendigkeitsmatrix' },
+  { label: 'Eskalation', href: '#eskalation' },
+  { label: 'Vorgehen', href: '#vorgehen' },
+  { label: 'Abgrenzung', href: '#abgrenzung' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+const situationen: Block[] = [
+  { t: 'Unklare Schnittstelle zwischen Eigentümer­seite und Verwaltung', d: 'Wer entscheidet was, bis zu welcher Höhe, in welcher Frist? Fehlt diese Klarheit, warten beide Seiten aufeinander, und kleine Fragen landen bei der Geschäftsführung.' },
+  { t: 'Bearbeitungs­rückstände', d: 'Offene Vorgänge, unbearbeitete Rechnungen, verzögerte Abrechnungen. Die Ursache liegt selten bei einzelnen Personen, meist im Prozess.' },
+  { t: 'Dienstleister ohne Steuerung', d: 'Aufträge ohne Leistungs­beschreibung, Nachträge (Änderungen eines laufenden Auftrags in Umfang oder Preis) ohne Prüfung, Abnahmen (Feststellung, ob die Leistung wie beauftragt erbracht wurde) ohne Protokoll. Was die Leistung kostet und wann sie fertig ist, bleibt am Ende offen.' },
+  { t: 'Kennzahlen, die niemand nutzt', d: 'Berichte werden erstellt, aber nicht gelesen, weil sie die Fragen der Eigentümerseite nicht beantworten.' },
+  {
+    t: 'Mehrere Verwaltungen nach Zukauf',
+    d: 'Teilbestände mit eigenen Verwaltungen, eigenen Berichtsformaten und eigenen Datenständen sollen nach einheitlichen Standards gesteuert werden. Die Reihenfolge der Vereinheitlichung entscheidet über Aufwand und Ergebnis.',
+    ...(beitragZukauf ? { mehr: { label: 'Beitrag: Nach dem Zukauf', href: `/einblicke/${beitragZukauf.id}/` } } : {}),
+  },
+];
+
+const leistungen: Block[] = [
+  {
+    t: 'Zuständigkeiten und Entscheidungswege',
+    d: 'Klare Regeln, wer welche Entscheidung trifft, bis zu welcher Wertgrenze und in welcher Frist. Festgehalten in einer Zuständigkeitsmatrix, abgestimmt mit allen Beteiligten.',
+    mehr: { label: 'Matrix als Muster', href: '#zustaendigkeitsmatrix' },
+  },
+  { t: 'Schnittstelle zwischen Eigentümerseite und Verwaltung', d: 'Berichtsrhythmus, Freigabeprozesse und Eskalationswege festlegen. Ziel ist, dass die Verwaltung handeln kann und die Eigentümerseite informiert bleibt, ohne jeden Vorgang selbst zu entscheiden.' },
+  {
+    t: 'Dienstleister­koordination',
+    d: 'Leistungsbeschreibung, Vergabe, Nachtrag und Abnahme folgen einem Standard, den die Eigentümerseite vorgibt und die Verwaltung anwendet.',
+    mehr: { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/' },
+  },
+  { t: 'Datenqualität', d: 'Stammdaten, Mietverträge, Flächen und Kostenstellen auf Konsistenz prüfen. Ein Bestand mit sauberen Daten lässt sich steuern, einer ohne nur verwalten.' },
+  { t: 'Bearbeitungsrückstände abbauen', d: 'Rückstände sichtbar machen, priorisieren, abarbeiten und durch Prozessänderungen dauerhaft vermeiden.' },
+  {
+    t: 'Kennzahlen und Reporting',
+    d: 'Wenige Kennzahlen zur Umsetzung, die an das Eigentümerreporting anschließen und Entscheidungen auslösen.',
+    mehr: { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  },
+];
+
+const ergebnisse = [
+  'Zuständigkeitsmatrix mit Wertgrenzen und Fristen, die Ihr Haus festlegt',
+  'Berichts- und Freigabeprozess zwischen Eigentümerseite und Verwaltung',
+  'Eskalationsregel mit Dokumentation und Wiedervorlage',
+  'Datenqualitätsbericht mit Bereinigungsplan',
+  'Rückstandsliste mit Priorität, Verantwortlichen und Abbauplan',
+];
+
+const vorgehen: Block[] = [
+  { t: 'Prozesse aufnehmen', d: 'Ist-Abläufe mit Verwaltung, Technik und Rechnungswesen erfassen, Engpässe, Wartezeiten und Doppelarbeit benennen.' },
+  { t: 'Soll-Prozesse festlegen', d: 'Zuständigkeiten, Wertgrenzen, Fristen, Eskalations- und Berichtswege gemeinsam definieren und in der Matrix festhalten.' },
+  { t: 'Einführen', d: 'Schrittweise umsetzen, Beteiligte einbinden, Rückstände parallel abbauen.' },
+  { t: 'Nachhalten', d: 'Kennzahlen zur Umsetzung in festem Rhythmus prüfen, Prozesse anpassen, Ergebnisse dokumentieren.' },
+];
+
+/* Schematische Zustaendigkeitsmatrix: Stufe 1 entscheidet die Verwaltung im Rahmen der Vorgaben, Stufe 2 die
+   Eigentuemerseite auf Vorlage. Wertgrenzen, Vermietungsvorgaben und Fristen legt jedes Haus selbst fest. */
+interface MatrixZeile { vorgang: string; verwaltung: string; eigentuemer: string; eskalation: string }
+const matrix: MatrixZeile[] = [
+  {
+    vorgang: 'Instandsetzung',
+    verwaltung: 'Stufe 1: bis zur vereinbarten Wertgrenze, ohne Rückfrage',
+    eigentuemer: 'Stufe 2: oberhalb der Wertgrenze, auf Vorlage der Verwaltung',
+    eskalation: 'Antwortfrist vereinbart. Nach Ablauf Wiedervorlage bei der Geschäftsführung.',
+  },
+  {
+    vorgang: 'Herrichtung leerer Wohnungen',
+    verwaltung: 'Stufe 1: nach festgelegtem Herrichtungsstandard, also dem vereinbarten Zustand, in dem eine Wohnung neu vermietet wird',
+    eigentuemer: 'Stufe 2: bei Abweichung vom Standard oder oberhalb der Wertgrenze',
+    eskalation: 'Antwortfrist vereinbart. Offene Freigaben erscheinen im Leerstandsbericht.',
+  },
+  {
+    vorgang: 'Vergabe von Aufträgen',
+    verwaltung: 'Stufe 1: innerhalb der Wertgrenze und bestehender Rahmenvereinbarungen, also vorab mit Dienstleistern vereinbarter Leistungen und Konditionen',
+    eigentuemer: 'Stufe 2: bei Einzelvergaben oberhalb der Wertgrenze oder außerhalb der Rahmenvereinbarung',
+    eskalation: 'Antwortfrist vereinbart. Vorlage mit Angeboten und Empfehlung der Verwaltung.',
+  },
+  {
+    vorgang: 'Mietanpassung',
+    verwaltung: 'Stufe 1: innerhalb der vereinbarten Vermietungsvorgaben',
+    eigentuemer: 'Stufe 2: bei Abweichung von den Vorgaben',
+    eskalation: 'Nach Vereinbarung. Die rechtliche Zulässigkeit prüft der Rechtsanwalt.',
+  },
+  {
+    vorgang: 'Forderungsmaßnahme',
+    verwaltung: 'Stufe 1: Mahnlauf nach festgelegtem Ablauf',
+    eigentuemer: 'Stufe 2: bei weitergehenden Schritten',
+    eskalation: 'Nach Vereinbarung. Rechtliche Schritte mit dem Rechtsanwalt des Eigentümers.',
+  },
+];
+
+const eskalation: Block[] = [
+  { t: 'Eskalationsweg', d: 'Jede Freigabeanfrage hat einen Adressaten und eine Antwortfrist. Verstreicht die Frist, geht der Vorgang an die nächste Instanz, nicht in die Warteschleife. Wer die nächste Instanz ist, steht in der Matrix.' },
+  { t: 'Ursache im Prozess, nicht bei Personen', d: 'Stockt eine Maßnahme, frage ich zuerst nach Ablauf, Schnittstelle und Informationsstand, erst dann nach Personen. Rückstände entstehen meist, weil eine Entscheidung nicht vorgesehen war, nicht weil jemand sie verweigert hat.' },
+  { t: 'Dokumentation', d: 'Jede Eskalation wird mit Datum, Anlass und Entscheidung festgehalten. Das ist keine Schuldzuweisung, sondern die Grundlage, den Prozess an dieser Stelle zu ändern.' },
+  { t: 'Wiedervorlage', d: 'Offene Punkte kommen in festem Rhythmus auf den Tisch, bis sie erledigt oder bewusst zurückgestellt sind. Eine Maßnahme ohne Wiedervorlage bleibt eine Absicht.' },
+];
+
+const abgrenzung: Absatz[] = [
+  {
+    text: 'Dies ist keine Seite für die Suche nach einer Hausverwaltung. Das laufende Verwaltungsangebot der Hausverwaltung Müller GmbH finden Sie auf der Website der Verwaltung.',
+    mehr: { label: 'muellerhv.de', href: OPERATOR.website },
+  },
+  'Ich übernehme keine operative Verwaltung im Mandat. Ich verbessere die Umsetzungsebene und arbeite mit Ihrer Verwaltung zusammen.',
+  {
+    text: 'Als Geschäftsführer einer Hausverwaltung habe ich eine eigene Interessenlage, deshalb lege ich verbundene Unternehmen vor jeder Empfehlung offen.',
+    mehr: { label: 'Zu den Interessen', href: '/zusammenarbeit/#interessen' },
+  },
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'verwaltung',
+    q: 'Arbeiten Sie gegen unsere Verwaltung?',
+    a: 'Nein. Die Verwaltung ist Teil der Lösung. Rückstände entstehen meist aus unklaren Prozessen, nicht aus mangelndem Einsatz. Ich beziehe die Verwaltung von Anfang an ein und arbeite mit ihren Systemen.',
+  },
+  {
+    id: 'mehrere-verwaltungen',
+    q: 'Können mehrere Verwaltungen im Bestand einheitlich gesteuert werden?',
+    a: 'Ja, wenn die Eigentümerseite die Standards setzt: eine Zuständigkeitsmatrix, ein Berichtsformat und ein Datenstand mit denselben Definitionen für alle Einheiten. Die Verwaltungen behalten ihre Systeme, liefern aber nach demselben Muster. Die Reihenfolge der Vereinheitlichung wird zu Beginn festgelegt, nicht alles auf einmal.',
+    ...(beitragZukauf ? { mehr: { label: 'Beitrag: Nach dem Zukauf', href: `/einblicke/${beitragZukauf.id}/` } } : {}),
+  },
+  {
+    id: 'verwalterwechsel',
+    q: 'Wie unterscheidet sich das von einem Verwalterwechsel?',
+    a: 'Ein Wechsel tauscht den Dienstleister, ändert aber nicht die Prozesse an der Schnittstelle. Ich arbeite zuerst an Zuständigkeiten, Fristen und Daten. Ein Verwalterwechsel ist kein Ziel der Beratung. Er kann höchstens ein Ergebnis der Analyse sein, mit Begründung und Alternativen.',
+    mehr: { label: 'Zu den Interessen', href: '/zusammenarbeit/#interessen' },
+  },
+  {
+    id: 'software',
+    q: 'Muss die Verwaltung dafür ihre Software wechseln?',
+    a: 'Nein. Ich arbeite mit den vorhandenen Systemen. Entscheidend sind Definitionen, Zuständigkeiten und Datenpflege, nicht das Werkzeug. Zeigt die Analyse Systemgrenzen, werden sie benannt und in der Reihenfolge der Maßnahmen berücksichtigt.',
+  },
+];
+
+const verwandt: Link[] = [
+  { label: 'Dienstleistersteuerung', href: '/dienstleistersteuerung/' },
+  { label: 'Reporting und Kennzahlen', href: '/reporting-und-kennzahlen/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+  { label: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
+  { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
+  { label: 'KI im Immobilienmanagement', href: '/ki-immobilienmanagement/' },
+];
 ---
 <Fachseite
-  path="/property-management-optimierung/"
+  path={path}
   title="Property Management optimieren | Timo Müller"
-  description="Immobilienverwaltung als Umsetzungsebene verbessern: Zuständigkeiten, Schnittstelle Eigentümer und Verwaltung, Dienstleistersteuerung, Datenqualität, Kennzahlen."
+  description="Immobilienverwaltung als Umsetzungsebene verbessern: Zuständigkeitsmatrix, Schnittstelle Eigentümerseite und Verwaltung, Eskalation, Datenqualität, Kennzahlen."
   h1="Property-Management-Optimierung"
   eyebrow="Beratung"
   frage="Warum kommen beschlossene Maßnahmen im Tagesgeschäft nicht an, und wie ändern Sie das?"
   intro="Property Management ist die operative Verwaltung des Bestands. Hier entscheidet sich, ob Strategien Wirkung entfalten. Ich verbessere die Umsetzungsebene: Zuständigkeiten, Schnittstellen, Dienstleister, Daten und Kennzahlen."
   serviceName="Property-Management-Optimierung"
   serviceType="Prozessberatung Immobilienverwaltung"
-  situationen={[
-    { t: 'Unklare Schnittstelle Eigentümer und Verwaltung', d: 'Wer entscheidet was, bis zu welcher Höhe, in welcher Frist? Fehlt diese Klarheit, warten beide Seiten aufeinander.' },
-    { t: 'Bearbeitungsrückstände', d: 'Offene Tickets, unbearbeitete Rechnungen, verzögerte Abrechnungen. Die Ursache liegt selten bei einzelnen Personen, meist im Prozess.' },
-    { t: 'Dienstleister ohne Steuerung', d: 'Aufträge ohne Leistungsbeschreibung, Nachträge ohne Prüfung, Abnahmen ohne Dokumentation.' },
-    { t: 'Kennzahlen, die niemand nutzt', d: 'Berichte werden erstellt, aber nicht gelesen, weil sie die Fragen der Eigentümerseite nicht beantworten.' },
-  ]}
-  leistungen={[
-    { t: 'Zuständigkeiten und Entscheidungswege', d: 'Klare Regeln, wer welche Entscheidung trifft, mit welchen Wertgrenzen und in welcher Frist. Dokumentiert und mit allen Beteiligten abgestimmt.' },
-    { t: 'Schnittstelle Eigentümer und Verwaltung', d: 'Berichtsrhythmus, Freigabeprozesse und Eskalationswege festlegen. Ziel ist, dass die Verwaltung handeln kann und die Eigentümerseite informiert bleibt.' },
-    { t: 'Dienstleisterkoordination', d: 'Leistungsbeschreibungen, Auftragsvergabe, Nachtragsprüfung und Abnahme strukturieren. Aus handwerklicher Praxis weiß ich, wo Angebote und Rechnungen genau hinzusehen verlangen.' },
-    { t: 'Datenqualität', d: 'Stammdaten, Mietverträge, Flächen und Kostenstellen auf Konsistenz prüfen. Ein Bestand mit sauberen Daten lässt sich steuern, einer ohne nur verwalten.' },
-    { t: 'Bearbeitungsrückstände abbauen', d: 'Rückstände sichtbar machen, priorisieren, abarbeiten und durch Prozessänderungen dauerhaft vermeiden.' },
-    { t: 'Kennzahlen und Reporting', d: 'Wenige, nachvollziehbare Kennzahlen, die Eigentümerfragen beantworten: Leerstand, Forderungen, Instandhaltungsfortschritt, Bearbeitungszeiten.' },
-  ]}
-  ergebnisse={[
-    'Zuständigkeitsmatrix mit Wertgrenzen und Fristen',
-    'Definierter Berichts- und Freigabeprozess zwischen Eigentümer und Verwaltung',
-    'Standards für Auftragsvergabe, Nachträge und Abnahmen',
-    'Datenqualitätsbericht mit Bereinigungsplan',
-    'Kennzahlenset mit Berichtsvorlage',
-  ]}
-  vorgehen={[
-    { t: 'Prozesse aufnehmen', d: 'Ist-Abläufe mit Verwaltung, Technik und Buchhaltung erfassen, Engpässe und Doppelarbeit benennen.' },
-    { t: 'Soll-Prozesse festlegen', d: 'Zuständigkeiten, Wertgrenzen, Fristen und Berichtswege gemeinsam definieren.' },
-    { t: 'Einführen', d: 'Schrittweise umsetzen, Beteiligte einbinden, Rückstände parallel abbauen.' },
-    { t: 'Nachhalten', d: 'Kennzahlen regelmäßig prüfen, Prozesse anpassen, Ergebnisse dokumentieren.' },
-  ]}
-  abgrenzung={[
-    'Dies ist keine Seite für die Suche nach einem WEG- oder Mietverwalter. Das laufende Verwaltungsangebot der Hausverwaltung Müller GmbH finden Sie auf muellerhv.de.',
-    'Ich übernehme keine operative Verwaltung im Mandat. Ich verbessere die Umsetzungsebene und arbeite mit Ihrer Verwaltung zusammen.',
-    'Verbundene Unternehmen lege ich offen. Eine Empfehlung für einen bestimmten Dienstleister erfolgt nur mit Begründung und Alternativen.',
-  ]}
-  faq={[
-    { q: 'Arbeiten Sie gegen unsere Verwaltung?', a: 'Nein. Die Verwaltung ist Teil der Lösung. Die meisten Rückstände entstehen aus unklaren Prozessen, nicht aus mangelndem Einsatz. Ich beziehe die Verwaltung von Anfang an ein.' },
-    { q: 'Was bringt handwerkliche Erfahrung in der Verwaltungsberatung?', a: 'Ein realistisches Verständnis dafür, was Maßnahmen kosten, wie lange sie dauern und woran Dienstleisterleistungen zu messen sind. Das hilft bei Angebotsprüfung, Nachträgen und Abnahmen.' },
-    { q: 'Wie viele Kennzahlen sind sinnvoll?', a: 'Wenige. Ein Set, das die Eigentümerseite tatsächlich liest und aus dem Entscheidungen folgen, ist mehr wert als ein umfangreiches Dashboard ohne Konsequenzen.' },
-  ]}
-  verwandt={[
-    { label: 'Portfoliooptimierung', href: '/portfoliooptimierung/' },
-    { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
-    { label: 'KI im Immobilienmanagement', href: '/ki-immobilienmanagement/' },
-  ]}
-/>
+  seitennav={seitennav}
+  situationen={situationen}
+  situationenIntro="Situationen, in denen die Umsetzungsebene und nicht die Strategie das Ergebnis begrenzt."
+  leistungen={leistungen}
+  ergebnisse={ergebnisse}
+  vorgehen={vorgehen}
+  vorgehenIntro="Vier Schritte. Reihenfolge und Tiefe richten sich nach den Engpässen, die die Aufnahme zeigt."
+  abgrenzung={abgrenzung}
+  faq={faq}
+  verwandt={verwandt}
+>
+  <section class="section section--linie" id="zustaendigkeitsmatrix" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Methode</span>
+        <h2>Zuständigkeiten in einer Matrix festhalten</h2>
+        <p>
+          Eine <a href="/glossar/#zustaendigkeitsmatrix">Zuständigkeitsmatrix</a> legt je Vorgang fest, wer entscheidet, bis zu welcher Wertgrenze und in welcher Frist die andere Seite antwortet.
+          Sie ist das zentrale Arbeitsdokument an der Schnittstelle zwischen Eigentümerseite und <a href="/glossar/#property-management">Property Management</a>, also der operativen Verwaltung.
+          Die Struktur unten ist ein Muster ohne Werte.
+        </p>
+      </div>
+      <figure class="matrix">
+        <p class="small tabelle-hinweis">Tabelle seitlich verschiebbar.</p>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Tabelle Zuständigkeitsmatrix">
+          <table>
+            <caption>Schematische Struktur, kein Projektergebnis</caption>
+            <thead>
+              <tr>
+                <th scope="col">Vorgang</th>
+                <th scope="col">Verwaltung entscheidet</th>
+                <th scope="col">Eigentümerseite entscheidet</th>
+                <th scope="col">Antwortfrist und Eskalation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matrix.map((z) => (
+                <tr>
+                  <th scope="row">{z.vorgang}</th>
+                  <td>{z.verwaltung}</td>
+                  <td>{z.eigentuemer}</td>
+                  <td>{z.eskalation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <figcaption class="bildunterschrift">Schematische Darstellung der Struktur. Wertgrenzen, Vermietungsvorgaben und Fristen legt jedes Haus selbst fest.</figcaption>
+      </figure>
+      <p class="small section-foot">
+        Stufe 1 bedeutet: Die Verwaltung entscheidet im Rahmen der Vorgaben allein und berichtet. Stufe 2 bedeutet: Die Eigentümerseite entscheidet auf Vorlage der Verwaltung.
+        Wo Stufe 1 endet, bestimmen Wertgrenzen und Vorgaben, die mit der Verwaltung abgestimmt und dokumentiert werden.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="eskalation" slot="methodik">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Eskalation</span>
+          <h2>Wenn eine Maßnahme stockt</h2>
+          <p><a href="/glossar/#eskalation">Eskalation</a> heißt hier: Ein offener Vorgang wird nach Ablauf der vereinbarten Frist an die nächste Instanz gegeben, statt liegen zu bleiben. Vier Regeln, damit das ohne Reibung funktioniert.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register" role="list">
+            {eskalation.map((e) => (
+              <li>
+                <h3>{e.t}</h3>
+                <p>{e.d}</p>
+              </li>
+            ))}
+          </ol>
+          {beitragSchnittstelle && (
+            <p class="abschnitt__foot"><a class="textlink" href={`/einblicke/${beitragSchnittstelle.id}/`}>Beitrag: Asset Management und Property Management</a></p>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+</Fachseite>
+
+<style>
+  /* Zustaendigkeitsmatrix: Zeilenkopf dunkel, Zellen in Sekundaerfarbe, Mindestbreiten statt Quetschen (scrollt in .table-wrap),
+     Kennzeichnung als figcaption ausserhalb des Scrollbereichs, Scrollhinweis nur auf schmalen Ansichten */
+  .matrix tbody th { color: var(--c-text); min-width: 10rem; }
+  .matrix td { color: var(--c-text-2); min-width: 12rem; }
+  .matrix figcaption { margin-top: var(--s-4); }
+  .tabelle-hinweis { display: none; color: var(--c-text-3); margin: 0 0 var(--s-2); }
+  @media (max-width: 640px) {
+    .tabelle-hinweis { display: block; }
+  }
+
+  /* Eskalation: Fusszeile unter dem Register */
+  .abschnitt__foot { margin: var(--s-5) 0 0; }
+</style>

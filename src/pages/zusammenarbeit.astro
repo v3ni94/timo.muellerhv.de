@@ -1,0 +1,507 @@
+---
+/**
+ * Zusammenarbeit: Ablauf eines Beratungsmandats vom Erstgespraech bis zur Uebergabe (docs/CONTENT-PLAN-V2.md 3.1,
+ * 6.2, 6.4; docs/DESIGN-SPEC-V2.md 6.2, 6.6, 6.10, 6.12, 6.14). Eigene Seite auf Base.astro, kein Service-Markup,
+ * BreadcrumbList und FAQPage. Einziger Heimatort der Interessenoffenlegung (Anker #interessen).
+ * Faktenregeln: keine Dauer, keine Reaktionszeit, keine Honorarhoehe, keine Kapazitaet, kein Vertragspartner,
+ * keine Arbeitsform. Aussagen zu Vertrag, Honorar, Vertraulichkeit und Interessen stammen aus bestehenden Seiten
+ * (AM-FAQ, Portfolio-FAQ, PM-Abgrenzung, Kontakt, Profil) oder haengen an Flags mit Freigabepunkt
+ * (docs/CONTENT-PLAN-V2.md Abschnitt 9, Nr. 22 bis 29 und 33). Ohne Freigabe rendert der jeweilige Inhalt nichts.
+ * Die Seite ist ohne alle Flag-Inhalte vollstaendig lesbar.
+ * Funktionen und Netzwerk im Abschnitt Interessen ausschliesslich aus docs/FAKTENLISTE.md Nr. 3, 5, 6, 7, 9.
+ */
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Hero from '../components/Hero.astro';
+import Seitennav, { type SeitennavEintrag } from '../components/Seitennav.astro';
+import Portrait from '../components/Portrait.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import Cta from '../components/Cta.astro';
+import { breadcrumbLd, faqLd, type Crumb } from '../lib/seo';
+import { PERSON, SITE } from '../data/site';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
+
+const path = '/zusammenarbeit/';
+const title = 'Zusammenarbeit: Ablauf eines Beratungsmandats | Timo Müller';
+const description = 'Vom Erstgespräch bis zur Übergabe: Ablauf, Datenbedarf, Vertraulichkeit, Rollen auf Ihrer Seite und Offenlegung von Interessen. Beratung von Timo Müller.';
+
+const crumbs: Crumb[] = [
+  { name: 'Beratung', href: '/asset-management-beratung/' },
+  { name: 'Zusammenarbeit', href: path },
+];
+
+/* ---------------------------------------------------------------------------
+   Freigabepunkte (docs/CONTENT-PLAN-V2.md Abschnitt 9, docs/FAKTENLISTE.md).
+   Muster wie beraterprofilPdf in profil.astro: Flag false, Text leer. Erst nach Freigabe durch Timo Mueller
+   beziehungsweise die Geschaeftsfuehrung Flag auf true setzen und den freigegebenen Wortlaut eintragen.
+   Ohne Freigabe rendert der jeweilige Inhalt nichts, es entstehen keine sichtbaren Platzhalter.
+--------------------------------------------------------------------------- */
+const vertragspartnerFreigabe: boolean = false;          // Nr. 22 Vertragspartner des Beratungsmandats
+const vertragspartnerText = '';
+const honorarlogikFreigabe: boolean = false;             // Nr. 23 Honorarlogik je Mandatsform
+const honorarlogikText = '';
+const verguetungDritterFreigabe: boolean = false;        // Nr. 24 Regel 5: keine Verguetung von Dritten
+const verguetungDritterText = '';
+const kostenfreiFreigabe: boolean = false;               // Nr. 25 Kostenfreiheit von Erstgespraech und Kurzeinschaetzung
+const kostenfreiText = '';
+const ankaufsregelFreigabe: boolean = false;             // Nr. 26 Regel 4: eigene Ankaufsinteressen
+const ankaufsregelText = '';
+const datenhaltungFreigabe: boolean = false;             // Nr. 28 Datenhaltung, Rueckgabe oder Loeschung nach Mandatsende
+const datenhaltungText = '';
+const vorOrtFreigabe: boolean = false;                   // Nr. 29 Arbeitsform vor Ort und remote (FAQ)
+const vorOrtAntwort = '';
+const vertraulichkeitsstandardFreigabe: boolean = false; // Nr. 33 Standard der Vertraulichkeitsvereinbarung
+const vertraulichkeitsstandardText = '';
+
+/** Ein Flag-Inhalt rendert nur, wenn Freigabe vorliegt und ein Wortlaut eingetragen ist. */
+const frei = (flag: boolean, text: string): boolean => flag && text.trim().length > 0;
+/** Haengt einen freigegebenen Zusatzsatz an einen Basistext an. */
+const mit = (basis: string, flag: boolean, zusatz: string): string => (frei(flag, zusatz) ? `${basis} ${zusatz}` : basis);
+
+/* Seitennavigation mit sechs Ankern (docs/DESIGN-SPEC-V2.md 6.11): Rollen (#rollen) und Mandatsende (#mandatsende)
+   bleiben in der Lesefolge und per Deep-Link erreichbar, stehen aber nicht in der Seitennavigation, damit sie bei
+   1440 px einzeilig bleibt. */
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Ablauf', href: '#ablauf' },
+  { label: 'Vorbereitung', href: '#vorbereitung' },
+  { label: 'Datenbedarf', href: '#daten' },
+  { label: 'Vertraulichkeit und Vertrag', href: '#vertraulichkeit' },
+  { label: 'Interessen', href: '#interessen' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+/* Abschnitt 2: Ablauf in sechs Schritten. Kein Schritt nennt eine Dauer oder eine Reaktionszeit. */
+interface Schritt { t: string; d: string }
+const ablauf: Schritt[] = [
+  {
+    t: 'Anfrage',
+    d: 'Sie schreiben mir über das Formular oder per E-Mail. Eine grobe Beschreibung von Bestand, Ziel und Ihrer Rolle genügt. Unterlagen sind in diesem Schritt nicht nötig.',
+  },
+  {
+    t: 'Erstgespräch',
+    d: mit(
+      'Telefon oder Video. Wir klären Ausgangslage, Ziel und Entscheidungswege und prüfen, ob eine Zusammenarbeit sinnvoll ist. Ohne Detaildaten und ohne Mieterdaten. Das Gespräch ist unverbindlich.',
+      kostenfreiFreigabe, kostenfreiText,
+    ),
+  },
+  {
+    t: 'Einschätzung und Angebot',
+    d: 'Ich schlage eine Mandatsform vor und beschreibe schriftlich Leistungsumfang, Datentiefe, Zeitrahmen und Honorar. Die Kontaktaufnahme allein begründet keinen Vertrag.',
+  },
+  {
+    t: 'Vertraulichkeit und Datenzugang',
+    d: 'Vor jedem Datenaustausch wird Vertraulichkeit schriftlich vereinbart. Danach erhalten Sie eine Unterlagenliste je Handlungsfeld, damit Ihr Haus gezielt liefern kann und nichts Überflüssiges zusammenstellt.',
+  },
+  {
+    t: 'Kick-off und Arbeitsrhythmus',
+    d: 'Im Kick-off, dem gemeinsamen Startgespräch, werden Ansprechpartner beider Seiten, Abstimmungstermine und das Entscheidungsprotokoll festgelegt. Die Maßnahmenliste wird zum gemeinsamen Arbeitsdokument.',
+  },
+  {
+    t: 'Ergebnis, Entscheidung und Übergabe',
+    d: 'Ergebnisdokumente, Ergebnisbesprechung, Entscheidung durch Sie. Danach Übergabe an die Umsetzenden in Ihrem Haus. Nachhalten nach Vereinbarung.',
+  },
+];
+
+/* Abschnitt 3: Vorbereitung auf das Erstgespraech (Heimatort, Kontakt kuerzt auf zwei Saetze plus Link). */
+const vorbereitung = [
+  'Art und ungefähre Größe des Bestands: Wohnen oder gemischt, Objekte und Einheiten in groben Zügen',
+  'Ihre Rolle und Ihre Entscheidungskompetenz',
+  'Das Ziel oder das Problem, um das es geht',
+  'Beteiligte und Entscheidungswege: Gesellschafter, Gremien, Verwaltung',
+  'Zeitrahmen, falls es einen gibt, etwa einen Finanzierungstermin oder eine Gesellschafterversammlung',
+  'Bekannte offene Themen, auch wenn sie noch nicht beziffert sind',
+];
+
+/* Abschnitt 4: Rollen und Mitwirkung auf Auftraggeberseite. Je Rolle: wofuer gebraucht, in welcher Phase. */
+interface Rolle { t: string; d: string; phase: string }
+const rollen: Rolle[] = [
+  {
+    t: 'Geschäftsführung oder Eigentümer',
+    d: 'Auftraggeber. Gibt das Ziel vor, trifft die Entscheidungen und nimmt an den Ergebnisbesprechungen teil.',
+    phase: 'Erstgespräch, Angebot, Entscheidung, Übergabe',
+  },
+  {
+    t: 'Asset- oder Portfoliomanagement, falls vorhanden',
+    d: 'Fachlicher Gegenpart auf der Ebene, die den Bestand wirtschaftlich steuert. Öffnet den Datenzugang, bewertet Optionen mit und trägt Ergebnisse intern weiter.',
+    phase: 'Ab Kick-off durchgehend',
+  },
+  {
+    t: 'Verwaltung',
+    d: 'Liefert Daten und Prozesswissen, setzt Maßnahmen im Tagesgeschäft um und nimmt an der Priorisierung teil.',
+    phase: 'Ab Datenzugang, in der Umsetzung laufend',
+  },
+  {
+    t: 'Technik oder Bauabteilung',
+    d: 'Bewertet den Zustand der Objekte und plausibilisiert Kosten und Reihenfolgen von Maßnahmen.',
+    phase: 'Bestandsaufnahme und Priorisierung',
+  },
+  {
+    t: 'Rechnungswesen',
+    d: 'Stellt Plan- und Istdaten sowie die Liquiditätsübersicht bereit und prüft Zahlen auf Konsistenz.',
+    phase: 'Bestandsaufnahme und Nachhalten',
+  },
+  {
+    t: 'Finanzierer sowie Steuer- und Rechtsberater, bei Bedarf',
+    d: 'Schnittstellen für Finanzierungs-, Steuer- und Rechtsfragen. Ich bereite Fragen vor und stimme ab, ersetze diese Berater aber nicht.',
+    phase: 'Punktuell, wenn Entscheidungen ihre Themen berühren',
+  },
+];
+
+/* Abschnitt 5: Datenbedarf. Kategorien ohne Formatvorgaben, keine Zahlen. */
+const datenPortfolioCheck = [
+  'Mieter- und Einheitenliste',
+  'Leerstand je Einheit mit Ursache',
+  'Forderungen nach Alter, also offene Posten nach Dauer des Rückstands',
+  'Laufende Kosten nach Umlagefähigkeit, also danach, ob sie auf Mieter umgelegt werden können oder beim Eigentümer bleiben',
+  'Instandhaltungshistorie und bekannter Rückstand',
+  'Verträge mit Laufzeiten, etwa Verwaltungs- und Dienstleisterverträge',
+  'Finanzierungsübersicht mit Laufzeiten und Terminen',
+];
+/* Link auf den Beitrag "Daten zuerst" nur, wenn er freigegeben und veroeffentlicht ist (bedingt gerendert). */
+const datenBeitrag = (await veroeffentlichteBeitraege()).find((b) => b.id === 'immobilienportfolio-optimieren-daten');
+
+/* Abschnitt 9: Regeln zur Interessenoffenlegung. Regel 1 und 2 sind bestehende Aussagen (AM-Abgrenzung,
+   Portfolio-FAQ, PM-Abgrenzung, Profil). Regel 3 ist baubar, der Wortlaut wird in der Textfreigabe bestaetigt
+   (Nr. 27). Regel 4 (Nr. 26) und Regel 5 (Nr. 24) rendern nur mit Freigabe. */
+interface Regel { t: string; d: string }
+const regeln: Regel[] = [
+  {
+    t: 'Offenlegung vor Empfehlung',
+    d: 'Kommt ein verbundenes Unternehmen oder ein Betrieb aus meinem Netzwerk als Dienstleister in Frage, benenne ich das vorab, mit Begründung und mit Alternativen. Wer beauftragt wird, entscheiden Sie.',
+  },
+  {
+    t: 'Die Beratung ist kein Vertriebskanal für die Verwaltung',
+    d: 'Ein Verwalterwechsel ist kein Ziel der Beratung. Er kann höchstens ein Ergebnis der Analyse sein, mit Begründung und Alternativen. Das Verwaltungsangebot der Hausverwaltung Müller GmbH bleibt auf muellerhv.de und wird auf dieser Website nicht angeboten.',
+  },
+  {
+    t: 'Vertraulichkeit gegenüber der eigenen Gruppe',
+    d: 'Informationen aus Mandaten nutze ich nicht für Gruppengesellschaften oder den eigenen Bestand. Was ich über Ihren Bestand erfahre, bleibt im Mandat.',
+  },
+];
+if (frei(ankaufsregelFreigabe, ankaufsregelText)) regeln.push({ t: 'Eigene Ankaufsinteressen', d: ankaufsregelText });
+if (frei(verguetungDritterFreigabe, verguetungDritterText)) regeln.push({ t: 'Keine Vergütung von Dritten', d: verguetungDritterText });
+
+/* Abschnitt 10: Was bei der Uebergabe vorliegt. */
+const uebergabe = [
+  'Ergebnisdokumente und Entscheidungsvorlagen',
+  'Maßnahmenliste mit Verantwortlichen und Terminen',
+  'Protokoll der getroffenen Entscheidungen',
+  'Benannte Verantwortliche für das Nachhalten in Ihrem Haus',
+];
+
+/* Abschnitt 11: Fragen und Antworten. Antworten sind reiner Text (FAQPage). Vor-Ort-Frage nur mit Freigabe Nr. 29. */
+const faq: FaqItem[] = [
+  {
+    id: 'teilbestand',
+    q: 'Kann eine Zusammenarbeit mit einem einzelnen Objekt oder Teilbestand beginnen?',
+    a: 'Ja. Der Umfang wird im Angebot festgelegt und kann sich auf ein Objekt, einen Teilbestand oder ein einzelnes Handlungsfeld beschränken. Eine Ausweitung ist möglich, aber kein Automatismus.',
+  },
+  {
+    id: 'kein-bedarf',
+    q: 'Was passiert, wenn das Erstgespräch keinen Bedarf zeigt?',
+    a: 'Dann sage ich das. Ein Mandat ohne erkennbaren Nutzen schlage ich nicht vor. Liegt ein anderer Weg näher, etwa eine Klärung im eigenen Haus oder ein anderer Spezialist, benenne ich ihn.',
+  },
+  {
+    id: 'verwalter',
+    q: 'Wie arbeiten Sie mit unserem bestehenden Verwalter zusammen?',
+    a: 'Die Verwaltung ist ab Beginn eingebunden: bei der Datenlieferung, bei der Priorisierung und in der Umsetzung. Ohne ihr Prozesswissen entsteht kein Umsetzungsergebnis. Ein Verwalterwechsel ist kein Ziel der Beratung.',
+    mehr: { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  },
+  {
+    id: 'verwaltungsmandat',
+    q: 'Sie führen selbst eine Hausverwaltung. Wollen Sie unser Verwaltungsmandat?',
+    a: 'Nein, das ist nicht Gegenstand dieser Beratung. Ich bin Geschäftsführer der Hausverwaltung Müller GmbH; ihr Verwaltungsangebot wird auf dieser Website nicht angeboten. Wie ich das trenne, steht in Regel 2.',
+    mehr: { label: 'Regel 2 unter Interessen', href: '#interessen' },
+  },
+  {
+    id: 'ende',
+    q: 'Wie endet eine Zusammenarbeit?',
+    a: 'Mit dokumentierten Ergebnissen, einer Ergebnisbesprechung und der Übergabe an die Verantwortlichen in Ihrem Haus. Nachhalten ist optional. Jede Mandatsform ist eigenständig beauftragbar.',
+    mehr: { label: 'Wie ein Mandat endet', href: '#mandatsende' },
+  },
+];
+if (frei(vorOrtFreigabe, vorOrtAntwort)) faq.push({ id: 'arbeitsform', q: 'Arbeiten Sie vor Ort oder remote?', a: vorOrtAntwort });
+
+const ld = [breadcrumbLd(crumbs), faqLd(faq)];
+const interessenUrl = `${SITE.url.replace(/^https?:\/\//, '').replace(/\/$/, '')}${path}#interessen`;
+---
+<Base title={title} description={description} path={path} ld={ld}>
+  <Breadcrumb crumbs={crumbs} />
+
+  <Hero
+    eyebrow="Zusammenarbeit"
+    title="So läuft eine Zusammenarbeit ab"
+    frage="Was passiert zwischen Ihrer Anfrage und dem ersten Arbeitsergebnis?"
+    lead="Das Erstgespräch kommt ohne Detaildaten aus. Vor Beginn erhalten Sie ein schriftliches Angebot. Die Entscheidungen über Ihren Bestand bleiben bei Ihnen."
+    ohneLinie
+  >
+    <div class="hero-actions">
+      <a class="btn btn--primary" href="/kontakt/">Portfolio besprechen</a>
+      <a class="textlink" href="#interessen">Zu den Interessen</a>
+    </div>
+    <Portrait slot="media" nr={1} ratio="4/5" priority sizes="(max-width: 860px) 20rem, (max-width: 1300px) 30vw, 380px" widths={[480, 800, 1200]} />
+  </Hero>
+
+  <Seitennav items={seitennav} />
+
+  <section class="section ablauf" id="ablauf">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow eyebrow--still">Ablauf</span>
+        <h2>Sechs Schritte von der Anfrage bis zur Übergabe</h2>
+        <p>Jedes Mandat, also jeder vereinbarte Beratungsauftrag, durchläuft dieselben Schritte. Wie lange die Schritte dauern, bestimmen Bestandsgröße, Datenlage und Ihre Entscheidungswege.</p>
+      </div>
+      <ol class="steps" role="list">
+        {ablauf.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}
+      </ol>
+      <p class="section-foot ablauf__mandatsformen">Drei Mandatsformen stehen zur Wahl: der Portfolio-Check als Bestandsaufnahme mit Maßnahmenplan, die Umsetzungsbegleitung als Steuerung der beschlossenen Maßnahmen und das <a href="/glossar/#sparring">Sparring</a> als regelmäßiger, kritischer Austausch zu anstehenden Entscheidungen. <a class="textlink" href="/asset-management-beratung/#mandate">Zu den Mandatsformen</a></p>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="vorbereitung">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Vorbereitung</span>
+          <h2>Was Sie für das Erstgespräch vorbereiten können</h2>
+          <p>Für eine erste Einschätzung genügen wenige Angaben. Sie müssen nichts zusammenstellen, was Sie nicht ohnehin im Kopf haben.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ul class="checklist vorbereitung-liste" role="list">
+            {vorbereitung.map((v) => <li>{v}</li>)}
+          </ul>
+          <p class="vorbereitung-schluss"><strong>Nicht nötig sind Mieterdaten, Verträge oder andere vertrauliche Unterlagen. Diese folgen erst nach der Vertraulichkeitsvereinbarung im Mandat.</strong></p>
+          <a class="textlink" href="/kontakt/">Zum Kontakt</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="rollen">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Ihre Seite</span>
+          <h2>Rollen und Mitwirkung auf Ihrer Seite</h2>
+          <p>Ein Mandat liefert nur dann ein Umsetzungsergebnis, wenn die richtigen Personen zur richtigen Zeit mitwirken. Welche Rolle wofür gebraucht wird und in welcher Phase.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <dl class="dl-grid rollen-dl">
+            {rollen.map((r) => (
+              <>
+                <dt>{r.t}</dt>
+                <dd>
+                  <p>{r.d}</p>
+                  <p class="small rollen__phase">Phase: {r.phase}</p>
+                </dd>
+              </>
+            ))}
+          </dl>
+          <div class="regel">
+            <p><strong>Ohne Mitwirkung der Verwaltung entsteht kein Umsetzungsergebnis. Deshalb ist sie von Anfang an eingebunden, nicht erst bei der Umsetzung.</strong></p>
+            <p>Wie die Schnittstelle zwischen Eigentümerseite und Verwaltung geordnet wird, beschreibe ich unter <a href="/property-management-optimierung/">Property-Management-Optimierung</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="daten">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Datenbedarf</span>
+          <h2>Welche Daten wann nötig sind</h2>
+          <p>Je Mandatsform ein anderer Bedarf, und in keinem Fall mehr, als für die vereinbarten Handlungsfelder nötig ist. Kategorien statt Formatvorgaben: Vorhandene Auswertungen aus Verwaltung und Rechnungswesen genügen.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register daten-register" role="list">
+            <li>
+              <h3>Ersteinschätzung</h3>
+              <p>Aggregierte Angaben genügen: Art und Größe des Bestands, Ziel, Rolle, bekannte offene Themen. Keine Einzeldaten, keine Mieterdaten.</p>
+            </li>
+            <li>
+              <h3>Portfolio-Check</h3>
+              <p>Sieben Kategorien, die den Bestand wirtschaftlich beschreiben. Fehlt eine Kategorie, wird die Lücke im Ergebnis benannt.</p>
+              <ul class="checklist" role="list">
+                {datenPortfolioCheck.map((d) => <li>{d}</li>)}
+              </ul>
+            </li>
+            <li>
+              <h3>Umsetzungsbegleitung</h3>
+              <p>Daten der vereinbarten Handlungsfelder, laufend aktualisiert. Was nicht zu einem Handlungsfeld gehört, wird nicht angefordert.</p>
+            </li>
+            <li>
+              <h3>Sparring</h3>
+              <p>Ihre eigenen <a href="/glossar/#entscheidungsvorlage">Entscheidungsvorlagen</a> und Berichte, also die Unterlagen, mit denen in Ihrem Haus Entscheidungen vorbereitet werden. Sparring arbeitet mit dem, was ohnehin entsteht.</p>
+            </li>
+          </ol>
+          <p class="daten-schluss"><strong>Die Datentiefe wird im Angebot vereinbart. Lücken werden benannt, nicht überspielt.</strong></p>
+          {datenBeitrag && (
+            <p class="daten-beitrag"><a class="textlink" href={`/einblicke/${datenBeitrag.id}/`}>Beitrag: {datenBeitrag.data.title}</a></p>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section rahmen" id="rahmen" aria-label="Vertraulichkeit, Angebot und Verantwortung">
+    <div class="container">
+      <section class="kapitel" id="vertraulichkeit">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">01</span>
+          <h2>Vertraulichkeit und Umgang mit Daten</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Vor jedem Datenaustausch schließen wir eine <a href="/glossar/#vertraulichkeitsvereinbarung">Vertraulichkeitsvereinbarung</a>, also eine schriftliche Zusage, erhaltene Informationen nur für den vereinbarten Zweck zu nutzen und nicht an Dritte weiterzugeben. Erst danach fließen Detaildaten.</p>
+          {frei(vertraulichkeitsstandardFreigabe, vertraulichkeitsstandardText) && <p>{vertraulichkeitsstandardText}</p>}
+          <p>Daten aus dem Mandat verwende ich ausschließlich für das vereinbarte Mandat.</p>
+          <p>KI-Werkzeuge kommen mit Mandantendaten nur nach ausdrücklicher Vereinbarung zum Einsatz und erst, nachdem Rechtsgrundlage und Auftragsverarbeitung geprüft sind. Auftragsverarbeitung heißt: Ein Dienstleister verarbeitet personenbezogene Daten im Auftrag und nach Weisung des Verantwortlichen. Das wird vertraglich geregelt und vorab geprüft. Wie ich KI einsetze, steht unter <a href="/ki-immobilienmanagement/">KI im Immobilienmanagement</a>.</p>
+          {frei(datenhaltungFreigabe, datenhaltungText) && <p>{datenhaltungText}</p>}
+          <a class="textlink" href="/datenschutz/">Datenschutzerklärung</a>
+        </div>
+      </section>
+
+      <section class="kapitel" id="angebot">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">02</span>
+          <h2>Einschätzung, Angebot und Vertrag</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Art und Umfang einer Beauftragung werden individuell vereinbart. Vor Beginn erhalten Sie ein schriftliches Angebot mit Leistungsumfang, Datentiefe und Zeitrahmen. Das Honorar richtet sich nach Mandatsform, Umfang und Datenlage.</p>
+          {frei(honorarlogikFreigabe, honorarlogikText) && <p>{honorarlogikText}</p>}
+          {frei(vertragspartnerFreigabe, vertragspartnerText) && <p>{vertragspartnerText}</p>}
+          <p>Ich gebe keine Ergebniszusagen und keine Erfolgsversprechen ab. Was ein Mandat leisten kann, hängt von Datenlage, Entscheidungswegen und Mitwirkung ab. Das Angebot beschreibt deshalb Leistungen und Arbeitsergebnisse, nicht das wirtschaftliche Ergebnis.</p>
+          <p>Die Kontaktaufnahme löst keinen Beratungsvertrag aus.</p>
+        </div>
+      </section>
+
+      <section class="kapitel" id="verantwortung">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">03</span>
+          <h2>Rollen und Verantwortung</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Ich analysiere, priorisiere, bereite Entscheidungen vor und steuere die Umsetzung. Die Entscheidungen über Ihren Bestand treffen Sie.</p>
+          <p>Ich arbeite persönlich am Mandat und binde bei Bedarf geeignete Spezialisten ein. Meine Beratung ist persönlich: keine Organ- oder Beiratsfunktion, keine Rechts- oder Steuerberatung, keine erlaubnispflichtige Finanzdienstleistung. Wo diese Themen berührt werden, arbeite ich mit Ihren Beratern zusammen.</p>
+          <a class="textlink" href="/asset-management-beratung/#abgrenzung">Zur Abgrenzung der Beratung</a>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="section section--flaeche interessen" id="interessen">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Interessen</span>
+        <h2>Interessen und verbundene Unternehmen</h2>
+        <p class="standfirst">Wessen Interessen sitzen mit am Tisch, wenn Sie mich beauftragen?</p>
+      </div>
+      <div class="g">
+        <div class="gc-1-5">
+          <dl class="dl-grid funktionen">
+            <dt>Funktionen</dt>
+            <dd><ul>{PERSON.funktionen.map((f) => <li>{f}</li>)}</ul></dd>
+            <dt>Netzwerk</dt>
+            <dd>Operatives Netzwerk mit Bezügen zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär. Keine eigene Handwerkerorganisation, keine Kapazitätszusage.</dd>
+            <dt>Berührungs&shy;punkte</dt>
+            <dd>Diese Funktionen können in einem Mandat Interessen berühren: bei Dienstleisterempfehlungen, bei Fragen zur Verwaltung und im Umgang mit Informationen über Ihren Bestand. Dafür gelten die folgenden Regeln.</dd>
+          </dl>
+          <p class="interessen-link"><a class="textlink" href="/profil/">Zum Profil</a></p>
+        </div>
+        <div class="gc-7-12">
+          <ol class="register" role="list">
+            {regeln.map((r) => (<li><h3>{r.t}</h3><p>{r.d}</p></li>))}
+          </ol>
+          <div class="bedeutung">
+            <h3>Was das für Sie bedeutet</h3>
+            <p>Sie erhalten die Eigentümerperspektive eines Praktikers, der selbst investiert und verwaltet. Meine Interessenlage kennen Sie, bevor ich die erste Empfehlung ausspreche. Die Entscheidung bleibt bei Ihnen. Vollständige Anbieterunabhängigkeit behaupte ich nicht, sondern lege Interessen offen.</p>
+            <p class="bildunterschrift">Direkter Link zu diesem Abschnitt: <a href="#interessen">{interessenUrl}</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="mandatsende">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Mandatsende</span>
+          <h2>Wie ein Mandat endet</h2>
+          <p>Mit Ergebnissen, die Ihr Haus ohne mich weiterführen kann. Eine dauerhafte Abhängigkeit von der Beratung ist nicht das Ziel.</p>
+        </div>
+        <div class="abschnitt__inhalt mandatsende-text">
+          <p>Jedes Mandat endet mit dokumentierten Ergebnissen und einer Ergebnisbesprechung. Die Unterlagen sind so aufgebaut, dass die Verantwortlichen in Ihrem Haus damit weiterarbeiten können: Wer führt die Maßnahmenliste fort, wer berichtet, wer entscheidet bei Abweichungen.</p>
+          <p>Nachhalten ist optional, als Sparring in festem Rhythmus oder punktuell vor größeren Entscheidungen. Der Übergang zwischen den Mandatsformen ist möglich, jede Mandatsform ist aber eigenständig beauftragbar. Ein Portfolio-Check verpflichtet nicht zur Umsetzungsbegleitung.</p>
+          <h3 class="h4">Was bei der Übergabe vorliegt</h3>
+          <ul class="checklist mandatsende-liste" role="list">
+            {uebergabe.map((u) => <li>{u}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Faq id="fragen" items={faq} />
+
+  <Cta ohneAblauf />
+</Base>
+
+<style>
+  /* Hero: Buttonzeile im Default-Slot der Hero-Komponente (Slot-Inhalt traegt das Scoping dieser Seite) */
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-5); align-items: center; margin-top: var(--s-6); }
+
+  /* Ablauf: sechs Schritte in zwei Reihen zu drei statt fuenf plus eins */
+  .ablauf .steps { grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+  .ablauf__mandatsformen { max-width: var(--w-text); }
+  .ablauf__mandatsformen .textlink { display: block; width: fit-content; margin-top: calc(var(--s-2) - 0.65rem); }   /* eigene Zeile wie .selbstpruefung__schluss auf der AM-Seite: die 44-px-Zielflaeche (0.65rem Innenabstand aus .textlink) ragt sonst in die Zeile mit dem Glossar-Link Sparring; sichtbarer Abstand --s-2 */
+
+  /* Vorbereitung: Checkliste, fetter Schlusssatz, Link */
+  .vorbereitung-liste { margin: 0 0 var(--s-5); max-width: var(--w-text); }
+  .vorbereitung-liste li + li { margin-top: var(--s-2); }
+  .vorbereitung-schluss { max-width: var(--w-text); margin-bottom: var(--s-5); }
+
+  /* Rollen: Definitionsliste mit fester Begriffsspalte, Phase in dritter Textfarbe */
+  .rollen-dl { grid-template-columns: 14rem minmax(0, 1fr); }
+  .rollen-dl dd p { max-width: 62ch; margin-bottom: var(--s-2); }
+  .rollen-dl dd p:last-child { margin-bottom: 0; }
+  .rollen__phase { color: var(--c-text-3); }
+  .regel { border-top: var(--rule-strong); margin-top: var(--s-6); padding-top: var(--s-5); max-width: var(--w-text); }
+  .regel p { color: var(--c-text-2); }
+  .regel strong { color: var(--c-text); }
+
+  /* Datenbedarf: Register je Mandatsform, Checkliste der Kategorien im Portfolio-Check */
+  .daten-register .checklist { margin: var(--s-3) 0 0; max-width: 62ch; }
+  .daten-register .checklist li { color: var(--c-text-2); }
+  .daten-register .checklist li + li { margin-top: var(--s-2); }
+  .daten-schluss { margin-top: var(--s-5); max-width: var(--w-text); }
+  .daten-beitrag { margin-top: var(--s-4); }
+
+  /* Kapitelfolge Vertraulichkeit, Angebot, Verantwortung */
+  .rahmen .kapitel__text p { color: var(--c-text-2); }
+  .rahmen .kapitel__text .textlink { margin-top: calc(var(--s-2) - 0.65rem); }   /* sichtbarer Abstand zum Absatz bleibt --s-4 plus --s-2; 0.65rem ist der Innenabstand der Zielflaeche aus .textlink */
+
+  /* Interessen: Frage als Standfirst im Abschnittskopf, Funktionen links, Regeln als Register rechts */
+  .interessen .section-head .standfirst { font-size: var(--fs-standfirst); line-height: 1.3; color: var(--c-text); max-width: var(--w-narrow); margin-bottom: 0; }
+  .funktionen { grid-template-columns: 9rem minmax(0, 1fr); }
+  .funktionen ul { list-style: none; padding: 0; margin: 0; }
+  .funktionen li { margin: 0; }
+  .funktionen li + li { margin-top: var(--s-1); }
+  .interessen-link { margin-top: var(--s-5); }
+  .bedeutung { border-top: var(--rule-strong); margin-top: var(--s-6); padding-top: var(--s-5); }
+  .bedeutung h3 { font-size: var(--fs-h3); margin-bottom: var(--s-2); }
+  .bedeutung p { color: var(--c-text-2); max-width: 62ch; }
+  .bedeutung .bildunterschrift { overflow-wrap: anywhere; }
+  .bedeutung .bildunterschrift a { color: var(--c-text-2); }
+
+  /* Mandatsende */
+  .mandatsende-text p { color: var(--c-text-2); max-width: var(--w-text); }
+  .mandatsende-text h3 { margin-top: var(--s-6); margin-bottom: var(--s-3); }
+  .mandatsende-liste { margin: 0; max-width: var(--w-text); }
+  .mandatsende-liste li + li { margin-top: var(--s-2); }
+
+  @media (max-width: 520px) {
+    .rollen-dl, .funktionen { grid-template-columns: 1fr; }
+  }
+</style>

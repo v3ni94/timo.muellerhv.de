@@ -1,0 +1,434 @@
+---
+/**
+ * Reporting und Kennzahlen, Querschnittsvertiefung (docs/CONTENT-PLAN-V2.md 3.4, 6.2, 6.4; docs/DESIGN-SPEC-V2.md
+ * 6.11, 6.14). Heimatort fuer Kennzahlendefinitionen, Kennzahlensteckbrief, Berichtsaufbau, Datenherkunft und
+ * Berichtsrhythmus. AM-, PM- und KI-Seite verweisen hierher mit einem Satz plus Link (Heimatort-Prinzip 1.2).
+ * Fachseite.astro mit Breadcrumb Start / Beratung / Reporting und Kennzahlen (zweistufig, docs/CONTENT-PLAN-V2.md 6.2).
+ * Slot methodik: Fuenf Fragen (Checkliste), Kennzahlenset nach Ebenen (Tabelle mit Caption "Schematische Auswahl,
+ * keine Zielwerte", th mit scope, Ebenen als Zeilengruppen), Kennzahlensteckbrief (dl.dl-grid) mit Aside
+ * "Eine Quelle je Kennzahl", Aufbau eines Berichts (Register, Muster ohne Werte), Rhythmus und Adressaten mit
+ * Aside KI-Schnittstelle. Slot szenario: Szenario "Reporting ohne Konsequenz" im Konjunktiv.
+ * Faktenregeln: keine Zielwerte, Richtwerte, Benchmarks, Rhythmusvorgaben, Zahlen oder Softwarenamen. Schwellen
+ * fuer Handlung legt der Auftraggeber fest. Umlagefaehigkeit nur allgemein, rechtliche Einordnung durch die
+ * Rechtsberatung. Beitragslink (Daten zuerst) rendert nur mit status freigegeben.
+ */
+import Fachseite, { type Block, type Absatz, type Link } from '../layouts/Fachseite.astro';
+import Szenario from '../components/Szenario.astro';
+import type { FaqItem } from '../components/Faq.astro';
+import type { SeitennavEintrag } from '../components/Seitennav.astro';
+import type { Crumb } from '../lib/seo';
+import { veroeffentlichteBeitraege } from '../lib/einblicke';
+
+const path = '/reporting-und-kennzahlen/';
+
+const crumbs: Crumb[] = [
+  { name: 'Beratung', href: '/asset-management-beratung/' },
+  { name: 'Reporting und Kennzahlen', href: path },
+];
+
+/* Bedingter Beitragslink: hoechstens ein freigegebener Beitrag je Vertiefung, kein Hinweis auf kommende Beitraege. */
+const beitraege = await veroeffentlichteBeitraege();
+const beitragDaten = beitraege.find((b) => b.id === 'immobilienportfolio-optimieren-daten');
+
+/* Seitennavigation: hoechstens sechs Anker in DOM-Reihenfolge (docs/DESIGN-SPEC-V2.md 6.11), damit die Leiste bei
+   1440 px einzeilig bleibt. Alle Abschnitts-ids bleiben fuer Deep-Links und Textlinks erhalten. */
+const seitennav: SeitennavEintrag[] = [
+  { label: 'Passende Situationen', href: '#situationen' },
+  { label: 'Leistungsumfang', href: '#leistung' },
+  { label: 'Kennzahlen', href: '#kennzahlen' },
+  { label: 'Berichtsaufbau', href: '#berichtsaufbau' },
+  { label: 'Szenario', href: '#szenario' },
+  { label: 'Fragen und Antworten', href: '#fragen' },
+];
+
+const situationen: Block[] = [
+  { t: 'Berichte ohne Konsequenz', d: 'Die Geschäftsführung erhält regelmäßig Berichte. Sie werden gelesen und abgelegt, lösen aber nichts aus, weil keine Abweichung mit einer Entscheidung verbunden ist.' },
+  { t: 'Abweichende Zahlen je Quelle', d: 'Verwaltung, Buchhaltung und Asset Management nennen für dieselbe Frage unterschiedliche Werte. Die Sitzung dreht sich um die Richtigkeit der Zahl statt um die Entscheidung.' },
+  { t: 'Verwaltungs­report statt Eigentümer­bericht', d: 'Der Bericht zeigt, was die Verwaltung getan hat, nicht, wo der Bestand zum Plan steht. Viele Kennzahlen, keine Gewichtung, keine Frage dahinter.' },
+  { t: 'Gremien brauchen eine andere Sicht', d: 'Gesellschafter, Beirat oder Finanzierer wollen den Bestand als Ganzes verstehen, das Tagesgeschäft braucht Vorgänge je Objekt. Ein Format für beide passt für keinen.' },
+];
+
+const leistungen: Block[] = [
+  { t: 'Fragen der Geschäftsführung erheben', d: 'Zuerst die Entscheidungen, dann die Zahlen: Welche Fragen müssen Sie vor Gesellschaftern, Finanzierern, Gremien und sich selbst beantworten? Daraus folgt, welche Kennzahl überhaupt gebraucht wird.' },
+  {
+    t: 'Kennzahlenset reduzieren und definieren',
+    d: 'Aus der vorhandenen Menge werden wenige Kennzahlen ausgewählt und je Kennzahl in einem Steckbrief festgelegt: Definition, Berechnungsweg, Quelle, Verantwortlicher, Schwelle für Handlung.',
+    mehr: { label: 'Zum Kennzahlensteckbrief', href: '#steckbrief' },
+  },
+  { t: 'Datenherkunft und Verantwortliche festlegen', d: 'Je Kennzahl genau eine Quelle und eine Person, die für die Pflege der Daten einsteht. Abweichungen zwischen Verwaltungssystem und Buchhaltung werden aufgelöst, nicht nebeneinander berichtet.' },
+  {
+    t: 'Berichtsaufbau und Rhythmus an Entscheidungstermine koppeln',
+    d: 'Der Bericht folgt dem Entscheidungstermin, nicht dem Kalender. Aufbau: Überblick auf einer Seite, Abweichungen mit Erklärung, Maßnahmenstatus, anstehende Entscheidungen, Anhang.',
+    mehr: { label: 'Zum Berichtsaufbau', href: '#berichtsaufbau' },
+  },
+  { t: 'Einführung begleiten und anpassen', d: 'Die ersten Berichtszyklen zeigen, welche Kennzahl trägt und welche Definition nachgeschärft werden muss. Danach wird das Set angepasst, nicht erweitert.' },
+];
+
+const ergebnisse = [
+  'Kennzahlensteckbriefe mit Definition, Quelle, Verantwortlichem und Handlungsschwelle',
+  'Berichtsstruktur als Muster ohne Werte',
+  'Datenherkunftsliste je Kennzahl',
+  'Berichtskalender, gekoppelt an Ihre Entscheidungstermine',
+  'Maßnahmen- und Beschlussverfolgung als fester Berichtsteil',
+];
+
+const vorgehen: Block[] = [
+  { t: 'Fragen erheben', d: 'Mit Geschäftsführung und Gremien klären, welche Entscheidungen der Bericht vorbereiten soll und wer ihn liest.' },
+  { t: 'Kennzahlen definieren', d: 'Set reduzieren, je Kennzahl einen Steckbrief erstellen, Quelle und Verantwortlichen festlegen, Widersprüche zwischen Systemen auflösen.' },
+  { t: 'Bericht und Termin koppeln', d: 'Aufbau festlegen, ersten Bericht mit Verwaltung und Rechnungswesen erstellen, Berichtstermin als Entscheidungstermin mit Protokoll einführen.' },
+  { t: 'Nachhalten und anpassen', d: 'Beschlüsse und Maßnahmen im nächsten Bericht wieder aufrufen. Nach den ersten Zyklen Definitionen schärfen und das Set anpassen.' },
+];
+
+const abgrenzung: Absatz[] = [
+  'Kein Ersatz für Buchhaltung, Jahresabschluss oder Bewertungsgutachten. Der Bericht baut auf diesen Zahlenwerken auf und ersetzt sie nicht.',
+  'Keine Benchmarks, keine Zielwerte, keine Branchenvergleiche. Schwellen für Handlung legt Ihr Haus fest; ich helfe bei der Begründung.',
+  'Kennzahlen ersetzen weder die Kenntnis der Objekte noch die Entscheidung. Sie zeigen, wo hinzusehen ist, und bereiten den Beschluss vor.',
+  'Keine Softwareauswahl und keine Systemeinführung. Ich arbeite mit den vorhandenen Systemen und benenne ihre Grenzen.',
+  {
+    text: 'Wo verbundene Unternehmen oder mein Netzwerk berührt sind, lege ich das vor einer Empfehlung offen.',
+    mehr: { label: 'Zu den Interessen', href: '/zusammenarbeit/#interessen' },
+  },
+];
+
+const faq: FaqItem[] = [
+  {
+    id: 'anzahl',
+    q: 'Wie viele Kennzahlen sind sinnvoll?',
+    a: 'So wenige, dass jede eine Entscheidung vorbereitet und einen Verantwortlichen hat. Die Anzahl ergibt sich aus den Fragen der Geschäftsführung, nicht aus dem, was das System liefern kann. Eine Kennzahl, auf die niemand reagiert, wird gestrichen. Ich nenne keine feste Anzahl, weil sie von Bestand, Gremien und Entscheidungsrhythmus abhängt.',
+  },
+  {
+    id: 'widerspruch',
+    q: 'Was tun bei widersprüchlichen Zahlen?',
+    a: 'Zuerst die Ursache klären: unterschiedliche Definitionen, unterschiedliche Stichtage oder unterschiedliche Quellen. Dann je Kennzahl eine führende Quelle festlegen und die andere regelmäßig abgleichen. Bis das geschehen ist, weist der Bericht den Widerspruch offen aus, statt eine der Zahlen stillschweigend zu bevorzugen.',
+  },
+  {
+    id: 'ersteller',
+    q: 'Wer erstellt den Bericht, Verwaltung oder Eigentümerseite?',
+    a: 'Die Daten liefern Verwaltung und Rechnungswesen nach den Steckbriefen. Die Einordnung, die Erklärung der Abweichungen und die Entscheidungsvorlagen gehören auf die Eigentümerseite, weil dort die Verantwortung liegt. Wer den Bericht zusammenstellt, wird zu Beginn festgelegt. Ziel ist, dass Ihr Haus den Aufbau nach der Einführung selbst fortführt.',
+  },
+  {
+    id: 'system',
+    q: 'Reicht das Verwaltungssystem aus?',
+    a: 'Für die Daten in der Regel ja, für die Verdichtung zum Eigentümerbericht oft nicht. Verwaltungssysteme führen Vorgänge und Stammdaten; der Bericht für Geschäftsführung und Gremien entsteht daneben und braucht klare Definitionen und einen Verantwortlichen für die Datenpflege, kein neues System. Zeigt die Einführung Systemgrenzen, werden sie benannt und mit einer Übergangsregel dokumentiert.',
+    mehr: { label: 'Datenqualität unter Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  },
+];
+
+const verwandt: Link[] = [
+  { label: 'Asset-Management-Beratung', href: '/asset-management-beratung/' },
+  { label: 'Property-Management-Optimierung', href: '/property-management-optimierung/' },
+  { label: 'KI im Immobilienmanagement', href: '/ki-immobilienmanagement/' },
+  { label: 'Zusammenarbeit', href: '/zusammenarbeit/' },
+];
+
+/* Kennzahlenset nach Ebenen: Kandidaten ohne Zielwerte. Der Rhythmus ist ein Beispiel und folgt den
+   Entscheidungsterminen des Auftraggebers, nicht einem festen Kalender. */
+interface Kennzahl { kennzahl: string; frage: string; quelle: string; rhythmus: string }
+interface Ebene { ebene: string; zeilen: Kennzahl[] }
+const kennzahlen: Ebene[] = [
+  {
+    ebene: 'Ertrag',
+    zeilen: [
+      { kennzahl: 'Sollmiete und Istmiete', frage: 'Wie viel der vertraglich vereinbarten Miete kommt tatsächlich an, und wo entsteht die Lücke: Leerstand, Minderung oder Ausfall?', quelle: 'Mietenliste des Verwaltungssystems, Zahlungseingänge der Buchhaltung', rhythmus: 'Jede Berichtsperiode' },
+      { kennzahl: 'Leerstand nach Ursache', frage: 'Welche Einheiten stehen leer, seit wann, und woran liegt es: Zustand, Preis, Prozess oder Nachfrage?', quelle: 'Leerstandsliste der Verwaltung mit Ursache je Einheit', rhythmus: 'Jede Berichtsperiode, je Einheit fortgeschrieben' },
+      { kennzahl: 'Forderungen nach Alter', frage: 'Welche offenen Posten sind wie alt, und welche Maßnahme läuft dazu?', quelle: 'Offene-Posten-Liste der Buchhaltung, Bearbeitungsstand der Verwaltung', rhythmus: 'Jede Berichtsperiode' },
+    ],
+  },
+  {
+    ebene: 'Kosten',
+    zeilen: [
+      { kennzahl: 'Plan und Ist je Kostenart', frage: 'Wo weichen die laufenden Kosten vom Plan ab, und ist die Abweichung erklärt?', quelle: 'Buchhaltung, Planwerte aus der Jahresplanung', rhythmus: 'Jede Berichtsperiode, kumuliert im Jahresverlauf' },
+      { kennzahl: 'Umlagefähige und nicht umlagefähige Kosten', frage: 'Welcher Teil der Kosten bleibt beim Eigentümer, und wie entwickelt er sich?', quelle: 'Kontenzuordnung der Buchhaltung; die rechtliche Einordnung der Umlagefähigkeit prüft Ihre Rechtsberatung', rhythmus: 'Jede Berichtsperiode' },
+    ],
+  },
+  {
+    ebene: 'Substanz',
+    zeilen: [
+      { kennzahl: 'Investitionsfortschritt', frage: 'Welche geplanten Maßnahmen sind begonnen, abgeschlossen oder verschoben, und wie steht der Mittelabfluss zum Plan?', quelle: 'Investitionsplan, Auftrags- und Rechnungsstatus', rhythmus: 'Zu jedem Berichtstermin' },
+      { kennzahl: 'Bekannter Rückstand', frage: 'Welche Instandhaltung ist bekannt, aber nicht beauftragt, und was davon ist zwingend?', quelle: 'Bewertete Maßnahmenliste aus der Investitionspriorisierung', rhythmus: 'Bei neuen Befunden, mindestens zu jedem Berichtstermin' },
+    ],
+  },
+  {
+    ebene: 'Prozess',
+    zeilen: [
+      { kennzahl: 'Bearbeitungszeiten', frage: 'Wie lange dauert es von der Meldung bis zur Erledigung eines Vorgangs, und wo staut es sich?', quelle: 'Vorgangsliste der Verwaltung mit Eingangs- und Erledigungsdatum', rhythmus: 'Jede Berichtsperiode' },
+      { kennzahl: 'Offene Vorgänge', frage: 'Wie viele Vorgänge sind offen, wie alt sind sie, und wer wartet auf wen?', quelle: 'Vorgangsliste, Freigabestatus aus der Zuständigkeitsmatrix', rhythmus: 'Jede Berichtsperiode' },
+      { kennzahl: 'Nachtragsanteil', frage: 'Welcher Teil der beauftragten Summen entsteht erst durch Nachträge, und bei welchen Gewerken?', quelle: 'Auftrags- und Nachtragsliste', rhythmus: 'Zu jedem Berichtstermin, je Maßnahme bei Abnahme' },
+    ],
+  },
+  {
+    ebene: 'Liquidität',
+    zeilen: [
+      { kennzahl: 'Liquiditätsvorschau', frage: 'Reichen die Mittel in den kommenden Perioden für laufende Kosten, Kapitaldienst und geplante Investitionen?', quelle: 'Liquiditätsplanung aus Buchhaltung und Investitionsplan', rhythmus: 'Jede Berichtsperiode, fortgeschrieben' },
+      { kennzahl: 'Finanzierungstermine', frage: 'Welche Finanzierungen laufen aus, welche Bedingungen sind zu erfüllen, und welche Unterlagen werden gebraucht?', quelle: 'Finanzierungsverträge, Übersicht des Rechnungswesens', rhythmus: 'Zu jedem Berichtstermin, mit Vorlauf vor dem Finanzierungstermin' },
+    ],
+  },
+];
+
+/* Kennzahlensteckbrief: sieben Felder, Beschreibung statt Beispielwert. */
+const steckbrief = [
+  { t: 'Definition', d: 'Was die Kennzahl misst und was nicht, in einem Satz. Bezugsgröße und Abgrenzung sind Teil der Definition.' },
+  { t: 'Datenquelle', d: 'Genau ein System oder eine Liste, aus der der Wert stammt. Wird die Quelle gewechselt, wird der Steckbrief geändert, nicht der Wert.' },
+  { t: 'Berechnungsweg', d: 'Formel oder Zählregel, einschließlich dessen, was ausgeschlossen wird. So kann jeder den Wert nachrechnen.' },
+  { t: 'Rhythmus', d: 'Zu welchem Berichtstermin die Kennzahl erhoben wird und mit welchem Stichtag.' },
+  { t: 'Verantwortlicher', d: 'Eine Person, die für Richtigkeit und Aktualität der Daten einsteht, in der Verwaltung, im Rechnungswesen oder auf Eigentümerseite.' },
+  { t: 'Schwelle für Handlung', d: 'Ab welcher Abweichung eine Maßnahme oder eine Vorlage ausgelöst wird. Die Schwelle legt der Auftraggeber fest; hier steht kein Beispielwert.' },
+  { t: 'Zuständiges Gremium', d: 'Wer über die ausgelöste Vorlage entscheidet: Geschäftsführung, Gesellschafter oder Beirat.' },
+];
+
+/* Aufbau eines Berichts: Muster ohne Werte. */
+const berichtsaufbau: Block[] = [
+  { t: 'Eine Seite Überblick', d: 'Die fünf Fragen auf einer Seite: Stand zum Plan, Veränderungen, Abweichungen, anstehende Entscheidungen, Umsetzung. Wer nur diese Seite liest, kennt die Lage.' },
+  { t: 'Abweichungen mit Erklärung', d: 'Jede Abweichung oberhalb der Handlungsschwelle mit Ursache, Verantwortlichem und Vorschlag. Keine Tabelle ohne erklärenden Satz.' },
+  { t: 'Maßnahmen- und Beschlussstatus', d: 'Was beim letzten Termin beschlossen wurde, wer es umsetzt, wo es steht. Offene Punkte bleiben sichtbar, bis sie erledigt oder bewusst zurückgestellt sind.' },
+  { t: 'Anstehende Entscheidungen', d: 'Vorlagen mit Fragestellung, Optionen, Annahmen, Risiken und Empfehlung. Der Termin endet mit Beschlüssen, nicht mit Kenntnisnahme.' },
+  { t: 'Anhang mit Detaildaten', d: 'Objektlisten, Vorgangslisten, Kennzahlen je Objekt. Für alle, die tiefer einsteigen wollen, nicht als Pflichtlektüre.' },
+];
+---
+<Fachseite
+  path={path}
+  title="Reporting und Kennzahlen für Eigentümer | Timo Müller"
+  description="Eigentümerreporting, das Entscheidungen auslöst: Kennzahlen mit Definition, Quelle und Verantwortlichem, Berichtsaufbau und Rhythmus. Ohne Zielwerte."
+  h1={'Reporting und Kennzahlen für Eigentümer und Geschäfts­leitungen'}
+  eyebrow="Vertiefung"
+  frage="Beantwortet Ihr Bericht die Fragen, über die Sie entscheiden müssen?"
+  intro="Ein Bericht ist gut, wenn er Entscheidungen auslöst. Dafür braucht eine Geschäftsführung wenige Kennzahlen, also definierte Messgrößen für je eine Steuerungsfrage, mit klarer Definition, Datenquelle, Verantwortlichem und einer festgelegten Konsequenz bei Abweichung."
+  serviceName="Reporting und Kennzahlen für Eigentümer und Geschäftsleitungen"
+  serviceType="Beratung zu Eigentümerreporting und Kennzahlen im Immobilienbestand"
+  crumbs={crumbs}
+  seitennav={seitennav}
+  situationen={situationen}
+  situationenIntro="Vier Ausgangslagen, in denen Berichte vorliegen, aber keine Entscheidung folgt."
+  leistungen={leistungen}
+  ergebnisse={ergebnisse}
+  vorgehen={vorgehen}
+  vorgehenIntro="Vier Schritte. Der Aufwand hängt von der Zahl der Systeme, der Datenlage und der Zahl der Adressaten ab."
+  abgrenzung={abgrenzung}
+  faq={faq}
+  verwandt={verwandt}
+>
+  <section class="section section--linie" id="fuenf-fragen" slot="methodik">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Fünf Fragen</span>
+          <h2>Fünf Fragen, die ein Eigentümer&shy;bericht beantwortet</h2>
+          <p>Ein Bericht wird an diesen Fragen gemessen, nicht an seiner Länge. Jede Kennzahl im Set muss zu mindestens einer Frage beitragen, sonst gehört sie in den Anhang oder nicht in den Bericht.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ul class="checklist fragen-liste" role="list">
+            <li><strong>Wo stehen wir zum Plan?</strong> Ertrag, Kosten und Liquidität im <a href="/glossar/#plan-ist-abgleich">Plan-Ist-Abgleich</a>, also im Vergleich geplanter und tatsächlicher Werte.</li>
+            <li><strong>Was hat sich verändert?</strong> Bewegungen seit dem letzten Bericht: Vermietung, Kündigungen, Forderungen, begonnene und abgeschlossene Maßnahmen.</li>
+            <li><strong>Wo sind Abweichungen, und warum?</strong> Jede Abweichung mit Ursache und Verantwortlichem, nicht nur als Zahl.</li>
+            <li><strong>Welche Entscheidungen stehen an?</strong> <a href="/glossar/#entscheidungsvorlage">Entscheidungsvorlagen</a> mit Optionen und Empfehlung, damit der Termin einen Beschluss hervorbringt.</li>
+            <li><strong>Was ist umgesetzt?</strong> Status der beschlossenen Maßnahmen und der Beschlüsse aus den letzten Terminen.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="kennzahlen" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Kennzahlenset</span>
+        <h2>Kennzahlen nach Ebenen</h2>
+        <p>Fünf Ebenen, auf denen sich ein Bestand steuern lässt: Ertrag, Kosten, Substanz, Prozess, Liquidität. Die Tabelle zeigt Kandidaten je Ebene mit der Frage, die sie beantworten, der Quelle und einem Beispiel für den Rhythmus. Kandidaten, kein Pflichtset: Jedes Haus wählt wenige.</p>
+      </div>
+      <figure class="kennzahlen-tabelle">
+        <p class="small tabelle-hinweis">Tabelle seitlich verschiebbar.</p>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Tabelle Kennzahlen nach Ebenen">
+          <table>
+            <caption>Schematische Auswahl, keine Zielwerte</caption>
+            <thead>
+              <tr>
+                <th scope="col">Kennzahl</th>
+                <th scope="col">Frage, die sie beantwortet</th>
+                <th scope="col">Datenquelle</th>
+                <th scope="col">Rhythmus (Beispiel)</th>
+              </tr>
+            </thead>
+            {kennzahlen.map((e) => (
+              <tbody>
+                <tr class="ebene">
+                  <th scope="rowgroup" colspan="4">{e.ebene}</th>
+                </tr>
+                {e.zeilen.map((z) => (
+                  <tr>
+                    <th scope="row">{z.kennzahl}</th>
+                    <td>{z.frage}</td>
+                    <td>{z.quelle}</td>
+                    <td>{z.rhythmus}</td>
+                  </tr>
+                ))}
+              </tbody>
+            ))}
+          </table>
+        </div>
+        <figcaption class="bildunterschrift">Schematische Darstellung. Zielwerte und Handlungsschwellen legt der Auftraggeber fest, hier stehen keine.</figcaption>
+      </figure>
+      <div class="g kennzahlen-erlaeuterung">
+        <div class="gc-1-8">
+          <p class="small">Berichtsperiode meint den Zeitraum zwischen zwei Berichtsterminen, den Ihr Haus festlegt. Der Rhythmus in der letzten Spalte ist ein Beispiel und folgt den Entscheidungsterminen, nicht einem festen Kalender. Nachträge sind Änderungen oder Erweiterungen eines bereits erteilten Auftrags; Kapitaldienst umfasst Zins und Tilgung laufender Finanzierungen.</p>
+          <p class="small">Die Kennzahlen der Ebene Substanz entstehen aus der <a href="/investitionspriorisierung/">Investitionspriorisierung</a>, die der Ebene Prozess aus der <a href="/dienstleistersteuerung/">Dienstleistersteuerung</a> und der <a href="/property-management-optimierung/#zustaendigkeitsmatrix">Zuständigkeitsmatrix</a>. Die <a href="/glossar/#liquiditaet">Liquiditätsplanung</a> liefert die Ebene Liquidität.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="steckbrief" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Steckbrief</span>
+        <h2>Der Kennzahlen&shy;steckbrief</h2>
+        <p>Ein <a href="/glossar/#kennzahlensteckbrief">Kennzahlensteckbrief</a> legt für eine Kennzahl auf einer Seite fest, was sie misst, woher der Wert kommt, wer dafür einsteht und was bei Abweichung geschieht. Sieben Felder, ohne die eine Kennzahl im Bericht nichts auslöst.</p>
+      </div>
+      <div class="g">
+        <div class="gc-1-7">
+          <dl class="dl-grid steckbrief">
+            {steckbrief.map((s) => (<><dt>{s.t}</dt><dd>{s.d}</dd></>))}
+          </dl>
+          <p class="small steckbrief__hinweis">Muster ohne Werte. Der Steckbrief wird je Kennzahl mit Ihrer Verwaltung und Ihrem Rechnungswesen ausgefüllt und mit der Geschäftsführung abgestimmt.</p>
+        </div>
+        <aside class="quelle gc-9-12" aria-labelledby="quelle-h">
+          <h3 id="quelle-h">Eine Quelle je Kennzahl</h3>
+          <ul class="quelle__liste" role="list">
+            <li><strong>Datenherkunft dokumentieren.</strong> Für jede Kennzahl steht im Steckbrief, aus welcher Liste oder welchem System der Wert kommt.</li>
+            <li><strong>Verwaltungssystem und Buchhaltung abstimmen.</strong> Führen beide dieselbe Größe, wird eine zur führenden Quelle erklärt und die andere regelmäßig abgeglichen.</li>
+            <li><strong>Zuständigkeit für Datenpflege.</strong> Stammdaten wie Einheiten, Flächen, Verträge und Kostenstellen haben einen Verantwortlichen. <a href="/glossar/#datenqualitaet">Datenqualität</a> ist eine Aufgabe, keine Eigenschaft.</li>
+            <li><strong>Umgang mit Systemgrenzen.</strong> Was ein System nicht liefern kann, wird benannt und mit einer Übergangsregel dokumentiert, statt von Hand geschätzt.</li>
+          </ul>
+          {beitragDaten && (
+            <a class="textlink" href={`/einblicke/${beitragDaten.id}/`}>Beitrag: Welche Daten zuerst auf den Tisch gehören</a>
+          )}
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="berichtsaufbau" slot="methodik">
+    <div class="container">
+      <div class="abschnitt">
+        <div class="abschnitt__kopf sticky-rand">
+          <span class="eyebrow eyebrow--still">Berichtsaufbau</span>
+          <h2>Aufbau eines Berichts</h2>
+          <p>Muster ohne Werte. Die Reihenfolge folgt der Frage, wie viel jemand lesen muss, um entscheiden zu können: erst der Überblick, dann die Begründung, zuletzt die Details.</p>
+        </div>
+        <div class="abschnitt__inhalt">
+          <ol class="register" role="list">
+            {berichtsaufbau.map((b) => (<li><h3>{b.t}</h3><p>{b.d}</p></li>))}
+          </ol>
+          <p class="bildunterschrift">Schematische Struktur. Kein Beispielbericht, keine Werte. Gremienvorlagen folgen den Formaten Ihres Hauses.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--linie" id="rhythmus" slot="methodik">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Rhythmus und Adressaten</span>
+        <h2>Der Berichtstermin ist ein Entscheidungstermin</h2>
+        <p>Ein Bericht, der nur versendet wird, löst nichts aus. Wirkung entsteht, wenn Bericht, Termin, Protokoll und Nachverfolgung zusammengehören.</p>
+      </div>
+      <div class="g">
+        <div class="gc-1-7 sichten">
+          <h3>Zwei Sichten, ein Datenstand</h3>
+          <p>Das Tagesgeschäft braucht Vorgänge je Objekt und kurze Abstände. Gesellschafter, Beirat und Finanzierer brauchen den Bestand als Ganzes, den Plan-Ist-Abgleich und die anstehenden Entscheidungen. Beide Sichten entstehen aus denselben Steckbriefen und derselben Quelle. Sie unterscheiden sich in Verdichtung und Rhythmus, nicht in den Zahlen.</p>
+          <h3>Termin, Protokoll, Nachverfolgung</h3>
+          <p>Der Termin hat eine Tagesordnung aus dem Bericht, ein Protokoll mit Beschlüssen und eine Nachverfolgung im nächsten Bericht. Der Rhythmus richtet sich nach den Entscheidungen, die anstehen, und nach den Terminen von Gremien und Finanzierern. Ich gebe keinen festen Rhythmus vor; er wird mit Ihrem Haus festgelegt und nach den ersten Zyklen überprüft.</p>
+          <h3>Gremienvorlagen in Ihrem Format</h3>
+          <p>Vorlagen für Gesellschafter oder Beirat folgen den Formaten, die Ihr Haus verwendet. Ich verändere Inhalt und Struktur, nicht die Gepflogenheiten des Gremiums.</p>
+        </div>
+        <aside class="ki-aside gc-9-12" aria-labelledby="ki-aside-h">
+          <h3 id="ki-aside-h">KI-Schnittstelle</h3>
+          <p>Berichtsentwürfe können aus geprüften Daten vorbereitet werden, mit Herkunftsnachweis je Zahl. Die <a href="/glossar/#freigabe">Freigabe</a> bleibt beim Verantwortlichen: Kein Bericht geht ohne Prüfung durch einen Menschen an ein Gremium.</p>
+          <a class="textlink" href="/ki-immobilienmanagement/">KI im Immobilienmanagement</a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <Szenario
+    slot="szenario"
+    titel="Reporting ohne Konsequenz"
+    intro="Wie ich vorgehen würde, wenn eine Geschäftsführung regelmäßig Berichte erhielte und trotzdem keine Entscheidungen fielen."
+    ausgangslage={[
+      'Ein Bestandshalter erhielte von seiner Verwaltung in festem Abstand umfangreiche Berichte. Die Zahlen wären vorhanden, aber Verwaltung und Buchhaltung würden für dieselbe Frage unterschiedliche Werte nennen.',
+      'In den Sitzungen würde über die Richtigkeit der Zahlen gesprochen, nicht über Maßnahmen. Beschlüsse blieben aus, Leerstand und Rückstände würden von Bericht zu Bericht weitergetragen.',
+    ]}
+    rolle={[
+      'Ich würde mit der Geschäftsführung die Fragen erheben, über die sie tatsächlich entscheiden muss, und daraus ableiten, welche Kennzahlen der Bericht braucht.',
+      'Ich würde die Abstimmung zwischen Verwaltung und Rechnungswesen moderieren, bis je Kennzahl eine führende Quelle feststeht.',
+      'Ich würde den ersten Bericht im neuen Aufbau mit den Beteiligten erstellen. Die Entscheidungen im Termin blieben bei der Geschäftsführung.',
+    ]}
+    vorgehen={[
+      'Fragen erheben: mit Geschäftsführung und Gremium festhalten, welche Entscheidungen der Bericht vorbereiten soll und wer ihn liest.',
+      'Set reduzieren: aus der vorhandenen Menge wenige Kennzahlen auswählen, je Kennzahl einen Steckbrief mit führender Quelle und Verantwortlichem erstellen.',
+      'Termin koppeln: den Bericht im neuen Aufbau erstellen und den Berichtstermin als Entscheidungstermin mit Tagesordnung und Protokoll einführen.',
+      'Maßnahmen verfolgen: jeden Beschluss mit Verantwortlichem und Termin im nächsten Bericht wieder aufrufen, bis er erledigt oder bewusst zurückgestellt ist.',
+    ]}
+    beteiligte={['Geschäftsführung', 'Verwaltung', 'Rechnungswesen', 'Gesellschafter oder Beirat als Adressaten']}
+    ergebnisse={[
+      'Kennzahlensteckbriefe mit führender Quelle je Kennzahl',
+      'Bericht im neuen Aufbau mit Überblick auf einer Seite',
+      'Berichtstermin mit Tagesordnung, Protokoll und Beschlussverfolgung',
+    ]}
+    messung="Gemessen würde, ob der Bericht Entscheidungen auslöst, nicht ein vorab zugesagter Wert: der Anteil der Berichtstermine, an denen ein Beschluss gefasst wurde, und der Anteil der Beschlüsse, die im folgenden Bericht mit Status wieder aufgerufen werden."
+    grenzen={[
+      'Keine Buchhaltung, kein Jahresabschluss, kein Bewertungsgutachten.',
+      'Keine Zielwerte und keine Benchmarks von meiner Seite.',
+      'Keine Ergebniszusage vor der Erhebung der Fragen.',
+    ]}
+    mehr={{ label: 'Was ein echter Fall zusätzlich braucht', href: '/einblicke/#redaktionsgrundsaetze' }}
+  />
+</Fachseite>
+
+<style>
+  /* Fuenf Fragen: Checkliste mit fetter Frage und erklaerendem Satz */
+  .fragen-liste { margin: 0; max-width: var(--w-text); }
+  .fragen-liste li { color: var(--c-text-2); }
+  .fragen-liste li + li { margin-top: var(--s-3); }
+  .fragen-liste strong { color: var(--c-text); }
+
+  /* Kennzahlentabelle: Ebenen als Zeilengruppen in Caps, Zeilenkopf dunkel, Mindestbreiten statt Quetschen (scrollt in .table-wrap),
+     Kennzeichnung als figcaption ausserhalb des Scrollbereichs, Scrollhinweis nur auf schmalen Ansichten */
+  .kennzahlen-tabelle .ebene th { font-size: var(--fs-xs); letter-spacing: var(--ls-caps); text-transform: uppercase; color: var(--c-text-2); font-weight: 600; padding-top: var(--s-5); border-bottom: var(--rule); }
+  .kennzahlen-tabelle tbody th[scope="row"] { color: var(--c-text); min-width: 11rem; }
+  .kennzahlen-tabelle td { color: var(--c-text-2); min-width: 12rem; }
+  .kennzahlen-tabelle td:last-child { min-width: 10rem; }
+  .kennzahlen-tabelle figcaption { margin-top: var(--s-4); max-width: var(--w-text); }
+  .tabelle-hinweis { display: none; color: var(--c-text-3); margin: 0 0 var(--s-2); }
+  @media (max-width: 640px) {
+    .tabelle-hinweis { display: block; }
+  }
+  .kennzahlen-erlaeuterung { margin-top: var(--s-6); }
+  .kennzahlen-erlaeuterung p { color: var(--c-text-2); max-width: var(--w-text); }
+  .kennzahlen-erlaeuterung p:last-child { margin-bottom: 0; }
+
+  /* Steckbrief: feste Begriffsspalte, Hinweiszeile darunter */
+  .steckbrief { grid-template-columns: 11rem minmax(0, 1fr); }
+  .steckbrief dd { max-width: 62ch; }
+  .steckbrief__hinweis { color: var(--c-text-2); margin: var(--s-4) 0 0; max-width: 62ch; }
+  @media (max-width: 520px) { .steckbrief { grid-template-columns: 1fr; } }
+
+  /* Aside Eine Quelle je Kennzahl: 2 px Linie, Liste mit Haarlinien */
+  .quelle { border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .quelle h3 { margin-bottom: var(--s-3); }
+  .quelle__liste { list-style: none; margin: 0; padding: 0; }
+  .quelle__liste li { margin: 0; padding-block: var(--s-3); border-top: var(--rule); color: var(--c-text-2); }
+  .quelle__liste li:first-child { border-top: 0; padding-top: 0; }
+  .quelle__liste strong { color: var(--c-text); }
+  .quelle .textlink { margin-top: calc(var(--s-4) - 0.65rem); }   /* sichtbarer Abstand zur Liste --s-4; 0.65rem ist der Innenabstand der Zielflaeche aus .textlink */
+
+  /* Berichtsaufbau: Hinweiszeile unter dem Register */
+  #berichtsaufbau .bildunterschrift { margin-top: var(--s-5); max-width: 62ch; }
+
+  /* Rhythmus und Adressaten: Text links, Aside KI-Schnittstelle rechts */
+  .sichten h3 { margin-bottom: var(--s-3); }
+  .sichten h3:not(:first-child) { margin-top: var(--s-6); }
+  .sichten p { color: var(--c-text-2); max-width: var(--w-text); margin: 0; }
+  .ki-aside { border-top: var(--rule-strong); padding-top: var(--s-4); }
+  .ki-aside h3 { margin-bottom: var(--s-3); }
+  .ki-aside p { color: var(--c-text-2); }
+</style>

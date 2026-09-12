@@ -11,24 +11,32 @@ interface Props {
   /** Pfad mit fuehrendem und abschliessendem Slash, z. B. "/profil/" */
   path: string;
   noindex?: boolean;
+  /** Nur mit noindex: Links weiter verfolgen lassen ("noindex, follow"), z. B. Einblicke im Leerzustand */
+  follow?: boolean;
+  /** Weder Canonical noch og:url ausgeben (Fehlerseite 404, die unter beliebigen Pfaden ausgeliefert wird) */
+  ohneCanonical?: boolean;
   /** Zusaetzliche JSON-LD-Knoten (ohne @context), werden in einen @graph gelegt. */
   ld?: Record<string, unknown>[];
   ogType?: 'website' | 'article' | 'profile';
 }
-const { title, description, path, noindex = false, ld = [], ogType = 'website' } = Astro.props;
+const { title, description, path, noindex = false, follow = false, ohneCanonical = false, ld = [], ogType = 'website' } = Astro.props;
 const canonical = absolute(path);
-const robots = noindex || SITE.noindex ? 'noindex, nofollow' : 'index, follow';
+const robots = SITE.noindex ? 'noindex, nofollow' : noindex ? (follow ? 'noindex, follow' : 'noindex, nofollow') : 'index, follow';
 const graph = { '@context': 'https://schema.org', '@graph': [websiteLd(), orgLd(), personLd(), ...ld] };
+/* Das Inline-Skript direkt nach <meta charset> entfernt html.no-js synchron vor dem ersten Paint. Ein deferred
+   Modul-Skript kaeme zu spaet: bis 1120 px rendert die Navigation sonst zunaechst ausgeklappt (Layoutsprung, CLS).
+   Die CSP in public/.htaccess erlaubt script-src 'unsafe-inline'. */
 ---
 <!doctype html>
 <html lang="de" class="no-js">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>document.documentElement.classList.remove('no-js')</script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
-    <link rel="canonical" href={canonical} />
+    {!ohneCanonical && <link rel="canonical" href={canonical} />}
     <meta name="author" content="Timo Müller" />
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#ffffff" />
@@ -37,10 +45,11 @@ const graph = { '@context': 'https://schema.org', '@graph': [websiteLd(), orgLd(
     <meta property="og:site_name" content={`${SITE.name} | ${SITE.claim}`} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!ohneCanonical && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={absolute('/og-default.png')} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Timo Müller, Asset Management und Portfoliooptimierung, typografisches Vorschaubild" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />

@@ -1,19 +1,35 @@
 ---
 import Base from '../layouts/Base.astro';
-import { NAV } from '../data/site';
+import Hero from '../components/Hero.astro';
+import { SEITEN_404 } from '../data/site';
 ---
-<Base title="Seite nicht gefunden | Timo Müller" description="Die angeforderte Seite existiert nicht." path="/404/" noindex>
+<Base title="Seite nicht gefunden | Timo Müller" description="Die angeforderte Seite existiert nicht. Übersicht der Beratungsfelder, Vertiefungen und weiteren Seiten von Timo Müller." path="/404/" noindex ohneCanonical>
+  <Hero
+    eyebrow="Fehler 404"
+    title="Diese Seite gibt es nicht."
+    lead="Die Adresse ist möglicherweise veraltet oder falsch geschrieben. Diese Seiten helfen weiter:"
+    compact
+  />
   <section class="section">
-    <div class="container prose">
-      <span class="eyebrow">Fehler 404</span>
-      <h1>Diese Seite gibt es nicht.</h1>
-      <p class="lead">Die Adresse ist möglicherweise veraltet oder falsch geschrieben. Diese Seiten helfen weiter:</p>
-      <ul class="checklist">
-        <li><a href="/">Startseite</a></li>
-        {NAV[0].children.map((c) => <li><a href={c.href}>{c.label}</a></li>)}
-        <li><a href="/profil/">Profil</a></li>
-        <li><a href="/kontakt/">Kontakt</a></li>
-      </ul>
+    <div class="container">
+      <nav class="g" aria-label="Weiterführende Seiten">
+        {SEITEN_404.map((gruppe, i) => (
+          <div class:list={['hilfe', ['gc-1-4', 'gc-5-8', 'gc-9-12'][i] ?? 'gc-full']}>
+            <h2 class="h3">{gruppe.titel}</h2>
+            <ul class="checklist" role="list">
+              {i === 0 && <li><a href="/">Startseite</a></li>}
+              {gruppe.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+            </ul>
+          </div>
+        ))}
+      </nav>
     </div>
   </section>
 </Base>
+<style>
+  .hilfe h2 { margin-bottom: var(--s-4); }
+  .hilfe .checklist { margin: 0; }
+  /* Zielhoehe 44 px (Spezifikation 5.6); der Marker folgt der zentrierten ersten Textzeile. */
+  .hilfe a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-block: var(--s-2); }
+  .hilfe .checklist li::before { top: calc(1.375rem - 3px); }
+</style>

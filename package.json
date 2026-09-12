@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "node scripts/test-build.mjs",
-    "lint:php": "php -l server/contact.php"
+    "lint:php": "php -l public/api/contact.php"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

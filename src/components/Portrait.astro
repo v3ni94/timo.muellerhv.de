@@ -1,0 +1,106 @@
+---
+/**
+ * Ein Bauteil fuer alle Portraetplaetze (docs/DESIGN-SPEC-V2.md, Abschnitt 7).
+ * Festes Seitenverhaeltnis (kein Layoutsprung). Liegt src/assets/portraits/portrait-{nr}.(jpg|jpeg|png) vor,
+ * wird das Foto ueber astro:assets ausgegeben, sonst der typografische Platzhalter ohne Gesicht und Silhouette.
+ * Der Platzhalter ist aria-hidden, weil Name und Claim im umgebenden Text stehen.
+ */
+import { Image } from 'astro:assets';
+import { portraitBild, type PortraitNr } from '../lib/portraits';
+import { PORTRAITS } from '../data/portraits';
+import { SITE } from '../data/site';
+
+interface Props {
+  /** Slot, entspricht dem Dateinamen portrait-{nr} */
+  nr: PortraitNr;
+  /** Seitenverhaeltnis des Rahmens */
+  ratio?: '4/5' | '3/2' | '1/1';
+  /** Farbwelt des Platzhalters; hell fuer kleine 1:1-Plaetze auf Weiss */
+  variant?: 'dunkel' | 'hell';
+  /** LCP-Kandidat: eager, fetchpriority high, decoding sync */
+  priority?: boolean;
+  /** sizes-Attribut, je Einsatzort laut Spezifikation 7.7 */
+  sizes?: string;
+  /** Ausgabebreiten fuer srcset */
+  widths?: number[];
+  /** Wenn wahr und keine Datei vorhanden: Komponente rendert nichts */
+  nurMitBild?: boolean;
+  /** Zusaetzliche Klassen, z. B. Rasterzuweisung */
+  class?: string;
+  /** Ueberschreibungen nur in Ausnahmefaellen, sonst zentral in src/data/portraits.ts pflegen */
+  alt?: string;
+  caption?: string;
+  focus?: string;
+}
+/* rest enthaelt das Scoping-Attribut der aufrufenden Datei (data-astro-cid-*), damit deren scoped Styles
+   auf .portrait wirken, z. B. ".kontakt-direkt .portrait { max-width: 12rem }". */
+const {
+  nr, ratio = '4/5', variant = 'dunkel', priority = false,
+  sizes = '(max-width: 860px) 100vw, 40vw', widths = [480, 800, 1200], nurMitBild = false, class: cls,
+  alt: altProp, caption: captionProp, focus: focusProp, ...rest
+} = Astro.props;
+delete (rest as Record<string, unknown>).slot;   /* Slot-Zuweisung des Aufrufers nicht als Attribut ausgeben */
+const meta = PORTRAITS[nr];
+const alt = altProp ?? meta.alt;
+const caption = captionProp ?? meta.caption;
+const focus = focusProp ?? meta.focus ?? '50% 30%';
+const img = portraitBild(nr);
+const style = `--ar:${ratio};--focus:${focus}`;
+const ratioClass = `portrait--${ratio.replace('/', 'x')}`;
+---
+{img ? (
+  <figure class:list={['portrait', ratioClass, cls]} style={style} {...rest}>
+    <Image
+      src={img}
+      alt={alt}
+      widths={widths}
+      sizes={sizes}
+      format="webp"
+      quality={82}
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : 'auto'}
+      decoding={priority ? 'sync' : 'async'}
+    />
+    {caption && <figcaption class="bildunterschrift">{caption}</figcaption>}
+  </figure>
+) : nurMitBild ? null : (
+  <div class:list={['portrait', 'portrait--typo', `portrait--${variant}`, ratioClass, cls]} style={style} aria-hidden="true" {...rest}>
+    <span class="portrait__label">{SITE.name}</span>
+    <span class="portrait__initialen">TM</span>
+    <span class="portrait__linie"></span>
+    <span class="portrait__claim">{SITE.claim}</span>
+  </div>
+)}
+
+<style>
+  .portrait { position: relative; margin: 0; width: 100%; aspect-ratio: var(--ar); overflow: hidden; border-radius: var(--radius-media); container-type: inline-size; }
+  .portrait img { width: 100%; height: 100%; object-fit: cover; object-position: var(--focus); display: block; }
+  .portrait figcaption { position: static; }
+  .portrait:has(figcaption) { aspect-ratio: auto; }
+  .portrait:has(figcaption) img { aspect-ratio: var(--ar); height: auto; }
+
+  /* Typografische Variante, dunkel */
+  .portrait--typo { display: grid; grid-template-rows: auto 1fr auto auto; padding: clamp(1rem, 6cqi, 1.75rem); background: var(--c-dunkel-3); color: #fff; }
+  .portrait--typo::before { content: ""; position: absolute; inset: 0.75rem; border: var(--rule-dark); pointer-events: none; }
+  .portrait__label, .portrait__claim { font-size: var(--fs-xs); letter-spacing: var(--ls-caps); text-transform: uppercase; font-weight: 600; color: var(--c-weiss-75); line-height: 1.4; }
+  .portrait__initialen { align-self: end; font-size: clamp(2.5rem, 34cqi, 8rem); font-weight: 700; line-height: 0.9; letter-spacing: -0.05em; }
+  .portrait__linie { width: 2.5rem; height: 3px; background: var(--c-orange); margin-block: var(--s-4) var(--s-3); }
+
+  /* Querformat: Claim rechts unten */
+  .portrait--3x2.portrait--typo { grid-template-columns: 1fr auto; grid-template-rows: auto 1fr auto; }
+  .portrait--3x2 .portrait__label { grid-column: 1 / -1; }
+  .portrait--3x2 .portrait__initialen { grid-column: 1 / -1; }
+  .portrait--3x2 .portrait__linie { grid-column: 1; }
+  .portrait--3x2 .portrait__claim { grid-column: 2; align-self: end; text-align: right; }
+
+  /* Quadrat: nur Initialen und Linie */
+  .portrait--1x1.portrait--typo { grid-template-rows: 1fr auto; }
+  .portrait--1x1 .portrait__label, .portrait--1x1 .portrait__claim { display: none; }
+  .portrait--1x1 .portrait__initialen { font-size: clamp(2rem, 30cqi, 4rem); }
+  .portrait--1x1 .portrait__linie { width: 2rem; margin-block: var(--s-3) 0; }
+
+  /* Helle Variante (Kontakt, Personenanker) */
+  .portrait--hell.portrait--typo { background: var(--c-flaeche-2); color: var(--c-text); }
+  .portrait--hell.portrait--typo::before { border-color: var(--c-linie); }
+  .portrait--hell .portrait__label, .portrait--hell .portrait__claim { color: var(--c-text-2); }
+</style>
