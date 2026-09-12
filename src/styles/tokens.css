@@ -1,0 +1,55 @@
+/*
+  Design-Tokens timo.muellerhv.de
+  Quelle der Markenfarben: HVM-CI (Skill hvm-ci, Abschnitt 2). Werte mit Kennzeichnung
+  "abgeleitet" sind keine Original-CI-Werte, sondern fuer Web-Kontraste (WCAG 2.2 AA)
+  aus der CI-Farbwelt abgeleitet. Siehe docs/DESIGN-SYSTEM.md.
+*/
+:root {
+  /* HVM-CI Original */
+  --c-orange: #E6A83C;      /* Akzent, nie fuer Fliesstext */
+  --c-anthrazit: #87888A;   /* CI-Anthrazit, nur fuer grosse Ueberschriften/Dekor (Kontrast 3,3:1) */
+  --c-mittelgrau: #9C9D9F;
+  --c-hellgrau: #D7D8DA;
+  --c-umriss: #ECECEC;
+  --c-text: #1A1A1A;
+
+  /* abgeleitet */
+  --c-dunkel: #2F3032;        /* dunkle Akzentflaechen, Buttons */
+  --c-dunkel-2: #3D3E41;      /* Hover auf dunklen Flaechen */
+  --c-text-2: #55565A;        /* Sekundaertext, Kontrast 7,0:1 auf Weiss */
+  --c-text-3: #6B6C70;        /* Meta-Text, Kontrast 5,3:1 auf Weiss */
+  --c-flaeche: #F6F6F7;       /* helle Sektionsflaechen */
+  --c-flaeche-2: #EFEFF0;
+  --c-linie: #D7D8DA;
+  --c-weiss: #FFFFFF;
+  --c-fokus: #B67F1E;         /* Fokusring, dunkleres Orange (Kontrast 3,6:1 auf Weiss) */
+  --c-fehler: #A32D2D;
+  --c-erfolg: #2E6B3A;
+
+  /* Typografie: CI-Vorgabe fuer Web ist die Systemschrift, keine externen Schriftabrufe */
+  --ff-sans: system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --fs-body: clamp(1.0625rem, 1rem + 0.2vw, 1.125rem); /* 17 bis 18 px */
+  --fs-small: 0.9375rem;
+  --fs-xs: 0.8125rem;
+  --fs-h1: clamp(1.75rem, 1rem + 2.4vw, 3.25rem);
+  --fs-h2: clamp(1.625rem, 1.3rem + 1.4vw, 2.25rem);
+  --fs-h3: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  --fs-eyebrow: 0.8125rem;
+  --lh-body: 1.6;
+  --lh-tight: 1.15;
+
+  /* Raster */
+  --w-content: 1240px;
+  --w-text: 68ch;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem;
+  --s-6: 2rem; --s-7: 3rem; --s-8: 4rem; --s-9: 6rem;
+  --section-y: clamp(3.5rem, 6vw, 6rem);
+
+  --radius: 4px;
+  --shadow-soft: 0 1px 2px rgba(26,26,26,.06);
+  --dur: 160ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; }
+}

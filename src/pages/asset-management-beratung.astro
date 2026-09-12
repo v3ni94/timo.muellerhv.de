@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Cta from '../components/Cta.astro';
+import Faq from '../components/Faq.astro';
+import { breadcrumbLd, serviceLd, faqLd } from '../lib/seo';
+
+const path = '/asset-management-beratung/';
+const title = 'Asset-Management-Beratung für Immobilien | Timo Müller';
+const description = 'Strategische Beratung für Immobilienbestandshalter: Eigentümerziele, Objektstrategien, Investitionsentscheidungen und Umsetzung. Drei Mandatsformen von Timo Müller.';
+const crumbs = [{ name: 'Beratung', href: path }];
+
+const mandate = [
+  {
+    id: 'portfolio-check',
+    titel: 'A. Portfolio-Check und Maßnahmenplan',
+    ausgangslage: 'Sie wollen wissen, wo Ihr Portfolio wirtschaftlich und operativ steht, welche Themen Priorität haben und wer sie bearbeiten muss.',
+    leistung: 'Strukturierte Bestandsaufnahme von wirtschaftlicher Entwicklung, Leerstand, Forderungen, Instandhaltung, Datenqualität und Zuständigkeiten. Gespräche mit Verwaltung, Technik und Eigentümerseite. Einordnung der Objekte nach Ausgangslage und Handlungsbedarf.',
+    ergebnis: 'Priorisierte Handlungsfelder, nachvollziehbare Entscheidungsgrundlagen und ein Maßnahmenplan mit Verantwortlichkeiten.',
+    zusammenarbeit: 'Zeitlich begrenztes Mandat. Umfang und Datentiefe werden vor Beginn vereinbart. Sie erhalten eine schriftliche Auswertung und eine Ergebnisbesprechung.',
+  },
+  {
+    id: 'umsetzung',
+    titel: 'B. Portfoliooptimierung und Umsetzungsbegleitung',
+    ausgangslage: 'Die Handlungsfelder sind bekannt, aber die Umsetzung stockt oder es fehlt jemand, der Verwaltung, Dienstleister und Eigentümerseite zusammenhält.',
+    leistung: 'Überarbeitung von Objektstrategien, laufenden Abläufen, Investitionsprioritäten, Dienstleistersteuerung und Reporting. Maßnahmen werden hinsichtlich Aufwand, Risiken und erwarteter Wirkung bewertet und mit Verantwortlichen hinterlegt.',
+    ergebnis: 'Abgestimmte Maßnahmen, klare Steuerung und dokumentierter Fortschritt.',
+    zusammenarbeit: 'Begleitung über einen vereinbarten Zeitraum mit festen Abstimmungsterminen. Ich arbeite mit Ihren bestehenden Strukturen, nicht an ihnen vorbei.',
+  },
+  {
+    id: 'sparring',
+    titel: 'C. Laufendes Sparring für Eigentümer und Geschäftsleitungen',
+    ausgangslage: 'Sie treffen regelmäßig Entscheidungen zu Portfolio, Investitionen und Finanzierung und wünschen sich eine unabhängige Gegenposition mit Eigentümerblick.',
+    leistung: 'Regelmäßiger Austausch zu Portfoliostrategie, Investitionsentscheidungen, Finanzierungsfragen und operativen Engpässen. Vorbereitung von Entscheidungen, kritische Zweitmeinung, Nachverfolgung offener Punkte.',
+    ergebnis: 'Vorbereitete Entscheidungen, kritische Zweitmeinung und konsequente Nachverfolgung.',
+    zusammenarbeit: 'Fester Rhythmus, zum Beispiel monatlich, plus Erreichbarkeit bei akuten Fragen. Diese persönliche Beratung ist keine Organ- oder Beiratsfunktion und ersetzt keine Rechts- oder Steuerberatung.',
+  },
+];
+
+const fragen = [
+  'Welche Objekte tragen das Ergebnis, welche binden Kapital und Aufmerksamkeit ohne Perspektive?',
+  'Welche Investitionen sind wirtschaftlich zwingend, welche sinnvoll, welche verzichtbar?',
+  'Wie sehen die Szenarien Halten, Entwickeln, Verkaufen für einzelne Objekte oder Teilportfolios aus?',
+  'Passt die Finanzierungsstruktur zur geplanten Bestandsentwicklung?',
+  'Liefert das Reporting die Informationen, die Eigentümer und Geschäftsleitung tatsächlich für Entscheidungen brauchen?',
+  'Wer ist für welche Maßnahme verantwortlich, und wie wird deren Wirkung nachgehalten?',
+];
+
+const unterlagen = [
+  { t: 'Portfolio-Einordnung', d: 'Objekte nach wirtschaftlicher Lage, Zustand und Handlungsbedarf geordnet.' },
+  { t: 'Objektstrategien', d: 'Je Objekt oder Cluster eine begründete Zielrichtung mit Maßnahmen und Zeitrahmen.' },
+  { t: 'Investitionsvorlagen', d: 'Entscheidungsvorlagen mit Annahmen, Alternativen, Risiken und Empfehlung.' },
+  { t: 'Maßnahmenplan', d: 'Verantwortliche, Budgetrahmen, Termine und Erfolgskriterien je Maßnahme.' },
+  { t: 'Reportingstruktur', d: 'Kennzahlen und Berichtsrhythmus, abgestimmt auf Eigentümer und Geschäftsleitung.' },
+];
+
+const faq = [
+  { q: 'Für welche Portfolios ist die Beratung gedacht?', a: 'Im Schwerpunkt für größere Wohnimmobilienbestände von Eigentümern, Family Offices, institutionellen Bestandshaltern und Fondsteams in Deutschland. Fachlich passende kleinere Portfolios sind ebenso willkommen. Entscheidend ist, dass Analyse, Entscheidung und Umsetzung zusammen gedacht werden sollen.' },
+  { q: 'Was unterscheidet die Beratung von einer laufenden Hausverwaltung?', a: 'Die Verwaltung führt das Tagesgeschäft: Mieterbetreuung, Abrechnung, Instandhaltung. Asset Management legt fest, wohin sich das Portfolio wirtschaftlich entwickeln soll, und steuert die Umsetzung. Ich berate auf dieser Ebene und arbeite mit Ihrer bestehenden Verwaltung zusammen.' },
+  { q: 'Übernehmen Sie auch Fondsverwaltung oder Kapitalanlagevermittlung?', a: 'Nein. Ich erbringe keine erlaubnispflichtigen Finanzdienstleistungen, keine Anlagevermittlung und keine Rechts- oder Steuerberatung. Wo diese Themen berührt werden, arbeite ich mit Ihren Beratern zusammen oder empfehle die Einbindung entsprechender Spezialisten.' },
+  { q: 'Wie werden Honorar und Umfang festgelegt?', a: 'Individuell nach Mandatsform, Portfoliogröße und Datenlage. Vor Beginn erhalten Sie ein Angebot mit klar beschriebenem Leistungsumfang. Die Kontaktaufnahme löst keinen Beratungsvertrag aus.' },
+  { q: 'Wie gehen Sie mit vertraulichen Daten um?', a: 'Vertraulichkeit wird vor Datenaustausch schriftlich vereinbart. Für die erste Kontaktaufnahme genügt eine grobe Beschreibung von Ausgangslage und Ziel. Detaildaten sind erst im Mandat erforderlich.' },
+];
+
+const ld = [
+  breadcrumbLd(crumbs),
+  serviceLd({ name: 'Asset-Management-Beratung für Immobilienportfolios', description, path, serviceType: 'Asset-Management-Beratung' }),
+  faqLd(faq),
+];
+---
+<Base title={title} description={description} path={path} ld={ld}>
+  <Breadcrumb crumbs={crumbs} />
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">Beratung</span>
+      <h1>Asset-Management-Beratung für Immobilienportfolios</h1>
+      <p class="hero-frage">Wohin soll sich Ihr Bestand wirtschaftlich entwickeln, und was muss dafür konkret passieren?</p>
+      <p class="lead">Ich berate Eigentümer, Geschäftsführungen und Asset-Management-Teams bei Objektstrategien, Investitionsentscheidungen, Reporting und Umsetzung. Drei Mandatsformen decken die typischen Anlässe ab.</p>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="/kontakt/">Portfolio besprechen</a>
+        <a class="textlink" href="#mandate">Zu den Mandatsformen</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>Fragen, die in der Beratung bearbeitet werden</h2>
+        <p>Asset Management heißt hier: aus Eigentümerzielen belastbare Objektstrategien ableiten, Szenarien vergleichen, Investitionen entscheiden und die Umsetzung steuern.</p>
+      </div>
+      <ul class="checklist fragen prose">{fragen.map((f) => <li>{f}</li>)}</ul>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="mandate">
+    <div class="container">
+      <div class="section-head">
+        <h2>Drei Mandatsformen</h2>
+        <p>Jede Mandatsform beschreibt Ausgangslage, Leistung, Arbeitsergebnis und Zusammenarbeit. Honorar, Verfügbarkeit und Zeitrahmen werden individuell vereinbart.</p>
+      </div>
+      <div class="mandate">
+        {mandate.map((m) => (
+          <article class="mandat card" id={m.id}>
+            <h3>{m.titel}</h3>
+            <dl class="dl-grid">
+              <dt>Ausgangslage</dt><dd>{m.ausgangslage}</dd>
+              <dt>Leistung</dt><dd>{m.leistung}</dd>
+              <dt>Arbeitsergebnis</dt><dd>{m.ergebnis}</dd>
+              <dt>Zusammenarbeit</dt><dd>{m.zusammenarbeit}</dd>
+            </dl>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><h2>Entscheidungsunterlagen, die entstehen</h2></div>
+      <div class="grid grid--3">
+        {unterlagen.map((u) => (<div class="card card--flaeche"><h3>{u.t}</h3><p>{u.d}</p></div>))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flaeche">
+    <div class="container prose">
+      <h2>Abgrenzung</h2>
+      <ul class="checklist">
+        <li>Keine laufende Hausverwaltung. Die operative Verwaltung bleibt bei Ihrem Verwalter. Wie Asset und Property Management zusammenarbeiten, beschreibe ich unter <a href="/property-management-optimierung/">Property-Management-Optimierung</a>.</li>
+        <li>Keine Fondsverwaltung, keine Anlagevermittlung, keine erlaubnispflichtige Finanzdienstleistung.</li>
+        <li>Keine Rechts- oder Steuerberatung. Diese Themen werden mit Ihren Beratern abgestimmt.</li>
+        <li>Persönliche Beratung, keine Organ- oder Beiratsfunktion.</li>
+      </ul>
+    </div>
+  </section>
+
+  <Faq items={faq} />
+  <Cta />
+</Base>
+
+<style>
+  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  .hero h1 { max-width: 24ch; }
+  .hero-frage { font-size: 1.2rem; font-weight: 600; color: var(--c-text-2); max-width: 44ch; margin-bottom: var(--s-4); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-5); align-items: center; margin-top: var(--s-5); }
+  .fragen li { font-size: 1.05em; }
+  .mandate { display: grid; gap: var(--s-5); }
+  .mandat h3 { margin-bottom: var(--s-4); }
+  .mandat .dl-grid { grid-template-columns: 10rem 1fr; }
+  @media (max-width: 600px) { .mandat .dl-grid { grid-template-columns: 1fr; } }
+</style>

@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { OPERATOR, SITE } from '../data/site';
+const path = '/datenschutz/';
+const crumbs = [{ name: 'Datenschutz', href: path }];
+---
+<Base title="Datenschutzerklärung | Timo Müller" description="Datenschutzerklärung für timo.muellerhv.de: Hosting, Kontaktformular, Rechtsgrundlagen, Speicherdauer und Betroffenenrechte." path={path}>
+  <Breadcrumb crumbs={crumbs} />
+  <section class="section">
+    <div class="container prose">
+      <h1>Datenschutzerklärung</h1>
+      <p class="note">Entwurf zur fachlichen Prüfung. Hosting-Anbieter, Mailserver-Betreiber, Speicherfristen und Verantwortlicher sind vor Veröffentlichung anhand der tatsächlichen Konfiguration zu bestätigen. Diese Website setzt standardmäßig keine Tracker, keine externen Schriften, keine eingebetteten Karten und keine Chat- oder Kalenderwidgets ein.</p>
+
+      <h2>1. Verantwortlicher</h2>
+      <p>{OPERATOR.firma}, {OPERATOR.coName}, {OPERATOR.strasse}, {OPERATOR.plzOrt}, vertreten durch den {OPERATOR.funktion} {OPERATOR.vertretenDurch}. E-Mail: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. [Prüfen, ob ein Datenschutzbeauftragter benannt ist.]</p>
+
+      <h2>2. Aufruf der Website und Server-Logdateien</h2>
+      <p>Beim Aufruf der Website verarbeitet der Webserver technisch notwendige Daten: aufgerufene Seite, Datum und Uhrzeit, übertragene Datenmenge, Browsertyp und Version, Betriebssystem, verweisende Seite sowie die IP-Adresse. Die Verarbeitung erfolgt zur Bereitstellung der Website, zur Gewährleistung von Stabilität und Sicherheit sowie zur Fehleranalyse.</p>
+      <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb der Website). Logdateien werden gelöscht, sobald sie für den Zweck nicht mehr erforderlich sind, spätestens nach [Frist des Hosters ergänzen].</p>
+      <p>Hosting: [Hosting-Anbieter, Anschrift, Serverstandort ergänzen. Auftragsverarbeitungsvertrag nach Art. 28 DSGVO prüfen.]</p>
+
+      <h2 id="kontakt">3. Kontaktformular und E-Mail-Kontakt</h2>
+      <p>Wenn Sie das Kontaktformular nutzen, verarbeiten wir die von Ihnen eingegebenen Angaben: Name, E-Mail-Adresse und Ihr Anliegen (Pflichtangaben) sowie optional Unternehmen, Rolle, Telefonnummer und die ungefähre Bestandsgröße. Die Daten werden serverseitig geprüft und per verschlüsselter Verbindung als E-Mail an {SITE.email} übermittelt. Zur Missbrauchsabwehr werden ein nicht sichtbares Kontrollfeld, ein Zeitstempel und eine gekürzte, pseudonymisierte Kennung Ihrer IP-Adresse zur Begrenzung der Anfragehäufigkeit verarbeitet. Formularinhalte werden nicht protokolliert und nicht an KI-Dienste oder Dritte weitergegeben.</p>
+      <p>Bei Kontakt per E-Mail verarbeiten wir die Angaben, die Sie uns übermitteln.</p>
+      <p>Zweck ist die Bearbeitung Ihrer Anfrage und gegebenenfalls die Anbahnung einer Zusammenarbeit. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (vorvertragliche Maßnahmen) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Beantwortung von Anfragen). Die Daten werden gelöscht, wenn die Anfrage abschließend bearbeitet ist und keine gesetzlichen Aufbewahrungspflichten entgegenstehen. [Konkrete Löschfrist festlegen.]</p>
+      <p>E-Mail-Versand und Postfach: [Mailserver-Betreiber ergänzen, Auftragsverarbeitungsvertrag prüfen.]</p>
+      <p>Eine Einwilligung in Werbung oder einen Newsletter wird nicht eingeholt. Es erfolgt kein Newsletterversand.</p>
+
+      <h2>4. Cookies und Analyse</h2>
+      <p>Diese Website setzt keine Cookies und verwendet keine Analyse- oder Werbedienste. Sollte sich dies ändern, wird diese Erklärung angepasst und, soweit erforderlich, eine Einwilligung eingeholt.</p>
+
+      <h2>5. Externe Dienste</h2>
+      <p>Es werden keine externen Schriften, Kartendienste, Videoplattformen oder Social-Media-Plugins eingebunden. Links zu externen Websites, etwa zu muellerhv.de, führen zu eigenständigen Angeboten mit eigenen Datenschutzhinweisen.</p>
+
+      <h2>6. Empfänger</h2>
+      <p>Empfänger personenbezogener Daten sind der Hosting-Anbieter und der Betreiber des E-Mail-Dienstes als Auftragsverarbeiter sowie innerhalb der {OPERATOR.firma} die mit der Bearbeitung befassten Personen. Eine Übermittlung in Drittländer findet nicht statt. [Bei Nutzung außereuropäischer Dienste prüfen und ergänzen.]</p>
+
+      <h2>7. Ihre Rechte</h2>
+      <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch gegen Verarbeitungen auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO (Art. 21). Zur Ausübung Ihrer Rechte wenden Sie sich an die oben genannten Kontaktdaten. Sie haben zudem das Recht auf Beschwerde bei einer Datenschutzaufsichtsbehörde. Zuständig ist unter anderem die Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen.</p>
+
+      <h2>8. Sicherheit</h2>
+      <p>Die Website wird ausschließlich über HTTPS ausgeliefert. Formulardaten werden verschlüsselt übertragen.</p>
+
+      <h2>9. Änderungen</h2>
+      <p>Diese Datenschutzerklärung wird angepasst, wenn sich die Verarbeitung ändert. Stand: [Datum der Freigabe eintragen].</p>
+    </div>
+  </section>
+</Base>

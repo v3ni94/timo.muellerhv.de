@@ -1,0 +1,28 @@
+---
+import { SITE } from '../data/site';
+interface Props { title?: string; text?: string; button?: string; }
+const {
+  title = 'Wo steht Ihr Portfolio, und was soll sich verändern?',
+  text = 'Schildern Sie mir kurz Ihre Ausgangslage und Ihr Ziel. Wir klären, ob und in welchem Umfang eine Zusammenarbeit sinnvoll ist.',
+  button = 'Anliegen schildern',
+} = Astro.props;
+---
+<section class="section section--dunkel cta">
+  <div class="container cta__inner">
+    <div>
+      <h2>{title}</h2>
+      <p class="lead">{text}</p>
+    </div>
+    <div class="cta__actions">
+      <a class="btn btn--primary" href="/kontakt/">{button}</a>
+      <p class="cta__mail">Direkt per E-Mail: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+    </div>
+  </div>
+</section>
+<style>
+  .cta__inner { display: grid; gap: var(--s-6); grid-template-columns: 1.4fr 1fr; align-items: center; }
+  .cta__actions { display: flex; flex-direction: column; gap: var(--s-4); align-items: flex-start; }
+  .cta__mail { color: rgba(255,255,255,.85); margin: 0; }
+  .cta__mail a { color: #fff; }
+  @media (max-width: 800px) { .cta__inner { grid-template-columns: 1fr; } }
+</style>

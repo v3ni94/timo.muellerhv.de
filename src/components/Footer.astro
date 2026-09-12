@@ -1,0 +1,57 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo-hvm.png';
+import { OPERATOR, SITE, NAV, FOOTER_LEGAL } from '../data/site';
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <p class="footer-name">Timo Müller</p>
+        <p class="footer-claim">{SITE.claim}</p>
+        <p><a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      </div>
+      <nav aria-label="Beratung">
+        <p class="footer-head">Beratung</p>
+        <ul>
+          {NAV[0].children.map((c) => <li><a href={c.href}>{c.label}</a></li>)}
+        </ul>
+      </nav>
+      <nav aria-label="Weitere Seiten">
+        <p class="footer-head">Weitere Seiten</p>
+        <ul>
+          <li><a href="/profil/">Profil</a></li>
+          <li><a href="/einblicke/">Einblicke</a></li>
+          <li><a href="/kontakt/">Kontakt</a></li>
+          {FOOTER_LEGAL.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </nav>
+      <div class="footer-operator">
+        <p class="footer-head">Ein Angebot der</p>
+        <a href={OPERATOR.website} class="footer-logo" rel="noopener">
+          <Image src={logo} alt="Hausverwaltung Müller GmbH" width="150" height="130" loading="lazy" densities={[1, 2]} />
+        </a>
+        <p class="small">{OPERATOR.firma}<br />{OPERATOR.strasse}<br />{OPERATOR.plzOrt}</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="small">{OPERATOR.firma}, {OPERATOR.registergericht}, {OPERATOR.hrb}, {OPERATOR.funktion}: {OPERATOR.vertretenDurch}</p>
+    </div>
+  </div>
+  <div class="kennlinie kennlinie--thin" aria-hidden="true"></div>
+</footer>
+
+<style>
+  .site-footer { border-top: 1px solid var(--c-linie); background: var(--c-flaeche); margin-top: var(--s-8); font-size: var(--fs-small); }
+  .footer-grid { display: grid; gap: var(--s-6); grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); padding-block: var(--s-7) var(--s-6); }
+  .footer-name { font-weight: 700; font-size: 1.1rem; margin-bottom: 2px; }
+  .footer-claim { color: var(--c-text-2); text-transform: uppercase; letter-spacing: 0.04em; font-size: var(--fs-xs); }
+  .footer-head { font-weight: 600; margin-bottom: var(--s-3); color: var(--c-text-2); font-size: var(--fs-xs); letter-spacing: 0.06em; text-transform: uppercase; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li + li { margin-top: var(--s-2); }
+  a { text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .footer-logo { display: inline-block; margin-bottom: var(--s-3); }
+  .footer-logo img { width: 110px; height: auto; }
+  .footer-bottom { border-top: 1px solid var(--c-linie); padding-block: var(--s-4); color: var(--c-text-2); }
+</style>

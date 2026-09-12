@@ -1,0 +1,58 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../data/site';
+import { absolute, orgLd, personLd, websiteLd } from '../lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Pfad mit fuehrendem und abschliessendem Slash, z. B. "/profil/" */
+  path: string;
+  noindex?: boolean;
+  /** Zusaetzliche JSON-LD-Knoten (ohne @context), werden in einen @graph gelegt. */
+  ld?: Record<string, unknown>[];
+  ogType?: 'website' | 'article' | 'profile';
+}
+const { title, description, path, noindex = false, ld = [], ogType = 'website' } = Astro.props;
+const canonical = absolute(path);
+const robots = noindex || SITE.noindex ? 'noindex, nofollow' : 'index, follow';
+const graph = { '@context': 'https://schema.org', '@graph': [websiteLd(), orgLd(), personLd(), ...ld] };
+---
+<!doctype html>
+<html lang="de" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <meta name="author" content="Timo Müller" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:site_name" content={`${SITE.name} | ${SITE.claim}`} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={absolute('/og-default.png')} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="32x32" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(graph)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+    <Header currentPath={path} />
+    <main id="inhalt" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

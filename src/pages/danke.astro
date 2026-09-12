@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../data/site';
+---
+<Base title="Anfrage übermittelt | Timo Müller" description="Ihre Anfrage wurde übermittelt." path="/danke/" noindex>
+  <section class="section">
+    <div class="container prose">
+      <span class="eyebrow">Kontakt</span>
+      <h1>Vielen Dank, Ihre Anfrage wurde übermittelt.</h1>
+      <p class="lead">Ich melde mich persönlich bei Ihnen. Falls Sie in den nächsten Werktagen nichts von mir hören, schreiben Sie mir bitte direkt an <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+      <p><a class="btn btn--secondary" href="/">Zur Startseite</a></p>
+    </div>
+  </section>
+</Base>

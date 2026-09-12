@@ -1,0 +1,210 @@
+---
+import Base from '../layouts/Base.astro';
+import Cta from '../components/Cta.astro';
+import { SITE } from '../data/site';
+
+const title = 'Timo Müller | Asset Management & Portfoliooptimierung';
+const description = 'Beratung für Immobilienbestandshalter und Investoren: Portfolios analysieren, Potenziale priorisieren und Veränderungen umsetzen. Kontakt zu Timo Müller.';
+
+const angebote = [
+  {
+    titel: 'Portfolio-Check und Maßnahmenplan',
+    nutzen: 'Sie erhalten eine unabhängige Bestandsaufnahme Ihres Portfolios: wirtschaftliche Entwicklung, Leerstand, Forderungen, Instandhaltung, Datenqualität und Zuständigkeiten.',
+    ergebnis: 'Priorisierte Handlungsfelder und ein Maßnahmenplan mit Verantwortlichkeiten.',
+    href: '/asset-management-beratung/#portfolio-check',
+  },
+  {
+    titel: 'Portfoliooptimierung und Umsetzungsbegleitung',
+    nutzen: 'Objektstrategien, Abläufe, Investitionsprioritäten, Dienstleistersteuerung und Reporting werden überarbeitet und in die Umsetzung gebracht.',
+    ergebnis: 'Abgestimmte Maßnahmen, klare Steuerung und dokumentierter Fortschritt.',
+    href: '/portfoliooptimierung/',
+  },
+  {
+    titel: 'Laufendes Sparring für Eigentümer und Geschäftsleitungen',
+    nutzen: 'Regelmäßiger Austausch zu Portfoliostrategie, Investitionsentscheidungen, Finanzierungsfragen und operativen Engpässen.',
+    ergebnis: 'Vorbereitete Entscheidungen, kritische Zweitmeinung und konsequente Nachverfolgung.',
+    href: '/asset-management-beratung/#sparring',
+  },
+];
+
+const ausgangslagen = [
+  { t: 'Unklare Investitionsprioritäten', d: 'Instandhaltung, Modernisierung und Nachverdichtung konkurrieren um Budget, ohne dass die Reihenfolge wirtschaftlich begründet ist.' },
+  { t: 'Leerstände ohne abgestimmte Maßnahmen', d: 'Einheiten stehen länger leer als nötig, weil Vermietung, Technik und Budgetfreigabe nicht ineinandergreifen.' },
+  { t: 'Unterschiedliche Datenstände', d: 'Verwaltung, Buchhaltung und Eigentümer arbeiten mit abweichenden Zahlen. Entscheidungen werden dadurch verzögert oder auf unsicherer Basis getroffen.' },
+  { t: 'Stockende Dienstleisterprozesse', d: 'Aufträge, Nachträge und Abnahmen laufen ohne klare Verantwortung. Kosten und Termine geraten aus dem Blick.' },
+  { t: 'Entscheidungen, die im Tagesgeschäft versanden', d: 'Beschlüsse sind gefasst, aber niemand hält Umsetzung, Wirkung und Abweichungen nach.' },
+];
+
+const schritte = [
+  { t: 'Bestand verstehen', d: 'Zahlen, Verträge, Objekte und Zuständigkeiten sichten. Datenlücken benennen statt überspielen.' },
+  { t: 'Prioritäten festlegen', d: 'Handlungsfelder nach Wirkung, Aufwand und Risiko ordnen. Gemeinsam entscheiden, was zuerst kommt.' },
+  { t: 'Umsetzung organisieren', d: 'Maßnahmen mit Verantwortlichen, Budget und Terminen hinterlegen. Dienstleister und Verwaltung einbinden.' },
+  { t: 'Entwicklung nachhalten', d: 'Fortschritt und Wirkung regelmäßig prüfen, Abweichungen erklären und nachsteuern.' },
+];
+
+const kiFelder = [
+  { t: 'Dokumente strukturieren', d: 'Verträge, Protokolle und Rechnungen zuordnen und auffindbar machen.' },
+  { t: 'Abweichungen sichtbar machen', d: 'Plan und Ist bei Kosten, Erträgen und Leerstand automatisch gegenüberstellen.' },
+  { t: 'Vorgänge nachvollziehbar bearbeiten', d: 'Bearbeitungsstände, Fristen und offene Punkte lückenlos verfolgen.' },
+  { t: 'Berichte vorbereiten', d: 'Entwürfe für Eigentümer- und Gremienberichte aus geprüften Daten erzeugen.' },
+];
+---
+<Base title={title} description={description} path="/">
+  <section class="hero">
+    <div class="container hero__grid">
+      <div>
+        <span class="eyebrow">Timo Müller | Asset Management &amp; Portfoliooptimierung</span>
+        <h1>Asset-Management-Beratung für Immobilienportfolios.</h1>
+        <p class="hero__leitzeile">Wirtschaftlich denken. Klar priorisieren. Veränderungen umsetzen.</p>
+        <p class="lead">
+          Ich unterstütze Eigentümer, Investoren und Bestandshalter dabei, Immobilienportfolios wirtschaftlich und operativ weiterzuentwickeln.
+          Mein Ansatz verbindet die Eigentümerperspektive mit klarer Portfoliosteuerung, praktischem Umsetzungsverständnis und dem gezielten Einsatz von KI.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="/kontakt/">Portfolio besprechen</a>
+          <a class="textlink" href="#beratung">So unterstütze ich Sie</a>
+        </div>
+        <p class="hero__mail small">Direkt: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      </div>
+      <aside class="hero__fakten" aria-label="Kurzprofil">
+        <p class="hero__fakten-head">Kurzprofil</p>
+        <ul>
+          <li><strong>Eigentümerperspektive.</strong> Ich halte selbst Immobilien und entscheide über Investitionen mit eigenem Kapital.</li>
+          <li><strong>Unternehmerische Verantwortung.</strong> Vorstand der Müller Holding AG und Geschäftsführer mehrerer Unternehmen, darunter die Hausverwaltung Müller GmbH.</li>
+          <li><strong>Operatives Verständnis.</strong> Verwaltungspraxis und ein Netzwerk aus Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär.</li>
+        </ul>
+        <a class="textlink small" href="/profil/">Zum Profil</a>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" id="ausgangslagen">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Ausgangslagen</span>
+        <h2>Wenn Potenziale im Bestand nicht in Ergebnisse übersetzt werden.</h2>
+        <p>Die meisten Portfolios haben keine Erkenntnislücke, sondern eine Umsetzungslücke. Typische Situationen, mit denen Eigentümer und Geschäftsleitungen zu mir kommen:</p>
+      </div>
+      <div class="grid grid--3">
+        {ausgangslagen.map((a) => (
+          <div class="card card--flaeche">
+            <h3>{a.t}</h3>
+            <p>{a.d}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="beratung">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Beratung</span>
+        <h2>Drei Mandatsformen, ein Anspruch: Analyse, Entscheidung und Umsetzung verbinden.</h2>
+      </div>
+      <div class="grid grid--3">
+        {angebote.map((a) => (
+          <article class="card">
+            <h3>{a.titel}</h3>
+            <p>{a.nutzen}</p>
+            <p><strong>Arbeitsergebnis:</strong> {a.ergebnis}</p>
+            <a class="textlink" href={a.href}>Mehr erfahren</a>
+          </article>
+        ))}
+      </div>
+      <p class="small section-foot">Der Schwerpunkt liegt auf Asset Management. <a href="/property-management-optimierung/">Property Management</a> ist die operative Schnittstelle, <a href="/ki-immobilienmanagement/">KI</a> ein ergänzender Hebel.</p>
+    </div>
+  </section>
+
+  <section class="section" id="arbeitsweise">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Arbeitsweise</span>
+        <h2>Vier Schritte, die sich am Bestand orientieren, nicht an einer Schablone.</h2>
+        <p>Dauer und Tiefe hängen von Portfolio, Datenlage und Zielsetzung ab. Nicht jedes Portfolio braucht eine komplette Neuaufstellung. Oft geht es darum, Bestehendes unabhängig zu prüfen, Prioritäten zu verändern und Maßnahmen konsequent zu organisieren.</p>
+      </div>
+      <ol class="steps">
+        {schritte.map((s) => (<li><h3>{s.t}</h3><p>{s.d}</p></li>))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="ansatz">
+    <div class="container ansatz">
+      <div class="section-head">
+        <span class="eyebrow">Persönlicher Ansatz</span>
+        <h2>Ich betrachte Immobilien nicht nur aus der Beratungsperspektive.</h2>
+      </div>
+      <div class="prose">
+        <p>Ich halte selbst Immobilien und trage als Vorstand der Müller Holding AG und Geschäftsführer mehrerer Unternehmen unternehmerische Verantwortung. Entscheidungen über Ankauf, Instandhaltung, Finanzierung und Vermietung treffe ich mit eigenem Kapital und eigenem Risiko. Diese Perspektive bringe ich in jedes Mandat ein.</p>
+        <p>Über die Hausverwaltung Müller GmbH kenne ich das Tagesgeschäft, in dem Beschlüsse tatsächlich umgesetzt werden müssen. Ein operatives Netzwerk mit Bezügen zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär hilft mir, Machbarkeit, Kosten und Dienstleisterleistungen realistisch einzuschätzen.</p>
+        <p>Ich arbeite persönlich am Mandat und binde bei Bedarf geeignete Spezialisten ein. Verbundene Unternehmen und mögliche wirtschaftliche Interessen lege ich offen, bevor ich eine Empfehlung ausspreche.</p>
+        <a class="textlink" href="/profil/">Zum Profil</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ki">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">KI als ergänzender Hebel</span>
+        <h2>Bessere Steuerung beginnt mit besseren Informationen.</h2>
+        <p>KI ist für mich Werkzeug, kein Selbstzweck. Sie hilft dort, wo Daten unvollständig, Vorgänge unübersichtlich und Berichte aufwendig sind. Ergebnisse bleiben prüfbar, Freigaben und Verantwortung bleiben klar geregelt.</p>
+      </div>
+      <div class="grid grid--4">
+        {kiFelder.map((k) => (<div class="card card--flaeche"><h3>{k.t}</h3><p>{k.d}</p></div>))}
+      </div>
+      <p class="section-foot"><a class="textlink" href="/ki-immobilienmanagement/">KI im Immobilienmanagement</a></p>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="vorgehen">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">So würde ich vorgehen</span>
+        <h2>Ein typischer Einstieg, dargestellt als Methode.</h2>
+        <p>Freigegebene Referenzfälle veröffentliche ich erst, wenn Ergebnisse belegt und die Freigabe des Eigentümers vorliegt. Bis dahin zeige ich, wie ein Einstieg konkret abläuft.</p>
+      </div>
+      <div class="grid grid--2">
+        <div class="card">
+          <h3>Ausgangslage</h3>
+          <p>Ein Wohnungsbestand mit mehreren Verwaltungseinheiten, uneinheitlichem Reporting und einem Instandhaltungsstau, dessen Umfang niemand belastbar beziffern kann.</p>
+          <h3>Vorgehen in den ersten Wochen</h3>
+          <ul class="checklist">
+            <li>Datenbestand zusammenführen: Mieterlisten, Leerstand, offene Forderungen, Instandhaltungshistorie, Verträge.</li>
+            <li>Objekte nach wirtschaftlicher Lage und Handlungsbedarf einordnen.</li>
+            <li>Mit Verwaltung und Technik die zehn größten offenen Themen priorisieren.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Arbeitsergebnis</h3>
+          <ul class="checklist">
+            <li>Ein Maßnahmenplan mit Verantwortlichen, Budgetrahmen und Terminen.</li>
+            <li>Eine Reportingstruktur, die Plan und Ist monatlich vergleichbar macht.</li>
+            <li>Eine Entscheidungsvorlage für die Eigentümerseite zu den drei größten Investitionsfragen.</li>
+          </ul>
+          <p class="small">Schematische Darstellung des Vorgehens. Keine Ergebniszusage, keine Beschreibung eines konkreten Kundenfalls.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Cta />
+</Base>
+
+<style>
+  .hero { padding-block: clamp(2.5rem, 6vw, 5.5rem) clamp(2.5rem, 5vw, 4.5rem); border-bottom: 1px solid var(--c-linie); }
+  .hero__grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .hero__grid > * { min-width: 0; }
+  .hero h1 { max-width: 20ch; }
+  .hero__leitzeile { font-size: 1.25rem; font-weight: 600; color: var(--c-text-2); margin-bottom: var(--s-4); }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--s-5); align-items: center; margin-top: var(--s-6); }
+  .hero__mail { margin-top: var(--s-4); color: var(--c-text-2); }
+  .hero__fakten { border-top: 3px solid var(--c-orange); background: var(--c-flaeche); padding: var(--s-5); font-size: var(--fs-small); }
+  .hero__fakten-head { font-weight: 600; font-size: var(--fs-xs); letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-text-2); margin-bottom: var(--s-3); }
+  .hero__fakten ul { list-style: none; padding: 0; margin: 0 0 var(--s-4); }
+  .hero__fakten li { padding-left: 0; border-bottom: 1px solid var(--c-linie); padding-block: var(--s-3); margin: 0; }
+  .hero__fakten li:last-child { border-bottom: 0; }
+  .section-foot { margin-top: var(--s-6); color: var(--c-text-2); }
+  @media (max-width: 900px) { .hero__grid { grid-template-columns: 1fr; } }
+</style>

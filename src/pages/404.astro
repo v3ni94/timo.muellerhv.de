@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import { NAV } from '../data/site';
+---
+<Base title="Seite nicht gefunden | Timo Müller" description="Die angeforderte Seite existiert nicht." path="/404/" noindex>
+  <section class="section">
+    <div class="container prose">
+      <span class="eyebrow">Fehler 404</span>
+      <h1>Diese Seite gibt es nicht.</h1>
+      <p class="lead">Die Adresse ist möglicherweise veraltet oder falsch geschrieben. Diese Seiten helfen weiter:</p>
+      <ul class="checklist">
+        <li><a href="/">Startseite</a></li>
+        {NAV[0].children.map((c) => <li><a href={c.href}>{c.label}</a></li>)}
+        <li><a href="/profil/">Profil</a></li>
+        <li><a href="/kontakt/">Kontakt</a></li>
+      </ul>
+    </div>
+  </section>
+</Base>

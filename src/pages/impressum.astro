@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { OPERATOR, SITE } from '../data/site';
+const path = '/impressum/';
+const crumbs = [{ name: 'Impressum', href: path }];
+---
+<Base title="Impressum | Timo Müller" description="Anbieterkennzeichnung für timo.muellerhv.de, ein Angebot der Hausverwaltung Müller GmbH." path={path}>
+  <Breadcrumb crumbs={crumbs} />
+  <section class="section">
+    <div class="container prose">
+      <h1>Impressum</h1>
+      <p class="note">Entwurf zur Prüfung. Registerdaten, Vertretung, Umsatzsteuer-Identifikationsnummer und etwaige weitere Pflichtangaben sind vor Veröffentlichung anhand aktueller Unterlagen zu prüfen. Keine Angabe wurde ungeprüft ergänzt.</p>
+
+      <h2>Anbieter</h2>
+      <p>
+        {OPERATOR.firma}<br />
+        {OPERATOR.coName}<br />
+        {OPERATOR.strasse}<br />
+        {OPERATOR.plzOrt}
+      </p>
+      <p>Vertreten durch den {OPERATOR.funktion}: {OPERATOR.vertretenDurch}</p>
+
+      <h2>Kontakt</h2>
+      <p>E-Mail: <a href={`mailto:${SITE.email}`}>{SITE.email}</a><br />
+      Telefon: [Telefonnummer ergänzen und freigeben]</p>
+
+      <h2>Registereintrag</h2>
+      <p>Registergericht: {OPERATOR.registergericht}<br />
+      Registernummer: {OPERATOR.hrb}</p>
+
+      <h2>Umsatzsteuer-Identifikationsnummer</h2>
+      <p>[USt-IdNr. gemäß § 27a UStG ergänzen, sofern vorhanden. Keine Steuernummer angeben.]</p>
+
+      <h2>Verantwortlich für den Inhalt</h2>
+      <p>Timo Müller, Anschrift wie oben.</p>
+
+      <h2>Hinweis zum Angebot</h2>
+      <p>timo.muellerhv.de ist das persönliche Beratungsangebot von Timo Müller für Asset Management und Portfoliooptimierung und wird von der {OPERATOR.firma} betrieben. Art und Umfang einer Beauftragung werden individuell vereinbart. Die Kontaktaufnahme über diese Website begründet keinen Beratungsvertrag. Es werden keine erlaubnispflichtigen Finanzdienstleistungen, keine Anlagevermittlung und keine Rechts- oder Steuerberatung erbracht.</p>
+
+      <h2>Streitbeilegung</h2>
+      <p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen. [Vor Veröffentlichung prüfen, ob Angebot ausschließlich an Unternehmer gerichtet ist und ob der Hinweis nach § 36 VSBG erforderlich ist.]</p>
+    </div>
+  </section>
+</Base>

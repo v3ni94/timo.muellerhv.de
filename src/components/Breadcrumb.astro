@@ -1,0 +1,15 @@
+---
+import type { Crumb } from '../lib/seo';
+interface Props { crumbs: Crumb[] }
+const { crumbs } = Astro.props;
+---
+<nav class="breadcrumb container" aria-label="Sie befinden sich hier">
+  <ol>
+    <li><a href="/">Start</a></li>
+    {crumbs.map((c, i) => (
+      i === crumbs.length - 1
+        ? <li aria-current="page">{c.name}</li>
+        : <li><a href={c.href}>{c.name}</a></li>
+    ))}
+  </ol>
+</nav>

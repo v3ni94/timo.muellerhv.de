@@ -1,0 +1,61 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Cta from '../../components/Cta.astro';
+import { render } from 'astro:content';
+import { breadcrumbLd, ID, absolute } from '../../lib/seo';
+import { veroeffentlichteBeitraege, formatDatum } from '../../lib/einblicke';
+
+export async function getStaticPaths() {
+  const beitraege = await veroeffentlichteBeitraege();
+  return beitraege.map((b) => ({ params: { slug: b.id }, props: { beitrag: b } }));
+}
+const { beitrag } = Astro.props;
+const { Content } = await render(beitrag);
+const path = `/einblicke/${beitrag.id}/`;
+const crumbs = [{ name: 'Einblicke', href: '/einblicke/' }, { name: beitrag.data.title, href: path }];
+const d = beitrag.data;
+const ld = [
+  breadcrumbLd(crumbs),
+  {
+    '@type': 'Article',
+    '@id': `${absolute(path)}#article`,
+    headline: d.title,
+    description: d.description,
+    inLanguage: 'de',
+    datePublished: d.datum?.toISOString(),
+    dateModified: (d.aktualisiert ?? d.datum)?.toISOString(),
+    author: { '@id': ID.person },
+    publisher: { '@id': ID.org },
+    mainEntityOfPage: absolute(path),
+  },
+];
+---
+<Base title={`${d.title} | Timo Müller`} description={d.description} path={path} ld={ld} ogType="article">
+  <Breadcrumb crumbs={crumbs} />
+  <article class="section">
+    <div class="container prose">
+      <span class="eyebrow">Einblicke</span>
+      <h1>{d.title}</h1>
+      <p class="article-meta">
+        Von Timo Müller{d.datum && <>, veröffentlicht am <time datetime={d.datum.toISOString().slice(0, 10)}>{formatDatum(d.datum)}</time></>}
+        {d.aktualisiert && <>, aktualisiert am <time datetime={d.aktualisiert.toISOString().slice(0, 10)}>{formatDatum(d.aktualisiert)}</time></>}
+      </p>
+      <p class="lead"><strong>Kernaussage:</strong> {d.kernaussage}</p>
+      <div class="article-body"><Content /></div>
+      {d.quellen.length > 0 && (
+        <aside class="quellen">
+          <h2>Quellen</h2>
+          <ol>{d.quellen.map((q) => <li><a href={q.url} rel="noopener">{q.titel}</a>, abgerufen am {q.abgerufen}</li>)}</ol>
+        </aside>
+      )}
+      <p class="note">Passende Beratung: <a href={d.beratung}>{d.beratungLabel}</a></p>
+    </div>
+  </article>
+  <Cta />
+</Base>
+<style>
+  .quellen { margin-top: var(--s-7); font-size: var(--fs-small); color: var(--c-text-2); }
+  .quellen h2 { font-size: 1.1rem; }
+  .note { margin-top: var(--s-6); }
+</style>

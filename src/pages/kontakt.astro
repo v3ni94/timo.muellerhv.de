@@ -1,0 +1,55 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { breadcrumbLd } from '../lib/seo';
+import { SITE, OPERATOR } from '../data/site';
+
+const path = '/kontakt/';
+const title = 'Kontakt | Timo Müller';
+const description = 'Portfolio besprechen: Schildern Sie Ausgangslage und Ziel. Direkter Kontakt zu Timo Müller per Formular oder E-Mail an timo@muellerhv.de.';
+const crumbs = [{ name: 'Kontakt', href: path }];
+---
+<Base title={title} description={description} path={path} ld={[breadcrumbLd(crumbs)]}>
+  <Breadcrumb crumbs={crumbs} />
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">Kontakt</span>
+      <h1>Portfolio besprechen</h1>
+      <p class="lead">Schildern Sie mir kurz Ihre Ausgangslage und Ihr Ziel. Ich melde mich persönlich zurück, und wir klären, ob und in welchem Umfang eine Zusammenarbeit sinnvoll ist. Die Kontaktaufnahme ist unverbindlich und löst keinen Beratungsvertrag aus.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container kontakt-grid">
+      <div>
+        <h2 class="h3">Anfrage senden</h2>
+        <ContactForm />
+      </div>
+      <aside class="kontakt-direkt">
+        <h2 class="h3">Direkt erreichen</h2>
+        <p><a class="mail-gross" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+        <p class="small">Anfragen gehen direkt an mich. Eine erste Einschätzung erhalten Sie in der Regel innerhalb weniger Werktage.</p>
+        <hr />
+        <h3 class="h4">Was hilft für eine erste Einschätzung</h3>
+        <ul class="checklist small">
+          <li>Art und ungefähre Größe des Bestands</li>
+          <li>Ihre Rolle und Entscheidungskompetenz</li>
+          <li>Das Ziel oder Problem, um das es geht</li>
+          <li>Gewünschter Zeitrahmen, falls vorhanden</li>
+        </ul>
+        <hr />
+        <p class="small">Betreiber dieser Seite: {OPERATOR.firma}, {OPERATOR.strasse}, {OPERATOR.plzOrt}. <a href="/impressum/">Impressum</a></p>
+      </aside>
+    </div>
+  </section>
+</Base>
+<style>
+  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  .kontakt-grid { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .kontakt-direkt { background: var(--c-flaeche); border-top: 3px solid var(--c-orange); padding: var(--s-5); }
+  .h3 { font-size: var(--fs-h3); }
+  .h4 { font-size: 1.05rem; }
+  .mail-gross { font-size: 1.2rem; font-weight: 600; word-break: break-all; }
+  @media (max-width: 860px) { .kontakt-grid { grid-template-columns: 1fr; } }
+</style>

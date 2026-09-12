@@ -1,0 +1,54 @@
+# timo.muellerhv.de, Apache-Konfiguration (klassisches PHP-Webhosting)
+# Vor dem Einsatz mit dem Hoster abstimmen: mod_rewrite, mod_headers, mod_deflate, PHP-Version.
+
+Options -Indexes
+AddDefaultCharset UTF-8
+
+# HTTPS erzwingen (nur diese Subdomain)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # URLs kanonisch mit Trailing Slash (ausser Dateien)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteCond %{REQUEST_URI} !\.[a-zA-Z0-9]{2,5}$
+  RewriteRule ^(.*)$ /$1/ [L,R=301]
+
+  # /index.html auf Verzeichnis umleiten
+  RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+  RewriteRule ^(.*/)?index\.html$ /$1 [L,R=301]
+</IfModule>
+
+# Verstecke Dateien und Konfiguration sperren
+<FilesMatch "^\.|\.(env|ini|log|sh|bak|sql|md|lock|json|ya?ml)$">
+  Require all denied
+</FilesMatch>
+<Files ".htaccess">
+  Require all denied
+</Files>
+
+ErrorDocument 404 /404.html
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+  # Keine externen Skripte, Schriften oder Frames. Inline-Skripte stammen aus dem Astro-Build (Hash-CSP bei Bedarf ergaenzen).
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests"
+  # HSTS nur fuer diese Subdomain, ohne includeSubDomains (bestehende HVM-Anwendungen nicht beeinflussen)
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Cache: gehashte Assets lange, HTML kurz
+  <FilesMatch "\.(css|js|woff2|webp|avif|png|jpe?g|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.(html|xml|txt)$">
+    Header set Cache-Control "public, max-age=600, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/javascript application/json image/svg+xml
+</IfModule>

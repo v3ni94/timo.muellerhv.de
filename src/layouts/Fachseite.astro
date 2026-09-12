@@ -1,0 +1,115 @@
+---
+import Base from './Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Cta from '../components/Cta.astro';
+import Faq from '../components/Faq.astro';
+import { breadcrumbLd, serviceLd, faqLd } from '../lib/seo';
+
+export interface Block { t: string; d: string }
+interface Props {
+  title: string;            // <title>
+  description: string;
+  path: string;
+  h1: string;
+  eyebrow: string;
+  frage: string;            // praezise Ausgangsfrage
+  intro: string;
+  serviceName: string;
+  serviceType: string;
+  situationen: Block[];
+  leistungen: Block[];
+  ergebnisse: string[];
+  vorgehen: Block[];
+  abgrenzung: string[];
+  faq: { q: string; a: string }[];
+  verwandt: { label: string; href: string }[];
+}
+const p = Astro.props;
+const crumbs = [{ name: 'Beratung', href: '/asset-management-beratung/' }, { name: p.h1, href: p.path }];
+const ld = [
+  breadcrumbLd(crumbs),
+  serviceLd({ name: p.serviceName, description: p.description, path: p.path, serviceType: p.serviceType }),
+  faqLd(p.faq),
+];
+---
+<Base title={p.title} description={p.description} path={p.path} ld={ld}>
+  <Breadcrumb crumbs={crumbs} />
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">{p.eyebrow}</span>
+      <h1>{p.h1}</h1>
+      <p class="hero-frage">{p.frage}</p>
+      <p class="lead">{p.intro}</p>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="/kontakt/">Portfolio besprechen</a>
+        <a class="textlink" href="#leistung">Leistungsumfang</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><h2>Passende Situationen</h2></div>
+      <div class="grid grid--3">
+        {p.situationen.map((s) => (<div class="card card--flaeche"><h3>{s.t}</h3><p>{s.d}</p></div>))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flaeche" id="leistung">
+    <div class="container zwei-spalten">
+      <div>
+        <div class="section-head"><h2>Leistungsumfang</h2></div>
+        <div class="leistungen">
+          {p.leistungen.map((l) => (<div class="leistung"><h3>{l.t}</h3><p>{l.d}</p></div>))}
+        </div>
+      </div>
+      <aside class="ergebnisse">
+        <h2 class="h3">Arbeitsergebnisse</h2>
+        <ul class="checklist">{p.ergebnisse.map((e) => <li>{e}</li>)}</ul>
+        <p class="small">Umfang, Datentiefe und Zeitrahmen werden mandatsbezogen vereinbart. Keine pauschalen Ergebniszusagen.</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><h2>Vorgehen</h2></div>
+      <ol class="steps">{p.vorgehen.map((v) => (<li><h3>{v.t}</h3><p>{v.d}</p></li>))}</ol>
+    </div>
+  </section>
+
+  <section class="section section--flaeche">
+    <div class="container zwei-spalten">
+      <div class="prose">
+        <h2>Abgrenzung</h2>
+        <ul class="checklist">{p.abgrenzung.map((a) => <li>{a}</li>)}</ul>
+      </div>
+      <aside>
+        <h2 class="h3">Verwandte Themen</h2>
+        <ul class="verwandt">{p.verwandt.map((v) => <li><a href={v.href}>{v.label}</a></li>)}</ul>
+      </aside>
+    </div>
+  </section>
+
+  <Faq items={p.faq} />
+  <Cta />
+</Base>
+
+<style>
+  .hero { padding-block: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  .hero h1 { max-width: 24ch; }
+  .hero-frage { font-size: 1.2rem; font-weight: 600; color: var(--c-text-2); max-width: 44ch; margin-bottom: var(--s-4); }
+  .hero-actions { display: flex; flex-wrap: wrap; gap: var(--s-5); align-items: center; margin-top: var(--s-5); }
+  .zwei-spalten { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem); align-items: start; }
+  .leistung + .leistung { margin-top: var(--s-5); padding-top: var(--s-5); border-top: 1px solid var(--c-linie); }
+  .leistung h3 { margin-bottom: var(--s-2); }
+  .leistung p { color: var(--c-text-2); max-width: 62ch; }
+  .ergebnisse { background: #fff; border: 1px solid var(--c-linie); border-top: 3px solid var(--c-orange); padding: var(--s-5); position: sticky; top: 6rem; }
+  .h3 { font-size: var(--fs-h3); }
+  .verwandt { list-style: none; padding: 0; margin: 0; }
+  .verwandt li { border-bottom: 1px solid var(--c-linie); padding-block: var(--s-3); margin: 0; }
+  .verwandt a { text-decoration: none; font-weight: 600; }
+  .verwandt a:hover { text-decoration: underline; }
+  @media (max-width: 860px) { .zwei-spalten { grid-template-columns: 1fr; } .ergebnisse { position: static; } }
+</style>

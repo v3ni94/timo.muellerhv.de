@@ -1,0 +1,94 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Cta from '../components/Cta.astro';
+import Timeline, { type Station } from '../components/Timeline.astro';
+import { breadcrumbLd, ID, absolute } from '../lib/seo';
+import { PERSON, SITE } from '../data/site';
+
+const path = '/profil/';
+const title = 'Timo Müller | Profil, Haltung und Funktionen';
+const description = 'Timo Müller: Vorstand der Müller Holding AG, Geschäftsführer mehrerer Unternehmen, Immobilieneigentümer. Beratung mit Eigentümerperspektive und Umsetzungskompetenz.';
+const crumbs = [{ name: 'Profil', href: path }];
+
+/**
+ * Vita: Es werden nur Stationen mit freigabe: true gerendert.
+ * Zeitraeume, Funktionen und Verantwortungsbereiche sind vom Auftraggeber zu bestaetigen (docs/FAKTENLISTE.md).
+ * Aktuell liegen keine bestaetigten Zeitraeume vor, daher bleibt die Timeline leer.
+ */
+const stationen: Station[] = [
+  { zeitraum: '[Zeitraum bestätigen]', titel: 'Vorstand, Müller Holding AG', text: '[Verantwortungsbereich bestätigen]', freigabe: false },
+  { zeitraum: '[Zeitraum bestätigen]', titel: 'Geschäftsführer, Hausverwaltung Müller GmbH', text: '[Verantwortungsbereich bestätigen]', freigabe: false },
+];
+
+// Downloadbutton fuer das Beraterprofil erst anzeigen, wenn die Datei tatsaechlich vorliegt.
+const beraterprofilPdf: string | null = null; // z. B. '/downloads/beraterprofil-timo-mueller.pdf'
+
+const ld = [
+  breadcrumbLd(crumbs),
+  { '@type': 'ProfilePage', '@id': `${absolute(path)}#profilepage`, url: absolute(path), name: title, mainEntity: { '@id': ID.person }, inLanguage: 'de' },
+];
+---
+<Base title={title} description={description} path={path} ld={ld} ogType="profile">
+  <Breadcrumb crumbs={crumbs} />
+  <section class="hero">
+    <div class="container profil-hero">
+      <div>
+        <span class="eyebrow">Profil</span>
+        <h1>Timo Müller</h1>
+        <p class="lead">Unternehmer, Eigentümer und Berater für Asset Management und Portfoliooptimierung. Ich verbinde die Eigentümerperspektive mit operativer Umsetzungskompetenz.</p>
+        <dl class="dl-grid funktionen">
+          <dt>Funktionen</dt>
+          <dd>
+            <ul>{PERSON.funktionen.map((f) => <li>{f}</li>)}</ul>
+          </dd>
+          <dt>Kontakt</dt>
+          <dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+        </dl>
+        {beraterprofilPdf && <a class="btn btn--secondary" href={beraterprofilPdf}>Beraterprofil als PDF</a>}
+      </div>
+      <div class="portrait" aria-hidden="true">
+        <!-- Typografische Variante bis zur Freigabe eines echten Portraets. Kein KI-Bild, kein Platzhalterfoto. -->
+        <span class="portrait__initialen">TM</span>
+        <span class="portrait__linie"></span>
+        <span class="portrait__claim">Asset Management &amp; Portfoliooptimierung</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container prose">
+      <h2>Verantwortung</h2>
+      <p>Als Vorstand der Müller Holding AG und Geschäftsführer mehrerer Unternehmen verantworte ich Beteiligungen, Unternehmensstrukturen, Bestandshaltung und Projektentwicklung. Über die Hausverwaltung Müller GmbH verantworte ich die Verwaltung von Wohnungseigentümergemeinschaften und Mietobjekten. Ich halte selbst Immobilien und treffe Entscheidungen über Ankauf, Instandhaltung, Finanzierung und Vermietung mit eigenem Kapital.</p>
+
+      <h2>Wie ich als Eigentümer denke</h2>
+      <p>Jede Maßnahme muss drei Fragen beantworten: Was bringt sie wirtschaftlich, was kostet sie an Kapital und Aufmerksamkeit, und welches Risiko entsteht, wenn sie unterbleibt? Diese Fragen stelle ich in eigenen Objekten genauso wie im Mandat. Ein Berater, der nicht selbst investiert, kann analysieren. Ein Eigentümer, der berät, weiß auch, wie sich Entscheidungen anfühlen, wenn das eigene Geld dranhängt.</p>
+
+      <h2>Warum ich Strategie und Betrieb verbinde</h2>
+      <p>Die beste Objektstrategie scheitert, wenn Verwaltung, Handwerker und Eigentümerseite nicht zusammenarbeiten. Ich kenne das Tagesgeschäft der Verwaltung und die Baustelle. Mein operatives Netzwerk hat Bezüge zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär. Das gibt mir ein realistisches Verständnis von Kosten, Dauer und Qualität, das in Angebotsprüfung, Nachtragsbewertung und Dienstleistersteuerung einfließt. Es bedeutet nicht, dass ich eine bundesweit verfügbare eigene Handwerkerorganisation anbiete.</p>
+
+      <h2>Finanzierung, Netzwerk und KI</h2>
+      <p>Die Finanzierungsperspektive gehört zu jeder Portfolioentscheidung: Welche Investition trägt sich, welche Struktur passt zur Bestandsentwicklung, welche Unterlagen erwarten Finanzierer? Ich bereite diese Fragen vor und begleite fachlich. Finanzierungen vermittle ich nicht. KI und Automatisierung entwickle ich als zusätzlichen unternehmerischen Hebel für die eigene Gruppe weiter: bessere Daten, schnellere Abläufe, prüfbare Berichte. Ich beschreibe diese Anwendungen in ihrem tatsächlichen Entwicklungsstand.</p>
+
+      <h2>Zusammenarbeit</h2>
+      <p>Ich arbeite persönlich am Mandat und binde bei Bedarf geeignete Spezialisten ein. Verbundene Unternehmen und mögliche wirtschaftliche Interessen lege ich offen, bevor ich eine Empfehlung ausspreche. Ich behaupte keine vollständige Anbieterunabhängigkeit, sondern Transparenz.</p>
+    </div>
+  </section>
+
+  <Timeline stationen={stationen} title="Stationen" />
+
+  <Cta title="Sie möchten Ihr Portfolio mit mir besprechen?" text="Schildern Sie mir kurz Ausgangslage und Ziel. Ich melde mich persönlich zurück." button="Kontakt aufnehmen" />
+</Base>
+
+<style>
+  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  .profil-hero { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .funktionen { margin-block: var(--s-5); grid-template-columns: 8rem 1fr; }
+  .funktionen ul { list-style: none; padding: 0; margin: 0; }
+  .funktionen li + li { margin-top: var(--s-1); }
+  .portrait { aspect-ratio: 4 / 5; max-width: 22rem; width: 100%; background: var(--c-dunkel); color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: var(--s-5); border-radius: var(--radius); justify-self: end; }
+  .portrait__initialen { font-size: clamp(4rem, 8vw, 6rem); font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+  .portrait__linie { display: block; width: 3rem; height: 4px; background: var(--c-orange); margin-block: var(--s-4); }
+  .portrait__claim { font-size: var(--fs-xs); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,.8); }
+  @media (max-width: 800px) { .profil-hero { grid-template-columns: 1fr; } .portrait { justify-self: start; max-width: 16rem; } .funktionen { grid-template-columns: 1fr; } }
+</style>

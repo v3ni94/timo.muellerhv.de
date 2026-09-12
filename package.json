@@ -1,0 +1,26 @@
+{
+  "name": "timo-muellerhv-de",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Website timo.muellerhv.de, Asset-Management-Beratung Timo Mueller (Betreiber: Hausverwaltung Mueller GmbH)",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node scripts/test-build.mjs",
+    "lint:php": "php -l server/contact.php"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.2",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "axe-core": "^4.13.0",
+    "playwright": "^1.63.0",
+    "typescript": "^6.0.3"
+  }
+}

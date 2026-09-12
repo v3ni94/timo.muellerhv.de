@@ -1,0 +1,26 @@
+---
+/**
+ * Rendert ausschliesslich Stationen mit freigabe === true.
+ * Ohne freigegebene Stationen wird nichts ausgegeben (kein Platzhalter in der Produktion).
+ */
+export interface Station { zeitraum: string; titel: string; text: string; freigabe: boolean }
+interface Props { stationen: Station[]; title?: string }
+const { stationen, title = 'Stationen' } = Astro.props;
+const sichtbar = stationen.filter((s) => s.freigabe);
+---
+{sichtbar.length > 0 && (
+  <section class="section">
+    <div class="container">
+      <div class="section-head"><h2>{title}</h2></div>
+      <ol class="timeline prose">
+        {sichtbar.map((s) => (
+          <li>
+            <span class="tl-zeit">{s.zeitraum}</span>
+            <h3>{s.titel}</h3>
+            <p>{s.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+)}

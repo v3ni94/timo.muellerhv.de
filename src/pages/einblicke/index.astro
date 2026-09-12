@@ -1,0 +1,58 @@
+---
+import Base from '../../layouts/Base.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Cta from '../../components/Cta.astro';
+import { breadcrumbLd } from '../../lib/seo';
+import { veroeffentlichteBeitraege, formatDatum } from '../../lib/einblicke';
+
+const path = '/einblicke/';
+const title = 'Einblicke | Timo Müller';
+const description = 'Fachbeiträge zur Arbeitsweise: Portfoliooptimierung, Zusammenarbeit von Asset und Property Management und kontrollierter KI-Einstieg im Immobilienmanagement.';
+const crumbs = [{ name: 'Einblicke', href: path }];
+const beitraege = await veroeffentlichteBeitraege();
+---
+<Base title={title} description={description} path={path} ld={[breadcrumbLd(crumbs)]}>
+  <Breadcrumb crumbs={crumbs} />
+  <section class="hero">
+    <div class="container">
+      <span class="eyebrow">Einblicke</span>
+      <h1>Einblicke in die Arbeitsweise</h1>
+      <p class="lead">Fachbeiträge zu Portfoliosteuerung, Zusammenarbeit von Asset und Property Management und dem sinnvollen Einsatz von KI. Jeder Beitrag beginnt mit einer Kernaussage, erklärt konkrete Arbeitsschritte und benennt Grenzen.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      {beitraege.length === 0 ? (
+        <div class="prose">
+          <h2>Beiträge in Vorbereitung</h2>
+          <p>Die ersten Fachbeiträge befinden sich in der fachlichen Prüfung und werden nach Freigabe veröffentlicht:</p>
+          <ul class="checklist">
+            <li>Immobilienportfolio optimieren: Welche Daten zuerst auf den Tisch gehören</li>
+            <li>Asset Management und Property Management: Wo die Zusammenarbeit konkret wird</li>
+            <li>KI im Immobilienmanagement: Welche Prozesse sich für einen kontrollierten Einstieg eignen</li>
+          </ul>
+          <p>Bis dahin finden Sie die inhaltlichen Grundlagen auf den Beratungsseiten: <a href="/portfoliooptimierung/">Portfoliooptimierung</a>, <a href="/property-management-optimierung/">Property-Management-Optimierung</a> und <a href="/ki-immobilienmanagement/">KI im Immobilienmanagement</a>.</p>
+        </div>
+      ) : (
+        <div class="grid grid--2">
+          {beitraege.map((b) => (
+            <article class="card">
+              <p class="article-meta">{b.data.datum && <time datetime={b.data.datum.toISOString().slice(0, 10)}>{formatDatum(b.data.datum)}</time>}</p>
+              <h2 class="h3"><a href={`/einblicke/${b.id}/`}>{b.data.title}</a></h2>
+              <p>{b.data.kernaussage}</p>
+              <a class="textlink" href={`/einblicke/${b.id}/`}>Beitrag lesen</a>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+  <Cta />
+</Base>
+<style>
+  .hero { padding-block: clamp(2rem, 4vw, 3.5rem); border-bottom: 1px solid var(--c-linie); }
+  .h3 { font-size: var(--fs-h3); }
+  .h3 a { text-decoration: none; }
+  .h3 a:hover { text-decoration: underline; }
+</style>

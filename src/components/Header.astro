@@ -1,0 +1,112 @@
+---
+import { NAV, CTA, SITE } from '../data/site';
+interface Props { currentPath: string }
+const { currentPath } = Astro.props;
+const isActive = (href: string) => currentPath === href || (href !== '/' && currentPath.startsWith(href));
+const beratungActive = NAV[0].children.some((c) => isActive(c.href));
+---
+<div class="kennlinie" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="/" aria-label="Timo Müller, Startseite">
+      <span class="brand__name">Timo Müller</span>
+      <span class="brand__claim">{SITE.claim}</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="hauptnavigation" data-nav-toggle>
+      <span class="nav-toggle__bars" aria-hidden="true"></span>
+      <span>Menü</span>
+    </button>
+
+    <nav id="hauptnavigation" class="site-nav" aria-label="Hauptnavigation" data-nav>
+      <ul class="site-nav__list">
+        <li class="site-nav__item site-nav__item--has-children">
+          <details class="nav-details" data-nav-details>
+            <summary class="site-nav__link" aria-current={beratungActive ? 'page' : undefined}>
+              {NAV[0].label}<span class="chev" aria-hidden="true"></span>
+            </summary>
+            <ul class="submenu">
+              {NAV[0].children.map((c) => (
+                <li>
+                  <a href={c.href} aria-current={isActive(c.href) ? 'page' : undefined}>
+                    <span class="submenu__label">{c.label}</span>
+                    <span class="submenu__kurz">{c.kurz}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </li>
+        {NAV.slice(1).map((n) => (
+          <li class="site-nav__item">
+            <a class="site-nav__link" href={n.href} aria-current={isActive(n.href) ? 'page' : undefined}>{n.label}</a>
+          </li>
+        ))}
+        <li class="site-nav__item site-nav__item--cta">
+          <a class="btn btn--primary" href={CTA.href}>{CTA.label}</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--c-linie); backdrop-filter: blur(6px); }
+  .site-header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--s-5); min-height: 4.5rem; flex-wrap: wrap; }
+  .brand { text-decoration: none; display: flex; flex-direction: column; line-height: 1.15; padding-block: var(--s-3); }
+  .brand__name { font-weight: 700; font-size: 1.2rem; letter-spacing: -0.01em; }
+  .brand__claim { font-size: var(--fs-xs); color: var(--c-text-2); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .nav-toggle { display: none; align-items: center; gap: var(--s-2); background: none; border: 1px solid var(--c-linie); border-radius: var(--radius); padding: 0.5rem 0.75rem; min-height: 44px; font-weight: 600; cursor: pointer; }
+  .nav-toggle__bars { display: block; width: 18px; height: 2px; background: currentColor; box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor; }
+
+  .site-nav__list { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: var(--s-2); }
+  .site-nav__link { display: inline-flex; align-items: center; gap: 0.3em; padding: 0.6rem 0.75rem; border-radius: var(--radius); text-decoration: none; font-weight: 600; cursor: pointer; list-style: none; min-height: 44px; }
+  .site-nav__link::-webkit-details-marker { display: none; }
+  .site-nav__link:hover { background: var(--c-flaeche); }
+  .site-nav__link[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--c-orange); }
+  .site-nav__item--cta { margin-left: var(--s-3); }
+  .chev { width: 0.45em; height: 0.45em; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-0.15em) rotate(45deg); }
+  .nav-details[open] .chev { transform: translateY(0.1em) rotate(225deg); }
+
+  .nav-details { position: relative; }
+  .submenu { list-style: none; margin: 0; padding: var(--s-2); position: absolute; top: calc(100% + 0.25rem); left: 0; min-width: 21rem; background: #fff; border: 1px solid var(--c-linie); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(26,26,26,.08); z-index: 60; }
+  .submenu li + li { margin: 0; }
+  .submenu a { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); text-decoration: none; border-radius: var(--radius); }
+  .submenu a:hover { background: var(--c-flaeche); }
+  .submenu a[aria-current="page"] { box-shadow: inset 3px 0 0 var(--c-orange); }
+  .submenu__label { font-weight: 600; }
+  .submenu__kurz { font-size: var(--fs-xs); color: var(--c-text-2); }
+
+  @media (max-width: 1080px) {
+    .nav-toggle { display: inline-flex; }
+    .site-nav { flex-basis: 100%; }
+    .site-nav:not([data-open]) { display: none; }
+    /* Ohne JavaScript ist die Navigation immer sichtbar */
+    html.no-js .site-nav { display: block; }
+    .site-nav__list { flex-direction: column; align-items: stretch; gap: 0; padding-bottom: var(--s-4); }
+    .site-nav__link { width: 100%; }
+    .submenu { position: static; box-shadow: none; border: 0; border-left: 2px solid var(--c-hellgrau); margin: 0 0 var(--s-2) var(--s-4); min-width: 0; }
+    .site-nav__item--cta { margin: var(--s-3) 0 0; }
+    .site-nav__item--cta .btn { width: 100%; justify-content: center; }
+  }
+</style>
+
+<script>
+  // Progressive Enhancement: Menue-Toggle und Schliessen des Untermenues bei Klick ausserhalb.
+  document.documentElement.classList.remove('no-js');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-nav-toggle]');
+  const nav = document.querySelector<HTMLElement>('[data-nav]');
+  toggle?.addEventListener('click', () => {
+    const open = nav?.hasAttribute('data-open');
+    if (open) nav?.removeAttribute('data-open'); else nav?.setAttribute('data-open', '');
+    toggle.setAttribute('aria-expanded', String(!open));
+  });
+  const details = document.querySelector<HTMLDetailsElement>('[data-nav-details]');
+  document.addEventListener('click', (e) => {
+    if (details?.open && !details.contains(e.target as Node)) details.open = false;
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && details?.open) { details.open = false; details.querySelector('summary')?.focus(); }
+  });
+</script>
