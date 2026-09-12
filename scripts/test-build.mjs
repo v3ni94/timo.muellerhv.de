@@ -38,6 +38,13 @@ for (const f of html) {
   if (!noindex && !f.endsWith('404.html') && !inSitemap) err(`${route}: fehlt in Sitemap`);
   if (/\[[^\]]*(ergänzen|bestätigen|prüfen|eintragen)[^\]]*\]/.test(s) && !/impressum|datenschutz/.test(route)) err(`${route}: Platzhalter im Build`);
   if (/(cdn\.|googleapis|gstatic|unpkg|jsdelivr)/.test(s)) err(`${route}: externe Ressource`);
+  // Verbotene Formulierungen laut Masterprompt (Abschnitt 3)
+  const text = s.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ');
+  for (const w of ['führender Experte', 'führende Expert', 'garantierte Rendite', 'revolutionär', 'einzigartig', '360-Grad', '360°', 'Waffe', 'Selfmade', 'Self-made', 'Vonovia', 'Deutsche Wohnen', 'Coming soon', 'Lorem ipsum']) {
+    if (text.toLowerCase().includes(w.toLowerCase())) err(`${route}: verbotene Formulierung "${w}"`);
+  }
+  // Keine Stockfoto- oder Fremdbild-Einbindung
+  if (/(unsplash|pexels|shutterstock|istock|getty)/i.test(s)) err(`${route}: Stockfoto-Quelle`);
   if (Buffer.byteLength(s) > 150_000) err(`${route}: HTML > 150 KB`);
 }
 // Drafts duerfen nicht gebaut sein
