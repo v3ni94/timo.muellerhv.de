@@ -3,6 +3,13 @@
 
 Options -Indexes
 AddDefaultCharset UTF-8
+# Textdateien (llms.txt, robots.txt, Sitemap) ausdruecklich als UTF-8 ausliefern, damit Umlaute in jedem Client korrekt erscheinen
+<FilesMatch "\.(txt|xml)$">
+  ForceType 'text/plain; charset=UTF-8'
+</FilesMatch>
+<FilesMatch "\.xml$">
+  ForceType 'application/xml; charset=UTF-8'
+</FilesMatch>
 
 # HTTPS erzwingen (nur diese Subdomain)
 <IfModule mod_rewrite.c>

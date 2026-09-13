@@ -11,7 +11,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 // Alle Routen des Builds (docs/CONTENT-PLAN-V2.md 2), axe bei 390 und 1440 px.
 const pages = [
   '/', '/asset-management-beratung/', '/portfoliooptimierung/', '/property-management-optimierung/', '/ki-immobilienmanagement/',
-  '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/', '/zusammenarbeit/', '/glossar/', '/kurzfakten/',
+  '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/', '/zusammenarbeit/', '/glossar/', '/kurzfakten/', '/facts/',
   '/profil/', '/einblicke/', '/kontakt/', '/danke/', '/impressum/', '/datenschutz/', '/404.html',
 ];
 let total = 0;

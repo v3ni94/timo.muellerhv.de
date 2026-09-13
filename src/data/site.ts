@@ -107,6 +107,7 @@ export const WEITERE_SEITEN = [
   { label: 'Einblicke', href: '/einblicke/' },
   { label: 'Glossar', href: '/glossar/' },
   { label: 'Kurzfakten', href: '/kurzfakten/' },
+  { label: 'Facts (English)', href: '/facts/' },
   { label: 'Profil', href: '/profil/' },
   { label: 'Kontakt', href: '/kontakt/' },
 ] as const satisfies readonly NavLink[];

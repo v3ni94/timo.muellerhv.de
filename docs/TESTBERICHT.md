@@ -225,3 +225,7 @@ Weiterhin nicht durchgeführt: SMTP-Versand end-to-end, Zielserver (Redirects, H
 ## Ergänzung 13.09.2026: Seite /kurzfakten/ und llms.txt
 
 Build 18 Seiten, `npx astro check` 0 Fehler, `npm test` 0 Fehler (15 Sitemap-URLs, 17 eindeutige H1), axe 0 Verstöße auf 18 Seiten, kein horizontaler Scroll bei 390 und 1440 px auf der neuen Seite. Inhalte ausschließlich aus der Faktenliste Nr. 1 bis 11 und bestehenden Seiten; Stand-Datum wird manuell gepflegt.
+
+## Ergänzung 13.09.2026: Seite /facts/ (englisch) und hreflang
+
+Base.astro erhält die Props lang und alternates; /kurzfakten/ und /facts/ verweisen wechselseitig per hreflang (de, en, x-default auf die deutsche Fassung). Build 19 Seiten, `npx astro check` 0 Fehler, `npm test` 0 Fehler (16 Sitemap-URLs, 18 eindeutige H1). llms.txt mit UTF-8-Kennung (BOM) und expliziter Zeichensatzangabe in der .htaccess, nachdem die Datei in einem lokalen Editor als Latin-1 angezeigt wurde.

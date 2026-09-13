@@ -1,4 +1,4 @@
-# Timo Müller | Asset Management & Portfoliooptimierung
+﻿# Timo Müller | Asset Management & Portfoliooptimierung
 
 > Persönliches Beratungsangebot von Timo Müller für Eigentümer, Investoren und Bestandshalter von Immobilienportfolios in Deutschland. Betreiber: Hausverwaltung Müller GmbH, Monheim am Rhein. Kontakt: timo@muellerhv.de.
 
@@ -7,6 +7,7 @@ Timo Müller ist Vorstand der Müller Holding AG, Geschäftsführer der Hausverw
 ## Kernseiten
 
 - [Kurzfakten](https://timo.muellerhv.de/kurzfakten/): Wer, Was, Für wen, Wie, Was nicht, Begriffe, Betreiber, zitierfähig
+- [Facts (English)](https://timo.muellerhv.de/facts/): the same summary in English
 - [Startseite](https://timo.muellerhv.de/): Positionierung, drei Mandatsformen, Arbeitsweise
 - [Asset-Management-Beratung](https://timo.muellerhv.de/asset-management-beratung/): Mandatsformen Portfolio-Check, Umsetzungsbegleitung, Sparring
 - [Portfoliooptimierung](https://timo.muellerhv.de/portfoliooptimierung/): Leerstand, Forderungen, Kosten, Investitionen, Liquidität

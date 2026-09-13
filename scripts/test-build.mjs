@@ -20,11 +20,11 @@ const info = (m) => console.log('INFO  ', m);
 const TITLE_MAX = 65;
 const DESC_MAX = 160;
 
-/* Die 16 indexierbaren Routen (Inhaltsplan 2). /einblicke/ ist nur mit mindestens einem freigegebenen Beitrag indexierbar. */
+/* Die 17 indexierbaren Routen (Inhaltsplan 2). /einblicke/ ist nur mit mindestens einem freigegebenen Beitrag indexierbar. */
 const ROUTEN_INDEX = [
   '/', '/asset-management-beratung/', '/portfoliooptimierung/', '/property-management-optimierung/',
   '/ki-immobilienmanagement/', '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/',
-  '/zusammenarbeit/', '/glossar/', '/kurzfakten/', '/profil/', '/kontakt/', '/impressum/', '/datenschutz/',
+  '/zusammenarbeit/', '/glossar/', '/kurzfakten/', '/facts/', '/profil/', '/kontakt/', '/impressum/', '/datenschutz/',
 ];
 const ROUTE_EINBLICKE = '/einblicke/';
 
@@ -107,7 +107,8 @@ for (const f of html) {
   else if (!canon.startsWith(site + '/')) err(`${route}: Canonical ${canon} nicht selbstreferenzierend/absolut`);
   else if (canon !== site + route) err(`${route}: Canonical ${canon} weicht ab`);
   if (!ist404 && !/property="og:url" content="([^"]*)"/.test(s)) err(`${route}: og:url fehlt`);
-  if (!/lang="de"/.test(s)) err(`${route}: lang fehlt`);
+  if (!/<html lang="(de|en)"/.test(s)) err(`${route}: lang fehlt`);
+  if (route === '/facts/' && !/<html lang="en"/.test(s)) err(`${route}: lang muss en sein`);
   if (/[\u2013\u2014]/.test(decode(ohneSkripte))) err(`${route}: Gedankenstrich im Text`);
   if (!/application\/ld\+json/.test(s)) err(`${route}: kein JSON-LD`);
   try {

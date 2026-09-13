@@ -1,0 +1,175 @@
+---
+/**
+ * Facts: English counterpart of /kurzfakten/ for international readers and for summaries by search engines and
+ * AI systems. The rest of the website is German; this page says so. Same fact rules as /kurzfakten/: only statements
+ * from docs/FAKTENLISTE.md Nr. 1 to 11 and existing pages, no figures, no references, no years. Keep both pages in sync.
+ */
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Hero from '../components/Hero.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import { breadcrumbLd, faqLd, absolute, ID, type Crumb } from '../lib/seo';
+import { OPERATOR, PERSON, SITE } from '../data/site';
+
+const path = '/facts/';
+const title = 'Facts: Timo Müller and this advisory offering';
+const description = 'Who Timo Müller is, what he advises on, for whom, how he works and what he does not offer. The essential statements of this website in English, quotable.';
+const STAND = '13.09.2026';
+const STAND_ISO = '2026-09-13';
+const crumbs: Crumb[] = [{ name: 'Facts', href: path }];
+
+interface Row { t: string; d: string; href?: string }
+
+const who: string[] = [
+  `${PERSON.name} is an entrepreneur and advisor for asset management and portfolio optimisation of residential real estate portfolios.`,
+  'He is a member of the management board (Vorstand) of Müller Holding AG, managing director of Hausverwaltung Müller GmbH and managing director of further companies.',
+  'He owns a real estate portfolio of his own and makes decisions on acquisition, maintenance, financing and letting with his own capital.',
+  'His operational network has ties to carpentry, window and facade element construction, and heating and plumbing trades.',
+  'He develops AI and automation as an additional entrepreneurial lever for better data, processes and decisions.',
+  `Based in ${OPERATOR.plzOrt}, Germany. Target market: Germany.`,
+];
+
+const what: Row[] = [
+  { t: 'Portfolio review and action plan', d: 'Structured assessment of economic performance, vacancy, receivables, maintenance, data quality and responsibilities. Result: prioritised fields of action and an action plan with clear ownership.', href: '/asset-management-beratung/#portfolio-check' },
+  { t: 'Portfolio optimisation and implementation support', d: 'Revision of asset strategies, processes, investment priorities, contractor management and reporting. Result: agreed measures, clear steering and documented progress.', href: '/portfoliooptimierung/' },
+  { t: 'Ongoing sparring for owners and executive management', d: 'Regular exchange on portfolio strategy, investment decisions, financing questions and operational bottlenecks. Result: prepared decisions, a critical second opinion and consistent follow-up.', href: '/asset-management-beratung/#sparring' },
+];
+
+const deepDives: Row[] = [
+  { t: 'Property management optimisation', d: 'Responsibilities, the interface between owner and property manager, contractors, data quality, key figures.', href: '/property-management-optimierung/' },
+  { t: 'Investment prioritisation', d: 'Ordering maintenance and capital expenditure by urgency, impact and technical dependency.', href: '/investitionspriorisierung/' },
+  { t: 'Contractor management', d: 'Specification, award, change orders, acceptance, invoice verification.', href: '/dienstleistersteuerung/' },
+  { t: 'Reporting and key figures', d: 'Few key figures that answer owner questions and trigger decisions.', href: '/reporting-und-kennzahlen/' },
+  { t: 'AI in real estate management', d: 'Document review, case handling, data checks, report drafts, always with human sign-off.', href: '/ki-immobilienmanagement/' },
+];
+
+const forWhom: string[] = [
+  'Owners and holders of residential real estate portfolios in Germany',
+  'Executive management and boards of portfolio holders',
+  'Heads of asset management and portfolio management',
+  'Family offices and institutional portfolio holders',
+  'Teams responsible for real estate funds',
+];
+
+const how: Row[] = [
+  { t: 'Understand the portfolio', d: 'Review figures, contracts, properties and responsibilities. Name data gaps instead of glossing over them.' },
+  { t: 'Set priorities', d: 'Rank fields of action by impact, effort and risk. Decide together what comes first.' },
+  { t: 'Organise implementation', d: 'Assign owners, budgets and deadlines to each measure. Involve property managers and contractors.' },
+  { t: 'Track progress', d: 'Review progress and impact regularly, explain deviations, adjust course.' },
+];
+
+const not: string[] = [
+  'No day-to-day property management within an advisory mandate. The property management services of Hausverwaltung Müller GmbH are described at muellerhv.de.',
+  'No fund management, no investment brokerage, no licensed financial services, no financing brokerage.',
+  'No legal or tax advice. These topics are coordinated with the client’s own advisors.',
+  'No corporate officer or advisory board role. The advice is personal and commissioned on its own.',
+  'No guaranteed results, no return promises. Measures are assessed by effort, risk and expected impact.',
+  'No automated payment or investment decisions by AI. AI prepares, people decide.',
+  'No published references or client cases. Scenarios on this website are schematic descriptions of the approach.',
+];
+
+const terms: Row[] = [
+  { t: 'Asset management', d: 'Economic steering of a real estate portfolio from the owner’s perspective: asset strategies, investments, letting strategy, financing questions, tracking against targets.', href: '/glossar/#asset-management' },
+  { t: 'Property management', d: 'Operational administration of the portfolio in daily business: tenant relations, accounting, maintenance, contractors. The level at which strategies are implemented.', href: '/glossar/#property-management' },
+  { t: 'Portfolio optimisation', d: 'Concrete economic and operational improvement of a portfolio: securing income, reducing costs and losses, prioritising investments, keeping liquidity in view.', href: '/glossar/#portfoliooptimierung' },
+  { t: 'CAPEX and OPEX', d: 'CAPEX is investment in the building substance, OPEX the running operating and administrative costs. Both are planned separately and viewed together in liquidity planning.', href: '/glossar/#capex' },
+  { t: 'Mandate', d: 'The agreed advisory engagement with a defined scope. Contacting via this website does not create a mandate.', href: '/glossar/#mandat' },
+];
+
+const faq: FaqItem[] = [
+  { q: 'Who is Timo Müller?', a: 'Timo Müller is an entrepreneur and advisor for asset management and portfolio optimisation. He is a member of the management board of Müller Holding AG, managing director of Hausverwaltung Müller GmbH and further companies, and owns a real estate portfolio of his own.' },
+  { q: 'What does timo.muellerhv.de offer?', a: 'Advisory services for owners and holders of real estate portfolios in three forms of mandate: portfolio review with action plan, portfolio optimisation with implementation support, and ongoing sparring for owners and executive management.' },
+  { q: 'Who is the advice for?', a: 'Owners, executive management, heads of asset and portfolio management, family offices, institutional portfolio holders and fund teams, primarily with larger residential portfolios in Germany. Smaller portfolios that fit the subject matter are welcome.' },
+  { q: 'Is timo.muellerhv.de a property management company?', a: 'No. The website is the personal advisory offering of Timo Müller for asset management and portfolio optimisation. It is operated by Hausverwaltung Müller GmbH, whose property management services are described at muellerhv.de.' },
+  { q: 'How can Timo Müller be reached?', a: `Directly by e-mail at ${SITE.email} or via the contact form at timo.muellerhv.de/kontakt/. Getting in touch is non-binding and does not create an advisory contract. Correspondence in German or English.` },
+];
+
+const ld = [
+  breadcrumbLd(crumbs),
+  {
+    '@type': 'AboutPage', '@id': `${absolute(path)}#aboutpage`, url: absolute(path), name: title, description,
+    inLanguage: 'en', dateModified: STAND_ISO, mainEntity: { '@id': ID.person }, about: [{ '@id': ID.person }, { '@id': ID.org }], isPartOf: { '@id': ID.website },
+  },
+  faqLd(faq),
+];
+---
+<Base title={title} description={description} path={path} ld={ld} lang="en" alternates={[{ lang: 'de', path: '/kurzfakten/' }]}>
+  <Breadcrumb crumbs={crumbs} />
+  <Hero
+    eyebrow="Facts"
+    title="Facts about Timo Müller and this advisory offering"
+    frage="The essential statements of this website on one page, concise and quotable."
+    lead="This page is the English summary. All other pages of this website are in German. Every statement here is set out in detail on a page of this website and linked there."
+  />
+
+  <div class="section kapitel-folge">
+    <div class="container">
+      <section class="kapitel" id="who">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">01</span><h2>Who</h2></div>
+        <div class="kapitel__text">
+          <ul class="checklist" role="list">{who.map((s) => <li>{s}</li>)}</ul>
+          <p><a class="textlink" href="/profil/" hreflang="de">Profile (German)</a></p>
+        </div>
+      </section>
+      <section class="kapitel" id="what">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">02</span><h2>What</h2></div>
+        <div class="kapitel__text">
+          <p>Asset management advice for real estate portfolios in three forms of mandate. The focus is economic steering; property management is the operational interface, AI a supporting tool.</p>
+          <dl class="fakten-dl">{what.map((z) => (<><dt><a href={z.href} hreflang="de">{z.t}</a></dt><dd>{z.d}</dd></>))}</dl>
+          <h3>Deep dives</h3>
+          <dl class="fakten-dl">{deepDives.map((z) => (<><dt><a href={z.href} hreflang="de">{z.t}</a></dt><dd>{z.d}</dd></>))}</dl>
+        </div>
+      </section>
+      <section class="kapitel" id="for-whom">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">03</span><h2>For whom</h2></div>
+        <div class="kapitel__text">
+          <ul class="checklist" role="list">{forWhom.map((s) => <li>{s}</li>)}</ul>
+          <p>The focus is on larger residential portfolios in Germany. Smaller portfolios that fit the subject matter are welcome. Portfolio size is not an entry requirement.</p>
+        </div>
+      </section>
+      <section class="kapitel" id="how">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">04</span><h2>How</h2></div>
+        <div class="kapitel__text">
+          <dl class="fakten-dl">{how.map((z) => (<><dt>{z.t}</dt><dd>{z.d}</dd></>))}</dl>
+          <p>Duration and depth depend on the portfolio, the data situation and the objective. Confidentiality is agreed in writing before any data is exchanged. Affiliated companies and possible economic interests are disclosed before a recommendation is made.</p>
+          <p><a class="textlink" href="/zusammenarbeit/" hreflang="de">How a mandate proceeds (German)</a></p>
+        </div>
+      </section>
+      <section class="kapitel" id="what-not">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">05</span><h2>What not</h2></div>
+        <div class="kapitel__text"><ul class="checklist" role="list">{not.map((s) => <li>{s}</li>)}</ul></div>
+      </section>
+      <section class="kapitel" id="terms">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">06</span><h2>Terms</h2></div>
+        <div class="kapitel__text">
+          <dl class="fakten-dl">{terms.map((z) => (<><dt><a href={z.href} hreflang="de">{z.t}</a></dt><dd>{z.d}</dd></>))}</dl>
+          <p><a class="textlink" href="/glossar/" hreflang="de">Glossary (German)</a></p>
+        </div>
+      </section>
+      <section class="kapitel" id="operator">
+        <div class="kapitel__kopf sticky-rand"><span class="kapitel__nr" aria-hidden="true">07</span><h2>Operator and contact</h2></div>
+        <div class="kapitel__text">
+          <dl class="fakten-dl">
+            <dt>Website</dt><dd>timo.muellerhv.de, the personal advisory offering of {PERSON.name}</dd>
+            <dt>Operator</dt><dd>{OPERATOR.firma}, {OPERATOR.coName}, {OPERATOR.strasse}, {OPERATOR.plzOrt}, Germany. Commercial register: {OPERATOR.registergericht}, {OPERATOR.hrb}. Managing director: {OPERATOR.vertretenDurch}</dd>
+            <dt>Contact</dt><dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a> or <a href="/kontakt/" hreflang="de">contact form</a>. Getting in touch is non-binding and does not create an advisory contract.</dd>
+            <dt>Property management</dt><dd>Day-to-day management of condominium associations and rental properties is the business of <a href={OPERATOR.website} rel="noopener">www.muellerhv.de</a>, not of this website.</dd>
+            <dt>German version</dt><dd><a href="/kurzfakten/" hreflang="de">Kurzfakten (Deutsch)</a>. In case of doubt the German version and the legal notice (Impressum) prevail.</dd>
+            <dt>Last updated</dt><dd>{STAND}. This page is updated when statements change.</dd>
+          </dl>
+          <p class="note">When citing: source timo.muellerhv.de/facts/, last updated {STAND}. The legal notice and the linked German pages are authoritative.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <Faq items={faq} title="Five questions, briefly answered" />
+</Base>
+
+<style>
+  .fakten-dl { margin: var(--s-4) 0 var(--s-5); border-top: var(--rule); }
+  .fakten-dl dt { font-weight: 600; padding-top: var(--s-3); }
+  .fakten-dl dd { margin: var(--s-1) 0 0; padding-bottom: var(--s-3); border-bottom: var(--rule); color: var(--c-text-2); }
+  .kapitel__text h3 { font-size: 1.1rem; margin-top: var(--s-5); margin-bottom: 0; }
+  .kapitel__text .checklist li { margin-top: var(--s-2); }
+</style>

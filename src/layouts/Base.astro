@@ -18,8 +18,14 @@ interface Props {
   /** Zusaetzliche JSON-LD-Knoten (ohne @context), werden in einen @graph gelegt. */
   ld?: Record<string, unknown>[];
   ogType?: 'website' | 'article' | 'profile';
+  /** Seitensprache, Standard de. Nur /facts/ ist englisch. */
+  lang?: 'de' | 'en';
+  /** Sprachalternativen fuer hreflang, z. B. [{ lang: 'en', path: '/facts/' }] (die eigene Seite wird automatisch ergaenzt) */
+  alternates?: { lang: 'de' | 'en'; path: string }[];
 }
-const { title, description, path, noindex = false, follow = false, ohneCanonical = false, ld = [], ogType = 'website' } = Astro.props;
+const { title, description, path, noindex = false, follow = false, ohneCanonical = false, ld = [], ogType = 'website', lang = 'de', alternates = [] } = Astro.props;
+const locale = lang === 'en' ? 'en_US' : SITE.locale;
+const hreflang = alternates.length ? [{ lang, path }, ...alternates] : [];
 const canonical = absolute(path);
 const robots = SITE.noindex ? 'noindex, nofollow' : noindex ? (follow ? 'noindex, follow' : 'noindex, nofollow') : 'index, follow';
 const graph = { '@context': 'https://schema.org', '@graph': [websiteLd(), orgLd(), personLd(), ...ld] };
@@ -28,7 +34,7 @@ const graph = { '@context': 'https://schema.org', '@graph': [websiteLd(), orgLd(
    Die CSP in public/.htaccess erlaubt script-src 'unsafe-inline'. */
 ---
 <!doctype html>
-<html lang="de" class="no-js">
+<html lang={lang} class="no-js">
   <head>
     <meta charset="utf-8" />
     <script is:inline>document.documentElement.classList.remove('no-js')</script>
@@ -41,7 +47,9 @@ const graph = { '@context': 'https://schema.org', '@graph': [websiteLd(), orgLd(
     <meta name="color-scheme" content="light" />
     <meta name="theme-color" content="#ffffff" />
     <meta property="og:type" content={ogType} />
-    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:locale" content={locale} />
+    {hreflang.map((h) => <link rel="alternate" hreflang={h.lang} href={absolute(h.path)} />)}
+    {hreflang.length > 0 && <link rel="alternate" hreflang="x-default" href={absolute(hreflang.find((h) => h.lang === "de")?.path ?? path)} />}
     <meta property="og:site_name" content={`${SITE.name} | ${SITE.claim}`} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
