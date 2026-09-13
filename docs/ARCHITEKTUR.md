@@ -37,6 +37,7 @@ Offen: Die tatsächlichen Hostingfähigkeiten (Apache mit mod_rewrite/mod_header
 | /reporting-und-kennzahlen/ | Vertiefung | Eigentümerreporting: fünf Fragen, Kennzahlenset nach Ebenen ohne Zielwerte, Kennzahlensteckbrief, Berichtsaufbau, Szenario | Fachseite mit Slots | ja |
 | /zusammenarbeit/ | Ablauf und Interessen | Ablauf in sechs Schritten, Vorbereitung, Rollen, Datenbedarf, Vertraulichkeit, Angebot, Interessenoffenlegung (#interessen), Mandatsende, FAQ | Base (eigener Aufbau, Cta ohne Ablaufzeile) | ja |
 | /glossar/ | Begriffe | Begriffe der Website in sieben Themenblöcken mit Ankernavigation, Verweis auf den Heimatort je Begriff | Base | ja |
+| /kurzfakten/ | Zitierfähige Kurzfakten: Wer, Was, Für wen, Wie, Was nicht, Begriffe, Betreiber; AboutPage und FAQPage | ja | Kurzfakten |
 | /profil/ | Person | Person, Haltung, Funktionen, Arbeitsprinzipien, Kurzprofil zum Weitergeben (#kurzprofil), Fragen an mich, Timeline nur mit freigegebenen Stationen | Base | ja |
 | /einblicke/ | Beitragsübersicht | Veröffentlichte Beiträge, Redaktionsgrundsätze (#redaktionsgrundsaetze), Glossar-Link | Base | nur mit mindestens einem freigegebenen Beitrag, sonst noindex und nicht in der Sitemap |
 | /einblicke/[slug]/ | Beitrag | Fachbeitrag mit Autorenkasten, Begriffen und verwandten Beiträgen; nur `status: freigegeben` | Base | ja |
@@ -86,3 +87,6 @@ Warum kein CSRF-Token: Die Seiten sind statisch und cachebar, ein pro Sitzung ge
 
 ## Design-System
 Siehe docs/DESIGN-SYSTEM.md (Zusammenfassung des umgesetzten Stands) und docs/DESIGN-SPEC-V2.md (verbindliche Spezifikation).
+
+
+Zusätzlich liefert `public/llms.txt` eine maschinenlesbare Übersicht der Kernseiten (Konvention, ohne Garantie). Bei neuen Seiten dort ergänzen.

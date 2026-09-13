@@ -20,11 +20,11 @@ const info = (m) => console.log('INFO  ', m);
 const TITLE_MAX = 65;
 const DESC_MAX = 160;
 
-/* Die 15 indexierbaren Routen (Inhaltsplan 2). /einblicke/ ist nur mit mindestens einem freigegebenen Beitrag indexierbar. */
+/* Die 16 indexierbaren Routen (Inhaltsplan 2). /einblicke/ ist nur mit mindestens einem freigegebenen Beitrag indexierbar. */
 const ROUTEN_INDEX = [
   '/', '/asset-management-beratung/', '/portfoliooptimierung/', '/property-management-optimierung/',
   '/ki-immobilienmanagement/', '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/',
-  '/zusammenarbeit/', '/glossar/', '/profil/', '/kontakt/', '/impressum/', '/datenschutz/',
+  '/zusammenarbeit/', '/glossar/', '/kurzfakten/', '/profil/', '/kontakt/', '/impressum/', '/datenschutz/',
 ];
 const ROUTE_EINBLICKE = '/einblicke/';
 

@@ -1,0 +1,226 @@
+---
+/**
+ * Kurzfakten: die wesentlichen Aussagen der Website an einer Stelle, knapp, eindeutig und zitierfaehig.
+ * Zweck: schnelle Orientierung fuer Besucher, Weitergabe durch Empfehler und eine konsistente Referenz fuer
+ * Zusammenfassungen durch Suchmaschinen und KI-Systeme (Masterprompt Abschnitt 10: zugaengliche Inhalte, klare
+ * Autorenschaft, praezise Antworten, belegbare Aussagen; keine Spezialdatei, keine Sichtbarkeitsgarantie).
+ * Faktenregel: ausschliesslich Aussagen aus docs/FAKTENLISTE.md (Nr. 1 bis 11) und aus bestehenden Seiten.
+ * Keine Zahlen, keine Referenzen, keine Jahreszahlen. Stand-Datum manuell pflegen, wenn sich Aussagen aendern.
+ */
+import Base from '../layouts/Base.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Hero from '../components/Hero.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import Cta from '../components/Cta.astro';
+import { breadcrumbLd, faqLd, absolute, ID, type Crumb } from '../lib/seo';
+import { OPERATOR, PERSON, SITE } from '../data/site';
+
+const path = '/kurzfakten/';
+const title = 'Kurzfakten: Timo Müller und dieses Beratungsangebot';
+const description = 'Wer Timo Müller ist, was er berät, für wen, wie er arbeitet und was er nicht anbietet. Die wesentlichen Aussagen dieser Website an einer Stelle, zitierfähig.';
+const STAND = '13.09.2026';            // echtes Aenderungsdatum dieser Seite, bei Textaenderungen anpassen
+const STAND_ISO = '2026-09-13';
+
+const crumbs: Crumb[] = [{ name: 'Kurzfakten', href: path }];
+
+interface Zeile { t: string; d: string; href?: string }
+
+const wer: string[] = [
+  `${PERSON.name} ist Unternehmer und Berater für Asset Management und Portfoliooptimierung von Immobilienbeständen.`,
+  'Er ist Vorstand der Müller Holding AG, Geschäftsführer der Hausverwaltung Müller GmbH und Geschäftsführer weiterer Unternehmen.',
+  'Er hält einen eigenen Immobilienbestand und trifft Entscheidungen über Ankauf, Instandhaltung, Finanzierung und Vermietung mit eigenem Kapital.',
+  'Sein operatives Netzwerk hat Bezüge zu Schreinerei, Fenster- und Elementebau sowie Heizung und Sanitär.',
+  'KI und Automatisierung entwickelt er als zusätzlichen unternehmerischen Hebel für bessere Daten, Abläufe und Entscheidungen.',
+  `Sitz des Angebots: ${OPERATOR.plzOrt}. Zielmarkt: Deutschland.`,
+];
+
+const was: Zeile[] = [
+  { t: 'Portfolio-Check und Maßnahmenplan', d: 'Strukturierte Bestandsaufnahme von wirtschaftlicher Entwicklung, Leerstand, Forderungen, Instandhaltung, Datenqualität und Zuständigkeiten. Ergebnis: priorisierte Handlungsfelder und ein Maßnahmenplan mit Verantwortlichkeiten.', href: '/asset-management-beratung/#portfolio-check' },
+  { t: 'Portfoliooptimierung und Umsetzungsbegleitung', d: 'Überarbeitung von Objektstrategien, Abläufen, Investitionsprioritäten, Dienstleistersteuerung und Reporting. Ergebnis: abgestimmte Maßnahmen, klare Steuerung und dokumentierter Fortschritt.', href: '/portfoliooptimierung/' },
+  { t: 'Laufendes Sparring für Eigentümer und Geschäftsleitungen', d: 'Regelmäßiger Austausch zu Portfoliostrategie, Investitionsentscheidungen, Finanzierungsfragen und operativen Engpässen. Ergebnis: vorbereitete Entscheidungen, kritische Zweitmeinung und konsequente Nachverfolgung.', href: '/asset-management-beratung/#sparring' },
+];
+
+const vertiefungen: Zeile[] = [
+  { t: 'Property-Management-Optimierung', d: 'Zuständigkeiten, Schnittstelle Eigentümer und Verwaltung, Dienstleister, Datenqualität, Kennzahlen.', href: '/property-management-optimierung/' },
+  { t: 'Investitionspriorisierung', d: 'Instandhaltung und Investitionen nach Dringlichkeit, Wirkung und Abhängigkeit ordnen.', href: '/investitionspriorisierung/' },
+  { t: 'Dienstleistersteuerung', d: 'Leistungsbeschreibung, Vergabe, Nachtrag, Abnahme, Rechnungsprüfung.', href: '/dienstleistersteuerung/' },
+  { t: 'Reporting und Kennzahlen', d: 'Wenige Kennzahlen, die Eigentümerfragen beantworten und Entscheidungen auslösen.', href: '/reporting-und-kennzahlen/' },
+  { t: 'KI im Immobilienmanagement', d: 'Dokumentensichtung, Vorgangsbearbeitung, Datenprüfung, Berichtsentwürfe, mit menschlicher Freigabe.', href: '/ki-immobilienmanagement/' },
+];
+
+const fuerWen: string[] = [
+  'Eigentümer und Bestandshalter von Wohnimmobilienportfolios in Deutschland',
+  'Geschäftsführungen und Vorstände von Bestandshaltern',
+  'Verantwortliche für Asset Management und Portfolio Management',
+  'Family Offices und institutionelle Bestandshalter',
+  'Verantwortliche Teams von Immobilienfonds',
+];
+
+const wie: Zeile[] = [
+  { t: 'Bestand verstehen', d: 'Zahlen, Verträge, Objekte und Zuständigkeiten sichten. Datenlücken benennen statt überspielen.' },
+  { t: 'Prioritäten festlegen', d: 'Handlungsfelder nach Wirkung, Aufwand und Risiko ordnen. Gemeinsam entscheiden, was zuerst kommt.' },
+  { t: 'Umsetzung organisieren', d: 'Maßnahmen mit Verantwortlichen, Budget und Terminen hinterlegen. Dienstleister und Verwaltung einbinden.' },
+  { t: 'Entwicklung nachhalten', d: 'Fortschritt und Wirkung regelmäßig prüfen, Abweichungen erklären und nachsteuern.' },
+];
+
+const nicht: string[] = [
+  'Keine laufende Hausverwaltung im Beratungsmandat. Das Verwaltungsangebot der Hausverwaltung Müller GmbH finden Sie auf muellerhv.de.',
+  'Keine Fondsverwaltung, keine Anlagevermittlung, keine erlaubnispflichtige Finanzdienstleistung, keine Finanzierungsvermittlung.',
+  'Keine Rechts- oder Steuerberatung. Diese Themen werden mit den Beratern des Auftraggebers abgestimmt.',
+  'Keine Organ- oder Beiratsfunktion. Die Beratung ist persönlich und eigenständig beauftragbar.',
+  'Keine Ergebniszusagen, keine Renditeversprechen. Maßnahmen werden nach Aufwand, Risiko und erwarteter Wirkung bewertet.',
+  'Keine automatischen Zahlungs- oder Investitionsentscheidungen durch KI. KI bereitet vor, Menschen entscheiden.',
+  'Keine veröffentlichten Referenzen oder Kundenfälle. Szenarien auf dieser Website sind schematische Vorgehensbeschreibungen.',
+];
+
+const begriffe: Zeile[] = [
+  { t: 'Asset Management', d: 'Wirtschaftliche Steuerung eines Immobilienbestands aus Eigentümersicht: Objektstrategien, Investitionen, Vermietungsstrategie, Finanzierungsfragen, Zielverfolgung.', href: '/glossar/#asset-management' },
+  { t: 'Property Management', d: 'Operative Verwaltung des Bestands im Tagesgeschäft: Mieterbetreuung, Abrechnung, Instandhaltung, Dienstleister. Die Ebene, auf der Strategien umgesetzt werden.', href: '/glossar/#property-management' },
+  { t: 'Portfoliooptimierung', d: 'Konkrete wirtschaftliche und operative Verbesserung eines Bestands: Erträge sichern, Kosten und Ausfälle senken, Investitionen priorisieren, Liquidität im Blick behalten.', href: '/glossar/#portfoliooptimierung' },
+  { t: 'CAPEX und OPEX', d: 'CAPEX sind Investitionen in die Substanz, OPEX die laufenden Betriebs- und Verwaltungskosten. Beide werden getrennt geplant und gemeinsam in der Liquidität betrachtet.', href: '/glossar/#capex' },
+  { t: 'Mandat', d: 'Der vereinbarte Beratungsauftrag mit festgelegtem Leistungsumfang. Die Kontaktaufnahme über diese Website begründet kein Mandat.', href: '/glossar/#mandat' },
+];
+
+const faq: FaqItem[] = [
+  { q: 'Wer ist Timo Müller?', a: 'Timo Müller ist Unternehmer und Berater für Asset Management und Portfoliooptimierung. Er ist Vorstand der Müller Holding AG, Geschäftsführer der Hausverwaltung Müller GmbH und weiterer Unternehmen und hält einen eigenen Immobilienbestand.' },
+  { q: 'Was bietet timo.muellerhv.de an?', a: 'Beratung für Eigentümer und Bestandshalter von Immobilienportfolios in drei Mandatsformen: Portfolio-Check mit Maßnahmenplan, Portfoliooptimierung mit Umsetzungsbegleitung und laufendes Sparring für Eigentümer und Geschäftsleitungen.' },
+  { q: 'Für wen ist die Beratung gedacht?', a: 'Für Eigentümer, Geschäftsführungen, Asset- und Portfolio-Management-Verantwortliche, Family Offices, institutionelle Bestandshalter und Fondsteams, im Schwerpunkt mit größeren Wohnimmobilienbeständen in Deutschland. Fachlich passende kleinere Portfolios sind willkommen.' },
+  { q: 'Ist timo.muellerhv.de eine Hausverwaltung?', a: 'Nein. Die Website ist das persönliche Beratungsangebot von Timo Müller für Asset Management und Portfoliooptimierung. Betreiber ist die Hausverwaltung Müller GmbH, deren Verwaltungsangebot auf muellerhv.de steht.' },
+  { q: 'Wie erreicht man Timo Müller?', a: `Direkt per E-Mail an ${SITE.email} oder über das Kontaktformular unter timo.muellerhv.de/kontakt/. Die Kontaktaufnahme ist unverbindlich und begründet keinen Beratungsvertrag.` },
+];
+
+const ld = [
+  breadcrumbLd(crumbs),
+  {
+    '@type': 'AboutPage',
+    '@id': `${absolute(path)}#aboutpage`,
+    url: absolute(path),
+    name: title,
+    description,
+    inLanguage: 'de',
+    dateModified: STAND_ISO,
+    mainEntity: { '@id': ID.person },
+    about: [{ '@id': ID.person }, { '@id': ID.org }],
+    isPartOf: { '@id': ID.website },
+  },
+  faqLd(faq),
+];
+---
+<Base title={title} description={description} path={path} ld={ld}>
+  <Breadcrumb crumbs={crumbs} />
+  <Hero
+    eyebrow="Kurzfakten"
+    title="Kurzfakten zu Timo Müller und diesem Angebot"
+    frage="Die wesentlichen Aussagen dieser Website an einer Stelle, knapp und zitierfähig."
+    lead="Für Leser, die sich schnell orientieren wollen, für Empfehler, die das Angebot weitergeben, und als verlässliche Referenz für Zusammenfassungen. Jede Aussage hier steht ausgeführt auf einer Seite dieser Website und ist dort verlinkt."
+  />
+
+  <div class="section kapitel-folge">
+    <div class="container">
+      <section class="kapitel" id="wer">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">01</span>
+          <h2>Wer</h2>
+        </div>
+        <div class="kapitel__text">
+          <ul class="checklist" role="list">{wer.map((s) => <li>{s}</li>)}</ul>
+          <p><a class="textlink" href="/profil/">Zum Profil</a></p>
+        </div>
+      </section>
+
+      <section class="kapitel" id="was">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">02</span>
+          <h2>Was</h2>
+        </div>
+        <div class="kapitel__text">
+          <p>Asset-Management-Beratung für Immobilienportfolios in drei Mandatsformen. Der Schwerpunkt liegt auf der wirtschaftlichen Steuerung; Property Management ist die operative Schnittstelle, KI ein ergänzendes Werkzeug.</p>
+          <dl class="fakten-dl">
+            {was.map((z) => (<><dt><a href={z.href}>{z.t}</a></dt><dd>{z.d}</dd></>))}
+          </dl>
+          <h3>Vertiefungen</h3>
+          <dl class="fakten-dl">
+            {vertiefungen.map((z) => (<><dt><a href={z.href}>{z.t}</a></dt><dd>{z.d}</dd></>))}
+          </dl>
+        </div>
+      </section>
+
+      <section class="kapitel" id="fuer-wen">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">03</span>
+          <h2>Für wen</h2>
+        </div>
+        <div class="kapitel__text">
+          <ul class="checklist" role="list">{fuerWen.map((s) => <li>{s}</li>)}</ul>
+          <p>Schwerpunkt sind größere Wohnimmobilienbestände in Deutschland. Fachlich passende kleinere Portfolios sind willkommen. Eine Bestandsgröße ist keine Zugangsvoraussetzung.</p>
+          <p><a class="textlink" href="/asset-management-beratung/#selbstpruefung">Passt mein Bestand? Fünf Fragen zur Selbstprüfung</a></p>
+        </div>
+      </section>
+
+      <section class="kapitel" id="wie">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">04</span>
+          <h2>Wie</h2>
+        </div>
+        <div class="kapitel__text">
+          <dl class="fakten-dl">
+            {wie.map((z) => (<><dt>{z.t}</dt><dd>{z.d}</dd></>))}
+          </dl>
+          <p>Dauer und Tiefe hängen von Portfolio, Datenlage und Zielsetzung ab. Vertraulichkeit wird vor jedem Datenaustausch schriftlich vereinbart. Verbundene Unternehmen und mögliche wirtschaftliche Interessen werden vor einer Empfehlung offengelegt.</p>
+          <p><a class="textlink" href="/zusammenarbeit/">Ablauf einer Zusammenarbeit</a></p>
+        </div>
+      </section>
+
+      <section class="kapitel" id="was-nicht">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">05</span>
+          <h2>Was nicht</h2>
+        </div>
+        <div class="kapitel__text">
+          <ul class="checklist" role="list">{nicht.map((s) => <li>{s}</li>)}</ul>
+        </div>
+      </section>
+
+      <section class="kapitel" id="begriffe">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">06</span>
+          <h2>Begriffe</h2>
+        </div>
+        <div class="kapitel__text">
+          <dl class="fakten-dl">
+            {begriffe.map((z) => (<><dt><a href={z.href}>{z.t}</a></dt><dd>{z.d}</dd></>))}
+          </dl>
+          <p><a class="textlink" href="/glossar/">Alle Begriffe im Glossar</a></p>
+        </div>
+      </section>
+
+      <section class="kapitel" id="betreiber">
+        <div class="kapitel__kopf sticky-rand">
+          <span class="kapitel__nr" aria-hidden="true">07</span>
+          <h2>Betreiber und Kontakt</h2>
+        </div>
+        <div class="kapitel__text">
+          <dl class="fakten-dl">
+            <dt>Website</dt><dd>timo.muellerhv.de, persönliches Beratungsangebot von {PERSON.name}</dd>
+            <dt>Betreiber</dt><dd>{OPERATOR.firma}, {OPERATOR.coName}, {OPERATOR.strasse}, {OPERATOR.plzOrt}, {OPERATOR.registergericht}, {OPERATOR.hrb}, {OPERATOR.funktion}: {OPERATOR.vertretenDurch}</dd>
+            <dt>Kontakt</dt><dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a> oder <a href="/kontakt/">Kontaktformular</a>. Die Kontaktaufnahme ist unverbindlich und begründet keinen Beratungsvertrag.</dd>
+            <dt>Verwaltungsangebot</dt><dd>Die laufende Verwaltung von Wohnungseigentümergemeinschaften und Mietobjekten ist Gegenstand von <a href={OPERATOR.website} rel="noopener">www.muellerhv.de</a>, nicht dieser Website.</dd>
+            <dt>Stand</dt><dd>{STAND}. Diese Seite wird angepasst, wenn sich Aussagen ändern.</dd>
+          </dl>
+          <p class="note">Zitierhinweis: Bei Verweisen auf diese Angaben bitte die Quelle timo.muellerhv.de/kurzfakten/ mit Stand {STAND} nennen. Verbindlich sind Impressum und die jeweils verlinkte Seite.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <Faq items={faq} title="Fünf Fragen, kurz beantwortet" />
+  <Cta />
+</Base>
+
+<style>
+  .fakten-dl { margin: var(--s-4) 0 var(--s-5); border-top: var(--rule); }
+  .fakten-dl dt { font-weight: 600; padding-top: var(--s-3); }
+  .fakten-dl dd { margin: var(--s-1) 0 0; padding-bottom: var(--s-3); border-bottom: var(--rule); color: var(--c-text-2); }
+  .kapitel__text h3 { font-size: 1.1rem; margin-top: var(--s-5); margin-bottom: 0; }
+  .kapitel__text .checklist li { margin-top: var(--s-2); }
+</style>

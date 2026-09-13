@@ -106,6 +106,7 @@ export const CTA = { label: 'Portfolio besprechen', href: '/kontakt/' } as const
 export const WEITERE_SEITEN = [
   { label: 'Einblicke', href: '/einblicke/' },
   { label: 'Glossar', href: '/glossar/' },
+  { label: 'Kurzfakten', href: '/kurzfakten/' },
   { label: 'Profil', href: '/profil/' },
   { label: 'Kontakt', href: '/kontakt/' },
 ] as const satisfies readonly NavLink[];

@@ -221,3 +221,7 @@ Eigener Prüflauf nach Abschluss aller Agentenrunden, vor dem Commit:
 Nach der Verifikation korrigiert: Start-H1 bei 1440 px von fünf auf drei Zeilen (Textspalte gc-1-8, Display-Obergrenze 60 px), Wortwiederholung im Profil (Kapitel 01), Druckstil für Profil und Fachseiten ergänzt (Masterprompt Abschnitt 9, Druckfassung ohne Navigation, Kontaktabschluss und Platzhalter).
 
 Weiterhin nicht durchgeführt: SMTP-Versand end-to-end, Zielserver (Redirects, Header, 404), Lighthouse, Screenreader, Windows- und macOS-Schriftmetrik, Firefox und Safari, reale Touch-Bedienung.
+
+## Ergänzung 13.09.2026: Seite /kurzfakten/ und llms.txt
+
+Build 18 Seiten, `npx astro check` 0 Fehler, `npm test` 0 Fehler (15 Sitemap-URLs, 17 eindeutige H1), axe 0 Verstöße auf 18 Seiten, kein horizontaler Scroll bei 390 und 1440 px auf der neuen Seite. Inhalte ausschließlich aus der Faktenliste Nr. 1 bis 11 und bestehenden Seiten; Stand-Datum wird manuell gepflegt.

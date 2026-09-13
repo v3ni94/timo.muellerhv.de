@@ -14,7 +14,7 @@ const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PAT
 // Zusammenarbeit, Glossar, Profil, Einblicke, Kontakt, Danke, Rechtstexte, 404.
 const pages = [
   '/', '/asset-management-beratung/', '/portfoliooptimierung/', '/property-management-optimierung/', '/ki-immobilienmanagement/',
-  '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/', '/zusammenarbeit/', '/glossar/',
+  '/investitionspriorisierung/', '/dienstleistersteuerung/', '/reporting-und-kennzahlen/', '/zusammenarbeit/', '/glossar/', '/kurzfakten/',
   '/profil/', '/einblicke/', '/kontakt/', '/danke/', '/impressum/', '/datenschutz/', '/404.html',
 ];
 let scrollFehler = 0;
